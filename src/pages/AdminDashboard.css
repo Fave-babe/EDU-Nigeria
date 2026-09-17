@@ -1,0 +1,700 @@
+.admin-dashboard {
+  min-height: 100vh;
+  background: #f6f7fb;
+}
+
+.admin-dashboard-content {
+  padding: 24px;
+  max-width: 1600px;
+  margin: 0 auto;
+}
+
+/* =========================================================
+   ACCESS DENIED
+========================================================= */
+
+.admin-denied {
+  min-height: 70vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  color: #8a8fa3;
+  padding: 30px;
+}
+
+.admin-denied h2 {
+  margin: 18px 0 8px;
+  color: #20242d;
+}
+
+.admin-denied p {
+  margin: 0;
+  font-size: 14px;
+}
+
+/* =========================================================
+   SECTION
+========================================================= */
+
+.admin-section {
+  margin-bottom: 24px;
+}
+
+.admin-section-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.admin-section-heading h2 {
+  margin: 0;
+  font-size: 18px;
+  color: #20242d;
+}
+
+.admin-section-heading p {
+  margin: 5px 0 0;
+  color: #8a8fa3;
+  font-size: 13px;
+}
+
+/* =========================================================
+   STAT CARDS
+========================================================= */
+
+.admin-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 18px;
+}
+
+.admin-stat-card {
+  background: #ffffff;
+  border: 1px solid #ecedf3;
+  border-radius: 18px;
+  padding: 20px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.admin-stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 30px rgba(32, 36, 45, 0.06);
+}
+
+.admin-stat-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.admin-stat-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.admin-stat-icon.blue,
+.academic-icon.blue,
+.activity-icon.blue {
+  background: #eef2ff;
+  color: #4f6ff0;
+}
+
+.admin-stat-icon.purple,
+.academic-icon.purple,
+.activity-icon.purple {
+  background: #f2edff;
+  color: #8469d9;
+}
+
+.admin-stat-icon.green,
+.academic-icon.green,
+.activity-icon.green {
+  background: #e7f9f4;
+  color: #12a594;
+}
+
+.admin-stat-icon.orange,
+.academic-icon.orange {
+  background: #fff4df;
+  color: #c98a12;
+}
+
+.admin-more-button {
+  border: none;
+  background: transparent;
+  color: #a2a6b5;
+  cursor: pointer;
+}
+
+.admin-stat-value {
+  margin-top: 22px;
+  font-size: 27px;
+  font-weight: 750;
+  color: #20242d;
+}
+
+.admin-stat-title {
+  margin-top: 4px;
+  font-size: 13px;
+  color: #555b6e;
+  font-weight: 600;
+}
+
+.admin-stat-footer {
+  margin-top: 12px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  flex-wrap: wrap;
+}
+
+.admin-trend {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.admin-trend.positive {
+  color: #12a594;
+}
+
+.admin-trend.negative {
+  color: #e05b68;
+}
+
+.admin-stat-description {
+  font-size: 11px;
+  color: #9a9eac;
+}
+
+/* =========================================================
+   TWO COLUMN
+========================================================= */
+
+.admin-two-column {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+  margin-bottom: 24px;
+}
+
+/* =========================================================
+   PANELS
+========================================================= */
+
+.admin-panel {
+  background: #ffffff;
+  border: 1px solid #ecedf3;
+  border-radius: 18px;
+  padding: 22px;
+  margin-bottom: 24px;
+}
+
+.panel-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 22px;
+}
+
+.panel-header h3 {
+  margin: 0;
+  font-size: 16px;
+  color: #20242d;
+}
+
+.panel-header p {
+  margin: 5px 0 0;
+  color: #8a8fa3;
+  font-size: 12px;
+}
+
+.panel-header > svg {
+  color: #8a8fa3;
+}
+
+.panel-link {
+  border: none;
+  background: transparent;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: #4f6ff0;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* =========================================================
+   FINANCE
+========================================================= */
+
+.finance-main {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.finance-main span,
+.finance-row span {
+  font-size: 12px;
+  color: #8a8fa3;
+}
+
+.finance-main strong {
+  font-size: 28px;
+  color: #20242d;
+}
+
+.finance-divider {
+  height: 1px;
+  background: #ecedf3;
+  margin: 20px 0;
+}
+
+.finance-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.finance-row > div {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.finance-row strong {
+  color: #20242d;
+  font-size: 17px;
+}
+
+.finance-row > svg {
+  color: #c98a12;
+}
+
+.collection-progress {
+  margin-top: 24px;
+}
+
+/* =========================================================
+   PROGRESS
+========================================================= */
+
+.progress-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.progress-header span {
+  font-size: 12px;
+  color: #8a8fa3;
+}
+
+.progress-header strong {
+  font-size: 12px;
+  color: #20242d;
+}
+
+.progress-track {
+  width: 100%;
+  height: 8px;
+  border-radius: 999px;
+  background: #f0f1f5;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  border-radius: inherit;
+  background: #4f6ff0;
+  transition: width 0.3s ease;
+}
+
+.progress-fill.finance {
+  background: #12a594;
+}
+
+.performance-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 28px;
+}
+
+/* =========================================================
+   ATTENDANCE
+========================================================= */
+
+.attendance-layout {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 45px;
+  padding: 10px 0 22px;
+}
+
+.attendance-circle {
+  width: 145px;
+  height: 145px;
+  border-radius: 50%;
+  background: conic-gradient(
+    #4f6ff0 0deg,
+    #4f6ff0 calc(var(--attendance, 0) * 3.6deg),
+    #edf0f6 calc(var(--attendance, 0) * 3.6deg),
+    #edf0f6 360deg
+  );
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.attendance-circle > div {
+  width: 111px;
+  height: 111px;
+  border-radius: 50%;
+  background: #ffffff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.attendance-circle strong {
+  font-size: 25px;
+  color: #20242d;
+}
+
+.attendance-circle span {
+  font-size: 11px;
+  color: #8a8fa3;
+  margin-top: 3px;
+}
+
+.attendance-details {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  min-width: 130px;
+}
+
+.attendance-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 30px;
+}
+
+.attendance-item span {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 12px;
+  color: #72778a;
+}
+
+.attendance-item strong {
+  color: #20242d;
+  font-size: 13px;
+}
+
+.attendance-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.attendance-dot.present {
+  background: #12a594;
+}
+
+.attendance-dot.absent {
+  background: #e05b68;
+}
+
+.attendance-dot.late {
+  background: #c98a12;
+}
+
+.secondary-button {
+  width: 100%;
+  border: 1px solid #e3e5ec;
+  border-radius: 10px;
+  background: #ffffff;
+  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  color: #4f6ff0;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* =========================================================
+   ACADEMICS
+========================================================= */
+
+.academic-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+.academic-card {
+  padding: 17px;
+  border-radius: 14px;
+  background: #f8f9fc;
+  display: flex;
+  align-items: center;
+  gap: 13px;
+}
+
+.academic-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 11px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.academic-card > div:last-child {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.academic-card span {
+  font-size: 11px;
+  color: #8a8fa3;
+}
+
+.academic-card strong {
+  font-size: 19px;
+  color: #20242d;
+}
+
+/* =========================================================
+   QUICK ACTIONS
+========================================================= */
+
+.quick-actions-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+}
+
+.quick-action {
+  border: 1px solid #ecedf3;
+  border-radius: 14px;
+  background: #ffffff;
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-align: left;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.quick-action:hover {
+  border-color: #cfd5ef;
+  transform: translateY(-1px);
+}
+
+.quick-action-icon {
+  width: 39px;
+  height: 39px;
+  border-radius: 10px;
+  background: #eef2ff;
+  color: #4f6ff0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.quick-action-content {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  flex: 1;
+}
+
+.quick-action-content strong {
+  color: #20242d;
+  font-size: 13px;
+}
+
+.quick-action-content span {
+  color: #9a9eac;
+  font-size: 11px;
+}
+
+.quick-action-arrow {
+  color: #a2a6b5;
+}
+
+/* =========================================================
+   ADMISSIONS
+========================================================= */
+
+.admission-summary {
+  padding: 20px;
+  border-radius: 14px;
+  background: #fafbfe;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 18px;
+}
+
+.admission-number {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.admission-number strong {
+  font-size: 30px;
+  color: #20242d;
+}
+
+.admission-number span {
+  font-size: 12px;
+  color: #8a8fa3;
+}
+
+.admission-status {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #12a594;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+/* =========================================================
+   ACTIVITY
+========================================================= */
+
+.activity-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.activity-item {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 12px 0;
+  border-bottom: 1px solid #f0f1f5;
+}
+
+.activity-item:last-child {
+  border-bottom: none;
+}
+
+.activity-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.activity-content {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  flex: 1;
+  min-width: 0;
+}
+
+.activity-content strong {
+  font-size: 12px;
+  color: #20242d;
+}
+
+.activity-content span {
+  font-size: 11px;
+  color: #8a8fa3;
+}
+
+.activity-item time {
+  font-size: 10px;
+  color: #a2a6b5;
+}
+
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+
+@media (max-width: 1200px) {
+  .admin-stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .quick-actions-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 900px) {
+  .admin-two-column {
+    grid-template-columns: 1fr;
+  }
+
+  .performance-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .academic-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .admin-dashboard-content {
+    padding: 16px;
+  }
+
+  .admin-stats-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .quick-actions-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .attendance-layout {
+    gap: 20px;
+    flex-direction: column;
+  }
+
+  .admission-summary {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .admin-panel {
+    padding: 17px;
+  }
+}

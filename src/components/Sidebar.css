@@ -1,0 +1,516 @@
+/* =========================================================
+   SIDEBAR
+========================================================= */
+
+.sidebar {
+  width: 270px;
+  height: 100vh;
+  position: fixed;
+  top: 0;
+  left: 0;
+
+  display: flex;
+  flex-direction: column;
+
+  background: #ffffff;
+  border-right: 1px solid #e5e7eb;
+
+  z-index: 1000;
+
+  transition: transform 0.25s ease;
+}
+
+
+/* =========================================================
+   HEADER / BRAND
+========================================================= */
+
+.sidebar-header {
+  height: 72px;
+  padding: 0 18px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  min-width: 0;
+}
+
+.brand-icon {
+  width: 42px;
+  height: 42px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  flex-shrink: 0;
+
+  border-radius: 10px;
+
+  background: #2563eb;
+  color: #ffffff;
+}
+
+.brand h2 {
+  margin: 0;
+
+  font-size: 17px;
+  font-weight: 700;
+
+  color: #111827;
+}
+
+.brand span {
+  display: block;
+
+  margin-top: 2px;
+
+  font-size: 10px;
+  color: #6b7280;
+}
+
+.close-sidebar {
+  display: none;
+
+  border: none;
+  background: transparent;
+
+  color: #6b7280;
+
+  cursor: pointer;
+}
+
+
+/* =========================================================
+   SCHOOL INFORMATION
+========================================================= */
+
+.school-section {
+  margin: 14px 12px;
+  padding: 12px;
+
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  border-radius: 10px;
+
+  background: #f8fafc;
+  border: 1px solid #e5e7eb;
+}
+
+.school-avatar {
+  width: 38px;
+  height: 38px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  flex-shrink: 0;
+
+  border-radius: 9px;
+
+  background: #eff6ff;
+  color: #2563eb;
+}
+
+.school-info {
+  min-width: 0;
+}
+
+.school-info strong {
+  display: block;
+
+  font-size: 13px;
+  font-weight: 600;
+
+  color: #111827;
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.school-info span {
+  display: block;
+
+  margin-top: 2px;
+
+  font-size: 11px;
+  color: #6b7280;
+}
+
+
+/* =========================================================
+   NAVIGATION
+========================================================= */
+
+.sidebar-nav {
+  flex: 1;
+
+  padding: 4px 12px 15px;
+
+  overflow-y: auto;
+}
+
+.sidebar-nav::-webkit-scrollbar {
+  width: 5px;
+}
+
+.sidebar-nav::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 10px;
+}
+
+.nav-title {
+  margin: 8px 10px 8px;
+
+  font-size: 10px;
+  font-weight: 700;
+
+  letter-spacing: 0.08em;
+
+  color: #9ca3af;
+}
+
+.nav-link {
+  min-height: 43px;
+
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  margin-bottom: 3px;
+  padding: 10px 12px;
+
+  border-radius: 8px;
+
+  color: #4b5563;
+  text-decoration: none;
+
+  font-size: 14px;
+  font-weight: 500;
+
+  transition:
+    background 0.2s ease,
+    color 0.2s ease;
+}
+
+.nav-link svg {
+  flex-shrink: 0;
+}
+
+.nav-link:hover {
+  background: #f3f4f6;
+  color: #111827;
+}
+
+.nav-link.active {
+  background: #eff6ff;
+  color: #2563eb;
+
+  font-weight: 600;
+}
+
+
+/* =========================================================
+   SIDEBAR BOTTOM
+========================================================= */
+
+.sidebar-bottom {
+  padding: 12px;
+
+  border-top: 1px solid #e5e7eb;
+
+  position: relative;
+}
+
+.profile-wrapper {
+  position: relative;
+}
+
+
+/* =========================================================
+   PROFILE BUTTON
+========================================================= */
+
+.profile-button {
+  width: 100%;
+
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  padding: 9px;
+
+  border: none;
+  border-radius: 9px;
+
+  background: transparent;
+
+  cursor: pointer;
+
+  text-align: left;
+
+  color: #111827;
+}
+
+.profile-button:hover {
+  background: #f3f4f6;
+}
+
+.profile-avatar {
+  width: 38px;
+  height: 38px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  flex-shrink: 0;
+
+  border-radius: 50%;
+
+  background: #2563eb;
+  color: #ffffff;
+
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.profile-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.profile-info strong {
+  display: block;
+
+  font-size: 13px;
+  font-weight: 600;
+
+  color: #111827;
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.profile-info span {
+  display: block;
+
+  margin-top: 2px;
+
+  font-size: 11px;
+  color: #6b7280;
+
+  text-transform: capitalize;
+}
+
+.profile-button > svg {
+  flex-shrink: 0;
+
+  color: #6b7280;
+
+  transition: transform 0.2s ease;
+}
+
+.profile-button > svg.rotate {
+  transform: rotate(180deg);
+}
+
+
+/* =========================================================
+   PROFILE MENU
+========================================================= */
+
+.profile-menu {
+  position: absolute;
+
+  left: 0;
+  right: 0;
+  bottom: calc(100% + 8px);
+
+  padding: 6px;
+
+  background: #ffffff;
+
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+
+  box-shadow:
+    0 10px 25px rgba(0, 0, 0, 0.08),
+    0 4px 10px rgba(0, 0, 0, 0.04);
+
+  z-index: 1100;
+}
+
+.profile-menu button {
+  width: 100%;
+
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  padding: 10px;
+
+  border: none;
+  border-radius: 7px;
+
+  background: transparent;
+
+  color: #374151;
+
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 500;
+
+  cursor: pointer;
+
+  text-align: left;
+}
+
+.profile-menu button:hover {
+  background: #f3f4f6;
+}
+
+.profile-menu button svg {
+  flex-shrink: 0;
+}
+
+.profile-menu .logout-button {
+  color: #dc2626;
+}
+
+.profile-menu .logout-button:hover {
+  background: #fef2f2;
+}
+
+
+/* =========================================================
+   MOBILE MENU BUTTON
+========================================================= */
+
+.mobile-menu-btn {
+  display: none;
+
+  position: fixed;
+
+  top: 14px;
+  left: 14px;
+
+  width: 42px;
+  height: 42px;
+
+  align-items: center;
+  justify-content: center;
+
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+
+  background: #ffffff;
+  color: #374151;
+
+  cursor: pointer;
+
+  z-index: 900;
+}
+
+.mobile-menu-btn:hover {
+  background: #f3f4f6;
+}
+
+
+/* =========================================================
+   MOBILE OVERLAY
+========================================================= */
+
+.sidebar-overlay {
+  display: none;
+
+  position: fixed;
+
+  inset: 0;
+
+  background: rgba(0, 0, 0, 0.35);
+
+  z-index: 999;
+}
+
+
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+
+@media (max-width: 768px) {
+  .sidebar {
+    transform: translateX(-100%);
+  }
+
+  .sidebar.sidebar-open {
+    transform: translateX(0);
+  }
+
+  .close-sidebar {
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    width: 36px;
+    height: 36px;
+
+    border-radius: 7px;
+  }
+
+  .close-sidebar:hover {
+    background: #f3f4f6;
+  }
+
+  .mobile-menu-btn {
+    display: flex;
+  }
+
+  .sidebar-overlay {
+    display: block;
+  }
+}
+
+
+/* =========================================================
+   SMALL MOBILE
+========================================================= */
+
+@media (max-width: 480px) {
+  .sidebar {
+    width: 255px;
+  }
+
+  .sidebar-header {
+    padding: 0 15px;
+  }
+
+  .school-section {
+    margin-left: 10px;
+    margin-right: 10px;
+  }
+
+  .sidebar-nav {
+    padding-left: 10px;
+    padding-right: 10px;
+  }
+
+  .sidebar-bottom {
+    padding-left: 10px;
+    padding-right: 10px;
+  }
+}

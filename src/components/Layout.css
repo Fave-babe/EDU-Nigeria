@@ -1,0 +1,25 @@
+.app-layout {
+  display: flex;
+  min-height: 100vh;
+  width: 100%;
+  background: #f5f7fb;
+}
+
+.main-content {
+  flex: 1;
+  min-width: 0;
+  padding: 24px;
+  overflow-x: hidden;
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  .app-layout {
+    display: block;
+  }
+
+  .main-content {
+    padding: 16px;
+    width: 100%;
+  }
+}

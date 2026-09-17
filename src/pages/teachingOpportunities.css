@@ -1,0 +1,706 @@
+.teaching-page {
+  width: 100%;
+  background: #ffffff;
+  color: #09204a;
+  overflow: hidden;
+}
+
+.teaching-container {
+  width: min(1180px, calc(100% - 40px));
+  margin: 0 auto;
+}
+
+/* =========================================================
+   HERO
+   ========================================================= */
+
+.teaching-hero {
+  position: relative;
+  min-height: 650px;
+  display: flex;
+  align-items: center;
+  background: #061a3d;
+  color: white;
+  overflow: hidden;
+}
+
+.teaching-hero-bg {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(
+      circle at 80% 35%,
+      rgba(68, 147, 255, 0.35),
+      transparent 30%
+    ),
+    linear-gradient(
+      120deg,
+      #061a3d 0%,
+      #0a2f6c 60%,
+      #0758a9 100%
+    );
+}
+
+.teaching-hero-bg::before {
+  content: "";
+  position: absolute;
+  width: 600px;
+  height: 600px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+  right: -170px;
+  top: -130px;
+}
+
+.teaching-hero-bg::after {
+  content: "";
+  position: absolute;
+  width: 380px;
+  height: 380px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 50%;
+  right: 80px;
+  bottom: -230px;
+}
+
+.teaching-hero-container {
+  position: relative;
+  z-index: 2;
+  width: min(1180px, calc(100% - 40px));
+  margin: 0 auto;
+}
+
+.teaching-hero-content {
+  max-width: 760px;
+}
+
+.teaching-eyebrow {
+  display: inline-block;
+  margin-bottom: 20px;
+  color: #9bcaff;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 2px;
+}
+
+.teaching-eyebrow.dark {
+  color: #1762ad;
+}
+
+.teaching-eyebrow.light {
+  color: #9ecbff;
+}
+
+.teaching-hero h1 {
+  margin: 0;
+  font-size: clamp(48px, 7vw, 82px);
+  line-height: 0.98;
+  letter-spacing: -3px;
+  font-weight: 800;
+}
+
+.teaching-hero h1 span {
+  color: #9dccff;
+}
+
+.teaching-hero-content > p {
+  max-width: 620px;
+  margin: 30px 0;
+  color: #d4e4f8;
+  font-size: 18px;
+  line-height: 1.75;
+}
+
+.teaching-hero-actions {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.teaching-primary-btn,
+.teaching-outline-btn,
+.teaching-cta-btn,
+.role-apply-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  text-decoration: none;
+  font-weight: 700;
+  transition: 0.25s ease;
+}
+
+.teaching-primary-btn {
+  padding: 15px 23px;
+  border-radius: 10px;
+  background: white;
+  color: #0a3d7e;
+}
+
+.teaching-primary-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+}
+
+.teaching-outline-btn {
+  padding: 14px 23px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 10px;
+  color: white;
+}
+
+.teaching-outline-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.teaching-hero-card {
+  position: absolute;
+  right: 0;
+  bottom: 40px;
+  width: 310px;
+  padding: 20px;
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 17px;
+  background: rgba(255, 255, 255, 0.09);
+  backdrop-filter: blur(15px);
+}
+
+.teaching-hero-card-icon {
+  width: 50px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.12);
+  color: #9dccff;
+}
+
+.teaching-hero-card strong,
+.teaching-hero-card span {
+  display: block;
+}
+
+.teaching-hero-card strong {
+  font-size: 14px;
+  margin-bottom: 5px;
+}
+
+.teaching-hero-card span {
+  color: #bdd4ef;
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+/* =========================================================
+   INTRO
+   ========================================================= */
+
+.teaching-intro {
+  padding: 110px 0;
+}
+
+.teaching-intro-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 90px;
+}
+
+.section-number {
+  display: block;
+  margin-bottom: 20px;
+  color: #1762ad;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.teaching-intro h2 {
+  margin: 0;
+  max-width: 520px;
+  font-size: clamp(37px, 4vw, 55px);
+  line-height: 1.1;
+  letter-spacing: -1.5px;
+}
+
+.teaching-intro h2 span {
+  color: #1762ad;
+}
+
+.teaching-intro-text {
+  padding-top: 35px;
+}
+
+.teaching-intro-text p {
+  margin: 0 0 20px;
+  color: #607086;
+  line-height: 1.85;
+  font-size: 16px;
+}
+
+/* =========================================================
+   BENEFITS
+   ========================================================= */
+
+.teaching-benefits {
+  padding: 110px 0;
+  background: #071d42;
+  color: white;
+}
+
+.teaching-section-heading {
+  max-width: 700px;
+  margin-bottom: 55px;
+}
+
+.teaching-section-heading h2 {
+  margin: 0 0 20px;
+  font-size: clamp(38px, 4vw, 55px);
+  line-height: 1.1;
+  letter-spacing: -1.5px;
+}
+
+.teaching-section-heading h2 span {
+  color: #9dccff;
+}
+
+.teaching-section-heading p {
+  max-width: 600px;
+  margin: 0;
+  color: #b9cbe1;
+  line-height: 1.8;
+}
+
+.teaching-benefits-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 18px;
+}
+
+.teaching-benefit-card {
+  position: relative;
+  padding: 32px;
+  min-height: 270px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.05);
+  transition: 0.25s ease;
+}
+
+.teaching-benefit-card:hover {
+  transform: translateY(-6px);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.teaching-benefit-icon {
+  width: 50px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 25px;
+  border-radius: 12px;
+  background: rgba(150, 203, 255, 0.12);
+  color: #9dccff;
+}
+
+.teaching-benefit-card h3 {
+  margin: 0 0 13px;
+  font-size: 19px;
+}
+
+.teaching-benefit-card p {
+  margin: 0;
+  color: #b8c9dd;
+  font-size: 14px;
+  line-height: 1.75;
+}
+
+.benefit-arrow {
+  position: absolute;
+  right: 25px;
+  bottom: 25px;
+  color: #79b6f6;
+}
+
+/* =========================================================
+   OPEN ROLES
+   ========================================================= */
+
+.teaching-roles {
+  padding: 110px 0;
+  background: #f5f9fe;
+}
+
+.roles-heading {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 40px;
+  margin-bottom: 45px;
+}
+
+.roles-heading h2 {
+  margin: 0 0 12px;
+  font-size: clamp(36px, 4vw, 52px);
+  letter-spacing: -1px;
+}
+
+.roles-heading p {
+  margin: 0;
+  color: #65748a;
+}
+
+.roles-count {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 11px 15px;
+  border: 1px solid #d8e3f0;
+  border-radius: 9px;
+  background: white;
+  color: #1762ad;
+  font-size: 13px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.roles-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.role-card {
+  display: flex;
+  align-items: center;
+  gap: 25px;
+  padding: 24px;
+  background: white;
+  border: 1px solid #e2eaf3;
+  border-radius: 15px;
+  transition: 0.25s ease;
+}
+
+.role-card:hover {
+  transform: translateX(5px);
+  border-color: #b6d2ef;
+  box-shadow: 0 12px 30px rgba(15, 54, 98, 0.07);
+}
+
+.role-number {
+  width: 45px;
+  height: 45px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border-radius: 10px;
+  background: #edf5ff;
+  color: #1762ad;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.role-main {
+  flex: 1;
+}
+
+.role-main h3 {
+  margin: 0 0 9px;
+  font-size: 18px;
+}
+
+.role-details {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  flex-wrap: wrap;
+}
+
+.role-details span {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #708096;
+  font-size: 12px;
+}
+
+.role-details svg {
+  color: #1762ad;
+}
+
+.role-apply-btn {
+  padding: 11px 17px;
+  border-radius: 8px;
+  background: #0b4e99;
+  color: white;
+  font-size: 13px;
+}
+
+.role-apply-btn:hover {
+  background: #073b77;
+}
+
+/* =========================================================
+   IMPACT
+   ========================================================= */
+
+.teaching-impact {
+  padding: 120px 0;
+}
+
+.impact-grid {
+  display: grid;
+  grid-template-columns: 1fr 0.85fr;
+  gap: 100px;
+  align-items: center;
+}
+
+.impact-content h2 {
+  margin: 0 0 25px;
+  max-width: 600px;
+  font-size: clamp(38px, 4vw, 57px);
+  line-height: 1.08;
+  letter-spacing: -1.5px;
+}
+
+.impact-content h2 span {
+  color: #1762ad;
+}
+
+.impact-content > p {
+  max-width: 620px;
+  color: #617087;
+  line-height: 1.85;
+}
+
+.impact-points {
+  margin-top: 30px;
+  display: grid;
+  gap: 14px;
+}
+
+.impact-points div {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #30435f;
+  font-size: 14px;
+}
+
+.impact-points svg {
+  color: #1762ad;
+  flex-shrink: 0;
+}
+
+.impact-visual {
+  position: relative;
+  min-height: 430px;
+  border-radius: 25px;
+  background: linear-gradient(145deg, #09295d, #0b59a8);
+  overflow: hidden;
+}
+
+.impact-visual::before {
+  content: "";
+  position: absolute;
+  width: 340px;
+  height: 340px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 50%;
+  top: -130px;
+  right: -80px;
+}
+
+.impact-circle {
+  position: absolute;
+  top: 55px;
+  left: 55px;
+  width: 75px;
+  height: 75px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.12);
+  color: #a6d1ff;
+}
+
+.impact-quote {
+  position: absolute;
+  left: 45px;
+  right: 45px;
+  bottom: 45px;
+}
+
+.impact-quote span {
+  display: block;
+  margin-bottom: 18px;
+  color: #9dccff;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 2px;
+}
+
+.impact-quote strong {
+  display: block;
+  color: white;
+  font-size: 31px;
+  line-height: 1.2;
+  letter-spacing: -0.5px;
+}
+
+/* =========================================================
+   CTA
+   ========================================================= */
+
+.teaching-cta {
+  padding: 80px 0;
+  background: #0a4d98;
+}
+
+.teaching-cta-container {
+  width: min(1180px, calc(100% - 40px));
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 25px;
+}
+
+.teaching-cta-icon {
+  width: 58px;
+  height: 58px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.12);
+  color: white;
+}
+
+.teaching-cta-content {
+  flex: 1;
+}
+
+.teaching-cta-content h2 {
+  margin: 0 0 10px;
+  color: white;
+  font-size: clamp(28px, 3vw, 40px);
+  letter-spacing: -1px;
+}
+
+.teaching-cta-content p {
+  margin: 0;
+  color: #c6ddf7;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.teaching-cta-btn {
+  padding: 15px 22px;
+  border-radius: 9px;
+  background: white;
+  color: #0a4d98;
+  white-space: nowrap;
+}
+
+.teaching-cta-btn:hover {
+  transform: translateY(-2px);
+}
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media (max-width: 1000px) {
+  .teaching-hero-card {
+    display: none;
+  }
+
+  .teaching-benefits-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .impact-grid {
+    grid-template-columns: 1fr;
+    gap: 55px;
+  }
+}
+
+@media (max-width: 700px) {
+  .teaching-container,
+  .teaching-hero-container,
+  .teaching-cta-container {
+    width: min(100% - 30px, 1180px);
+  }
+
+  .teaching-hero {
+    min-height: 600px;
+  }
+
+  .teaching-hero h1 {
+    font-size: 48px;
+    letter-spacing: -1.5px;
+  }
+
+  .teaching-hero-content > p {
+    font-size: 16px;
+  }
+
+  .teaching-primary-btn,
+  .teaching-outline-btn {
+    width: 100%;
+  }
+
+  .teaching-intro,
+  .teaching-benefits,
+  .teaching-roles,
+  .teaching-impact {
+    padding: 75px 0;
+  }
+
+  .teaching-intro-grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  .teaching-intro-text {
+    padding-top: 0;
+  }
+
+  .roles-heading {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .role-card {
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .role-main {
+    min-width: 70%;
+  }
+
+  .role-apply-btn {
+    margin-left: 70px;
+  }
+
+  .impact-visual {
+    min-height: 360px;
+  }
+
+  .teaching-cta-container {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .teaching-cta-btn {
+    width: 100%;
+  }
+}
