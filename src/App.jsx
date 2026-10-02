@@ -9,7 +9,7 @@ import {
 import {
   AuthProvider,
   useAuth,
-} from "./context/authcontext.jsx";
+} from "./context/AuthContext.jsx";
 
 import { PERMISSIONS, ROLES } from "./config/permissions";
 
