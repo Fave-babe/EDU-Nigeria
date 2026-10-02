@@ -531,10 +531,6 @@
 
 /* Modal */
 
-.page-container > div[style*="position: fixed"] {
-  /* backdrop-filter: blur(2px); */
-}
-
 /* Responsive */
 
 @media (max-width: 768px) {
