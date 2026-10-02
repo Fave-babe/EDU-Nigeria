@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { getToken, clearToken } from './token';
 
-const BASE_URL = 'https://edu-nigeria-backend.onrender.com/api';
+const BASE_URL = 'https://edu-nigeria-backend.onrender.com/api/v1';
 const http = axios.create({
     baseURL: BASE_URL,
     timeout:30000,
