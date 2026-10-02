@@ -16,7 +16,7 @@ import {
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "../context/authcontext";
 import { getStudentAcademicInfo } from "../api/enrollement.api";
 import { getMyStudentProfile } from "../api/student.api";
 import { getSchoolSubjects } from "../api/subject.api";
@@ -308,9 +308,7 @@ function UpcomingAssignments({ navigate, assignments }) {
       return new Date(assignment.dueDate) >= new Date();
     })
     .sort(
-      (a, b) =>
-        new Date(a.dueDate).getTime() -
-        new Date(b.dueDate).getTime(),
+      (a, b) => new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime(),
     )
     .slice(0, 5);
 
@@ -322,24 +320,17 @@ function UpcomingAssignments({ navigate, assignments }) {
           <h3>Upcoming Assignments</h3>
         </div>
 
-        <button
-          className="text-link"
-          onClick={() => navigate("/assignments")}
-        >
+        <button className="text-link" onClick={() => navigate("/assignments")}>
           View All
           <ChevronRight size={14} />
         </button>
       </div>
 
-      <p className="card-description">
-        Assignments that need your attention.
-      </p>
+      <p className="card-description">Assignments that need your attention.</p>
 
       <div className="assignment-list">
         {upcomingAssignments.length === 0 ? (
-          <div className="results-empty">
-            No upcoming assignments.
-          </div>
+          <div className="results-empty">No upcoming assignments.</div>
         ) : (
           upcomingAssignments.map((assignment) => {
             const dueDate = new Date(assignment.dueDate);
@@ -353,10 +344,7 @@ function UpcomingAssignments({ navigate, assignments }) {
             });
 
             return (
-              <div
-                className="assignment-item"
-                key={assignment._id}
-              >
+              <div className="assignment-item" key={assignment._id}>
                 <div className="assignment-date">
                   <span>{month}</span>
                   <strong>{day}</strong>
@@ -366,8 +354,7 @@ function UpcomingAssignments({ navigate, assignments }) {
                   <strong>{assignment.title}</strong>
 
                   <span>
-                    {assignment.subject?.name ||
-                      "Subject not assigned"}
+                    {assignment.subject?.name || "Subject not assigned"}
                   </span>
                 </div>
 
@@ -376,10 +363,7 @@ function UpcomingAssignments({ navigate, assignments }) {
                   color="blue"
                 />
 
-                <ChevronRight
-                  size={16}
-                  className="item-arrow"
-                />
+                <ChevronRight size={16} className="item-arrow" />
               </div>
             );
           })
@@ -510,7 +494,10 @@ function Announcements({ navigate }) {
           <h3>Latest Announcements</h3>
         </div>
 
-        <button className="text-link" onClick={() => navigate("/announcements")}>
+        <button
+          className="text-link"
+          onClick={() => navigate("/announcements")}
+        >
           View All
           <ChevronRight size={14} />
         </button>
@@ -565,13 +552,10 @@ function ReportCard({ navigate }) {
             View your complete academic report, grades and teacher remarks.
           </span>
 
-          <button
-  className="report-btn"
-  onClick={() => navigate("/results")}
->
-  View Report Card
-  <ChevronRight size={15} />
-</button>
+          <button className="report-btn" onClick={() => navigate("/results")}>
+            View Report Card
+            <ChevronRight size={15} />
+          </button>
         </div>
       </div>
     </section>
@@ -613,7 +597,7 @@ export default function StudentDashboard() {
           response?.student ||
           response?.data ||
           null;
-          const schoolId = studentData?.school?._id;
+        const schoolId = studentData?.school?._id;
         console.log("STUDENT PROFILE RESPONSE:", response);
         console.log("STUDENT DATA:", studentData);
         console.log("SCHOOL:", studentData?.school);
@@ -667,48 +651,50 @@ export default function StudentDashboard() {
           }
         }
         if (schoolId) {
-  try {
-    const assignmentsResponse = await getSchoolAssignments(schoolId);
+          try {
+            const assignmentsResponse = await getSchoolAssignments(schoolId);
 
-    const schoolAssignments =
-      assignmentsResponse?.data?.assignments ||
-      assignmentsResponse?.assignments ||
-      [];
+            const schoolAssignments =
+              assignmentsResponse?.data?.assignments ||
+              assignmentsResponse?.assignments ||
+              [];
 
-    const studentClassId = studentData?.enrollment?.class?._id;
+            const studentClassId = studentData?.enrollment?.class?._id;
 
-    console.log("ALL SCHOOL ASSIGNMENTS:", schoolAssignments);
-console.log("STUDENT CLASS ID:", studentClassId);
+            console.log("ALL SCHOOL ASSIGNMENTS:", schoolAssignments);
+            console.log("STUDENT CLASS ID:", studentClassId);
 
-const studentAssignments = schoolAssignments.filter((assignment) => {
-  const assignmentClassId =
-    assignment?.class?._id || assignment?.class;
+            const studentAssignments = schoolAssignments.filter(
+              (assignment) => {
+                const assignmentClassId =
+                  assignment?.class?._id || assignment?.class;
 
-  console.log("ASSIGNMENT:", assignment);
-  console.log("ASSIGNMENT CLASS ID:", assignmentClassId);
-  console.log("ASSIGNMENT STATUS:", assignment?.status);
+                console.log("ASSIGNMENT:", assignment);
+                console.log("ASSIGNMENT CLASS ID:", assignmentClassId);
+                console.log("ASSIGNMENT STATUS:", assignment?.status);
 
-  return (
-    studentClassId &&
-    assignmentClassId &&
-    String(assignmentClassId) === String(studentClassId) &&
-    assignment.status === "published"
-  );
-});
+                return (
+                  studentClassId &&
+                  assignmentClassId &&
+                  String(assignmentClassId) === String(studentClassId) &&
+                  assignment.status === "published"
+                );
+              },
+            );
 
-    if (mounted) {
-      setAssignments(studentAssignments);
-    }
+            if (mounted) {
+              setAssignments(studentAssignments);
+            }
 
-    console.log("STUDENT ASSIGNMENTS:", studentAssignments);
-  } catch (error) {
-    console.error("Failed to load student assignments:", error);
+            console.log("STUDENT ASSIGNMENTS:", studentAssignments);
+          } catch (error) {
+            console.error("Failed to load student assignments:", error);
 
-    if (mounted) {
-      setAssignments([]);
-    }
-  }
-}
+            if (mounted) {
+              setAssignments([]);
+            }
+          }
+        }
 
         // Get academic information
         if (studentId) {
@@ -921,20 +907,17 @@ const studentAssignments = schoolAssignments.filter((assignment) => {
           <div className="student-main-column">
             <AcademicResults student={currentUser} subjects={realSubjects} />
 
-          <UpcomingAssignments
-  navigate={navigate}
-  assignments={assignments}
-/>
+            <UpcomingAssignments
+              navigate={navigate}
+              assignments={assignments}
+            />
           </div>
 
           {/* RIGHT COLUMN */}
 
           <div className="student-side-column">
             <TodayTimetable timetable={timetable} navigate={navigate} />
-            <AttendanceCard
-  student={currentUser}
-  navigate={navigate}
-/>
+            <AttendanceCard student={currentUser} navigate={navigate} />
             <FeeStatus student={currentUser} />
           </div>
         </section>
@@ -946,7 +929,7 @@ const studentAssignments = schoolAssignments.filter((assignment) => {
         <section className="student-bottom-grid">
           <Announcements navigate={navigate} />
 
-         <ReportCard navigate={navigate} />
+          <ReportCard navigate={navigate} />
         </section>
       </div>
     </div>

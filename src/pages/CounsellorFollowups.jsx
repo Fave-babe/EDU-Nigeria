@@ -16,7 +16,7 @@ import {
   RefreshCw,
 } from "lucide-react";
 
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "../context/authcontext";
 import { getCounsellingFollowUpsByCounsellor } from "../api/counsellingRecord.api";
 
 function CounsellorFollowups() {
@@ -54,10 +54,7 @@ function CounsellorFollowups() {
 
         console.log("COUNSELLOR FOLLOW-UPS RESPONSE:", response);
 
-        const followUps =
-          response?.records ||
-          response?.data?.records ||
-          [];
+        const followUps = response?.records || response?.data?.records || [];
 
         setRecords(Array.isArray(followUps) ? followUps : []);
       } catch (error) {
@@ -111,12 +108,10 @@ function CounsellorFollowups() {
           const student = record?.student;
 
           return student
-            ? `${student.firstName || ""} ${
-                student.lastName || ""
-              }`.trim()
+            ? `${student.firstName || ""} ${student.lastName || ""}`.trim()
             : "";
         })
-        .filter(Boolean)
+        .filter(Boolean),
     ).size;
 
     const recent = records.filter((record) => {
@@ -134,15 +129,10 @@ function CounsellorFollowups() {
 
       const difference = Date.now() - date.getTime();
 
-      return (
-        difference >= 0 &&
-        difference <= 7 * 24 * 60 * 60 * 1000
-      );
+      return difference >= 0 && difference <= 7 * 24 * 60 * 60 * 1000;
     }).length;
 
-    const withNotes = records.filter(
-      (record) => record?.notes?.trim()
-    ).length;
+    const withNotes = records.filter((record) => record?.notes?.trim()).length;
 
     return {
       total,
@@ -189,16 +179,13 @@ function CounsellorFollowups() {
     const firstInitial = student.firstName?.[0] || "";
     const lastInitial = student.lastName?.[0] || "";
 
-    const initials =
-      `${firstInitial}${lastInitial}`.toUpperCase();
+    const initials = `${firstInitial}${lastInitial}`.toUpperCase();
 
     return initials || "?";
   };
 
   const toggleRecord = (recordId) => {
-    setExpandedRecord((current) =>
-      current === recordId ? null : recordId
-    );
+    setExpandedRecord((current) => (current === recordId ? null : recordId));
   };
 
   const handleReviewCases = () => {
@@ -1077,7 +1064,6 @@ function CounsellorFollowups() {
       `}</style>
 
       <div className="cfu-inner">
-
         {/* HEADER */}
 
         <header className="cfu-hero">
@@ -1092,13 +1078,11 @@ function CounsellorFollowups() {
                 Counselling
               </div>
 
-              <h1 className="cfu-title">
-                Follow-ups
-              </h1>
+              <h1 className="cfu-title">Follow-ups</h1>
 
               <p className="cfu-subtitle">
-                Keep track of students who need another
-                counselling session or continued attention.
+                Keep track of students who need another counselling session or
+                continued attention.
               </p>
             </div>
           </div>
@@ -1144,12 +1128,9 @@ function CounsellorFollowups() {
         {/* FOLLOW-UP CARD */}
 
         <section className="cfu-card">
-
           <div className="cfu-card-head">
             <div>
-              <h2 className="cfu-heading">
-                Follow-up queue
-              </h2>
+              <h2 className="cfu-heading">Follow-up queue</h2>
 
               <p className="cfu-heading-sub">
                 Students currently requiring follow-up.
@@ -1164,17 +1145,13 @@ function CounsellorFollowups() {
                   type="text"
                   placeholder="Search student or reason..."
                   value={search}
-                  onChange={(e) =>
-                    setSearch(e.target.value)
-                  }
+                  onChange={(e) => setSearch(e.target.value)}
                 />
               </div>
 
               <span className="cfu-count">
                 {filteredRecords.length}{" "}
-                {filteredRecords.length === 1
-                  ? "record"
-                  : "records"}
+                {filteredRecords.length === 1 ? "record" : "records"}
               </span>
             </div>
           </div>
@@ -1183,11 +1160,7 @@ function CounsellorFollowups() {
 
           {loading ? (
             <div className="cfu-loading">
-              <RefreshCw
-                size={22}
-                className="cfu-loading-icon"
-              />
-
+              <RefreshCw size={22} className="cfu-loading-icon" />
               Loading follow-ups...
             </div>
           ) : filteredRecords.length === 0 ? (
@@ -1196,9 +1169,7 @@ function CounsellorFollowups() {
                 <ClipboardCheck size={22} />
               </div>
 
-              <h3>
-                No follow-ups found
-              </h3>
+              <h3>No follow-ups found</h3>
 
               <p>
                 {search
@@ -1210,202 +1181,145 @@ function CounsellorFollowups() {
             /* COMPACT FOLLOW-UP LIST */
 
             <div className="cfu-list">
-              {filteredRecords.map(
-                (record, index) => {
-                  const student = record?.student;
+              {filteredRecords.map((record, index) => {
+                const student = record?.student;
 
-                  const studentName =
-                    getStudentName(student);
+                const studentName = getStudentName(student);
 
-                  const initials =
-                    getInitials(student);
+                const initials = getInitials(student);
 
-                  const recordId =
-                    record?._id ||
-                    `${studentName}-${index}`;
+                const recordId = record?._id || `${studentName}-${index}`;
 
-                  const isExpanded =
-                    expandedRecord === recordId;
+                const isExpanded = expandedRecord === recordId;
 
-                  return (
-                    <div
-                      key={recordId}
-                      className={`cfu-item ${
-                        isExpanded
-                          ? "expanded"
-                          : ""
-                      }`}
+                return (
+                  <div
+                    key={recordId}
+                    className={`cfu-item ${isExpanded ? "expanded" : ""}`}
+                  >
+                    {/* COMPACT ROW */}
+
+                    <button
+                      type="button"
+                      className="cfu-item-button"
+                      onClick={() => toggleRecord(recordId)}
                     >
+                      <div className="cfu-item-student">
+                        <div className="cfu-avatar">{initials}</div>
 
-                      {/* COMPACT ROW */}
+                        <div className="cfu-student-info">
+                          <span className="cfu-student-name">
+                            {studentName}
+                          </span>
 
-                      <button
-                        type="button"
-                        className="cfu-item-button"
-                        onClick={() =>
-                          toggleRecord(recordId)
-                        }
-                      >
+                          <span className="cfu-student-email">
+                            <Mail size={11} />
 
-                        <div className="cfu-item-student">
-                          <div className="cfu-avatar">
-                            {initials}
-                          </div>
-
-                          <div className="cfu-student-info">
-                            <span className="cfu-student-name">
-                              {studentName}
-                            </span>
-
-                            <span className="cfu-student-email">
-                              <Mail size={11} />
-
-                              {student?.email ||
-                                "No email"}
-                            </span>
-                          </div>
+                            {student?.email || "No email"}
+                          </span>
                         </div>
+                      </div>
 
-                        <span className="cfu-item-reason">
-                          {record?.reason ||
-                            "No reason provided"}
-                        </span>
+                      <span className="cfu-item-reason">
+                        {record?.reason || "No reason provided"}
+                      </span>
 
-                        <span className="cfu-item-date">
-                          {formatDate(
-                            record?.date ||
-                              record?.createdAt
-                          )}
-                        </span>
+                      <span className="cfu-item-date">
+                        {formatDate(record?.date || record?.createdAt)}
+                      </span>
 
-                        <span className="cfu-status cfu-status-follow">
-                          Follow-up
-                        </span>
+                      <span className="cfu-status cfu-status-follow">
+                        Follow-up
+                      </span>
 
-                        {isExpanded ? (
-                          <ChevronUp
-                            size={18}
-                            className="cfu-chevron"
-                          />
-                        ) : (
-                          <ChevronDown
-                            size={18}
-                            className="cfu-chevron"
-                          />
-                        )}
+                      {isExpanded ? (
+                        <ChevronUp size={18} className="cfu-chevron" />
+                      ) : (
+                        <ChevronDown size={18} className="cfu-chevron" />
+                      )}
+                    </button>
 
-                      </button>
+                    {/* EXPANDED DETAILS */}
 
-                      {/* EXPANDED DETAILS */}
+                    {isExpanded && (
+                      <div className="cfu-details">
+                        <div className="cfu-details-inner">
+                          <div className="cfu-details-grid">
+                            {/* STUDENT */}
 
-                      {isExpanded && (
-                        <div className="cfu-details">
-                          <div className="cfu-details-inner">
+                            <div className="cfu-detail-section">
+                              <p className="cfu-detail-label">Student</p>
 
-                            <div className="cfu-details-grid">
+                              <p className="cfu-detail-value">{studentName}</p>
 
-                              {/* STUDENT */}
-
-                              <div className="cfu-detail-section">
-                                <p className="cfu-detail-label">
-                                  Student
+                              {student?.registrationNumber && (
+                                <p className="cfu-detail-muted">
+                                  Registration: {student.registrationNumber}
                                 </p>
+                              )}
+                            </div>
 
-                                <p className="cfu-detail-value">
-                                  {studentName}
-                                </p>
+                            {/* CONTACT */}
 
-                                {student?.registrationNumber && (
-                                  <p className="cfu-detail-muted">
-                                    Registration:{" "}
-                                    {
-                                      student.registrationNumber
-                                    }
-                                  </p>
+                            <div className="cfu-detail-section">
+                              <p className="cfu-detail-label">Contact</p>
+
+                              <div className="cfu-detail-contact">
+                                <span className="cfu-contact-line">
+                                  <Mail size={13} />
+
+                                  {student?.email || "No email"}
+                                </span>
+
+                                {student?.phone && (
+                                  <span className="cfu-contact-line">
+                                    <Phone size={13} />
+
+                                    {student.phone}
+                                  </span>
                                 )}
                               </div>
-
-                              {/* CONTACT */}
-
-                              <div className="cfu-detail-section">
-                                <p className="cfu-detail-label">
-                                  Contact
-                                </p>
-
-                                <div className="cfu-detail-contact">
-
-                                  <span className="cfu-contact-line">
-                                    <Mail size={13} />
-
-                                    {student?.email ||
-                                      "No email"}
-                                  </span>
-
-                                  {student?.phone && (
-                                    <span className="cfu-contact-line">
-                                      <Phone size={13} />
-
-                                      {student.phone}
-                                    </span>
-                                  )}
-
-                                </div>
-                              </div>
-
-                              {/* REASON */}
-
-                              <div className="cfu-detail-section">
-                                <p className="cfu-detail-label">
-                                  Reason
-                                </p>
-
-                                <p className="cfu-detail-value">
-                                  {record?.reason ||
-                                    "No reason provided"}
-                                </p>
-                              </div>
-
-                              {/* DATE */}
-
-                              <div className="cfu-detail-section">
-                                <p className="cfu-detail-label">
-                                  Follow-up date
-                                </p>
-
-                                <p className="cfu-detail-value">
-                                  {formatDate(
-                                    record?.date ||
-                                      record?.createdAt
-                                  )}
-                                </p>
-                              </div>
-
                             </div>
 
-                            {/* NOTES */}
+                            {/* REASON */}
 
-                            <div className="cfu-notes-box">
-                              <p className="cfu-detail-label">
-                                Notes
-                              </p>
+                            <div className="cfu-detail-section">
+                              <p className="cfu-detail-label">Reason</p>
 
-                              <p className="cfu-notes-text">
-                                {record?.notes ||
-                                  "No additional notes were added to this counselling record."}
+                              <p className="cfu-detail-value">
+                                {record?.reason || "No reason provided"}
                               </p>
                             </div>
 
+                            {/* DATE */}
+
+                            <div className="cfu-detail-section">
+                              <p className="cfu-detail-label">Follow-up date</p>
+
+                              <p className="cfu-detail-value">
+                                {formatDate(record?.date || record?.createdAt)}
+                              </p>
+                            </div>
+                          </div>
+
+                          {/* NOTES */}
+
+                          <div className="cfu-notes-box">
+                            <p className="cfu-detail-label">Notes</p>
+
+                            <p className="cfu-notes-text">
+                              {record?.notes ||
+                                "No additional notes were added to this counselling record."}
+                            </p>
                           </div>
                         </div>
-                      )}
-
-                    </div>
-                  );
-                }
-              )}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
             </div>
           )}
-
         </section>
       </div>
     </div>
@@ -1416,18 +1330,12 @@ function StatCard({ label, value, icon }) {
   return (
     <div className="cfu-stat">
       <div className="cfu-stat-top">
-        <p className="cfu-stat-label">
-          {label}
-        </p>
+        <p className="cfu-stat-label">{label}</p>
 
-        <div className="cfu-stat-icon">
-          {icon}
-        </div>
+        <div className="cfu-stat-icon">{icon}</div>
       </div>
 
-      <h3 className="cfu-stat-number">
-        {value}
-      </h3>
+      <h3 className="cfu-stat-number">{value}</h3>
     </div>
   );
 }

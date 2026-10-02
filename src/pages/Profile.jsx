@@ -1,11 +1,11 @@
 import React from "react";
 import "./Pages.css";
-import { UserRound, ArrowLeft  } from "lucide-react";
+import { UserRound, ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "../context/authcontext";
 
 export default function Profile() {
-    const navigate = useNavigate();
+  const navigate = useNavigate();
   const { user } = useAuth();
 
   const fullName =
@@ -15,13 +15,10 @@ export default function Profile() {
 
   return (
     <div className="page-container">
-        <button
-  className="back-button"
-  onClick={() => navigate(-1)}
->
-  <ArrowLeft size={18} />
-  Back
-</button>
+      <button className="back-button" onClick={() => navigate(-1)}>
+        <ArrowLeft size={18} />
+        Back
+      </button>
       <div className="page-header">
         <div>
           <h1>My Profile</h1>
@@ -43,13 +40,11 @@ export default function Profile() {
             <h2>{fullName}</h2>
 
             <p>
-              <strong>Email:</strong>{" "}
-              {user?.email || "Not available"}
+              <strong>Email:</strong> {user?.email || "Not available"}
             </p>
 
             <p>
-              <strong>Role:</strong>{" "}
-              {user?.role || "Student"}
+              <strong>Role:</strong> {user?.role || "Student"}
             </p>
           </div>
         </div>

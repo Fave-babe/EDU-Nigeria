@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "../context/authcontext";
 
 import {
   Users,
@@ -40,14 +40,9 @@ function Cdashboard() {
     return <Navigate to="/login" replace />;
   }
 
-  const schoolId =
-    user?.school?._id ||
-    user?.school?.id ||
-    user?.school;
+  const schoolId = user?.school?._id || user?.school?.id || user?.school;
 
-  const counsellorId =
-    user?._id ||
-    user?.id;
+  const counsellorId = user?._id || user?.id;
 
   useEffect(() => {
     const loadDashboard = async () => {
@@ -61,30 +56,18 @@ function Cdashboard() {
         setLoading(true);
         setError("");
 
-        const [
-          studentsResponse,
-          recordsResponse,
-          followUpsResponse,
-        ] = await Promise.all([
-          getStudentsBySchool(schoolId),
-          getCounsellingRecordsByCounsellor(counsellorId),
-          getCounsellingFollowUpsByCounsellor(counsellorId),
-        ]);
+        const [studentsResponse, recordsResponse, followUpsResponse] =
+          await Promise.all([
+            getStudentsBySchool(schoolId),
+            getCounsellingRecordsByCounsellor(counsellorId),
+            getCounsellingFollowUpsByCounsellor(counsellorId),
+          ]);
 
-        console.log(
-          "COUNSELLOR DASHBOARD STUDENTS:",
-          studentsResponse
-        );
+        console.log("COUNSELLOR DASHBOARD STUDENTS:", studentsResponse);
 
-        console.log(
-          "COUNSELLOR DASHBOARD RECORDS:",
-          recordsResponse
-        );
+        console.log("COUNSELLOR DASHBOARD RECORDS:", recordsResponse);
 
-        console.log(
-          "COUNSELLOR DASHBOARD FOLLOW UPS:",
-          followUpsResponse
-        );
+        console.log("COUNSELLOR DASHBOARD FOLLOW UPS:", followUpsResponse);
 
         const studentList =
           studentsResponse?.students ||
@@ -93,41 +76,22 @@ function Cdashboard() {
           [];
 
         const counsellingList =
-          recordsResponse?.records ||
-          recordsResponse?.data?.records ||
-          [];
+          recordsResponse?.records || recordsResponse?.data?.records || [];
 
         const followUpList =
-          followUpsResponse?.records ||
-          followUpsResponse?.data?.records ||
-          [];
+          followUpsResponse?.records || followUpsResponse?.data?.records || [];
 
-        setStudents(
-          Array.isArray(studentList)
-            ? studentList
-            : []
-        );
+        setStudents(Array.isArray(studentList) ? studentList : []);
 
-        setRecords(
-          Array.isArray(counsellingList)
-            ? counsellingList
-            : []
-        );
+        setRecords(Array.isArray(counsellingList) ? counsellingList : []);
 
-        setFollowUps(
-          Array.isArray(followUpList)
-            ? followUpList
-            : []
-        );
+        setFollowUps(Array.isArray(followUpList) ? followUpList : []);
       } catch (err) {
-        console.error(
-          "COUNSELLOR DASHBOARD ERROR:",
-          err
-        );
+        console.error("COUNSELLOR DASHBOARD ERROR:", err);
 
         setError(
           err?.response?.data?.message ||
-            "Unable to load counsellor dashboard data."
+            "Unable to load counsellor dashboard data.",
         );
       } finally {
         setLoading(false);
@@ -139,22 +103,15 @@ function Cdashboard() {
 
   const activeCases = useMemo(() => {
     return records.filter(
-      (record) =>
-        String(record?.status || "").toLowerCase() ===
-        "active"
+      (record) => String(record?.status || "").toLowerCase() === "active",
     );
   }, [records]);
 
   const needsAttention = useMemo(() => {
     return records.filter((record) => {
-      const status = String(
-        record?.status || ""
-      ).toLowerCase();
+      const status = String(record?.status || "").toLowerCase();
 
-      return (
-        status === "active" ||
-        status === "follow_up"
-      );
+      return status === "active" || status === "follow_up";
     });
   }, [records]);
 
@@ -163,9 +120,7 @@ function Cdashboard() {
 
     records.forEach((record) => {
       const studentId =
-        record?.student?._id ||
-        record?.student?.id ||
-        record?.student;
+        record?.student?._id || record?.student?.id || record?.student;
 
       if (studentId) {
         studentIds.add(String(studentId));
@@ -180,29 +135,19 @@ function Cdashboard() {
       ...records.map((record) => ({
         type: "case",
         record,
-        date:
-          record?.date ||
-          record?.createdAt ||
-          null,
+        date: record?.date || record?.createdAt || null,
       })),
 
       ...followUps.map((record) => ({
         type: "follow_up",
         record,
-        date:
-          record?.date ||
-          record?.createdAt ||
-          null,
+        date: record?.date || record?.createdAt || null,
       })),
     ];
 
     return activities
       .filter((item) => item.date)
-      .sort(
-        (a, b) =>
-          new Date(b.date) -
-          new Date(a.date)
-      )
+      .sort((a, b) => new Date(b.date) - new Date(a.date))
       .slice(0, 3);
   }, [records, followUps]);
 
@@ -215,14 +160,11 @@ function Cdashboard() {
       return "—";
     }
 
-    return parsedDate.toLocaleDateString(
-      "en-NG",
-      {
-        day: "numeric",
-        month: "short",
-        year: "numeric",
-      }
-    );
+    return parsedDate.toLocaleDateString("en-NG", {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+    });
   };
 
   const getStudentName = (record) => {
@@ -236,18 +178,15 @@ function Cdashboard() {
       return student.fullName;
     }
 
-    return [
-      student.firstName,
-      student.lastName,
-    ]
-      .filter(Boolean)
-      .join(" ") || "Student";
+    return (
+      [student.firstName, student.lastName].filter(Boolean).join(" ") ||
+      "Student"
+    );
   };
 
   const getActivityTitle = (activity) => {
     const record = activity.record;
-    const studentName =
-      getStudentName(record);
+    const studentName = getStudentName(record);
 
     if (activity.type === "follow_up") {
       return `Follow-up for ${studentName}`;
@@ -811,25 +750,18 @@ function Cdashboard() {
       `}</style>
 
       <div className="counsellor-container">
-
         {/* HEADER */}
         <header className="counsellor-header">
           <div className="header-copy">
-            <span className="eyebrow">
-              Support Hub
-            </span>
+            <span className="eyebrow">Support Hub</span>
 
-            <h1>
-              Counsellor Dashboard
-            </h1>
+            <h1>Counsellor Dashboard</h1>
           </div>
 
           <button
             type="button"
             className="header-button"
-            onClick={() =>
-              navigate("/counsellor/counselling")
-            }
+            onClick={() => navigate("/counsellor/counselling")}
           >
             <FileText size={18} />
             Open Records
@@ -848,44 +780,31 @@ function Cdashboard() {
         <section className="welcome-box">
           <div>
             <h2>
-              Welcome back,{" "}
-              {user?.fullName ||
-                user?.firstName ||
-                "Counsellor"}
+              Welcome back, {user?.fullName || user?.firstName || "Counsellor"}
             </h2>
 
             <p>
-              Keep track of student wellbeing,
-              manage active cases, and stay on top
-              of follow-up tasks.
+              Keep track of student wellbeing, manage active cases, and stay on
+              top of follow-up tasks.
             </p>
           </div>
 
           <div className="mini-metric">
-            <span>
-              Students in care
-            </span>
+            <span>Students in care</span>
 
-            <strong>
-              {loading ? "—" : studentsInCare}
-            </strong>
+            <strong>{loading ? "—" : studentsInCare}</strong>
           </div>
         </section>
 
         {/* STATISTICS */}
         <section className="stats-grid">
-
           {/* TOTAL STUDENTS */}
           <div className="stat-card">
             <div className="stat-top">
               <div>
-                <h3>
-                  {loading ? "—" : students.length}
-                </h3>
+                <h3>{loading ? "—" : students.length}</h3>
 
-                <p>
-                  Total Students
-                </p>
+                <p>Total Students</p>
               </div>
 
               <div className="stat-icon">
@@ -898,15 +817,9 @@ function Cdashboard() {
           <div className="stat-card">
             <div className="stat-top">
               <div>
-                <h3>
-                  {loading
-                    ? "—"
-                    : needsAttention.length}
-                </h3>
+                <h3>{loading ? "—" : needsAttention.length}</h3>
 
-                <p>
-                  Needs Attention
-                </p>
+                <p>Needs Attention</p>
               </div>
 
               <div className="stat-icon">
@@ -919,15 +832,9 @@ function Cdashboard() {
           <div className="stat-card">
             <div className="stat-top">
               <div>
-                <h3>
-                  {loading
-                    ? "—"
-                    : activeCases.length}
-                </h3>
+                <h3>{loading ? "—" : activeCases.length}</h3>
 
-                <p>
-                  Active Cases
-                </p>
+                <p>Active Cases</p>
               </div>
 
               <div className="stat-icon">
@@ -940,15 +847,9 @@ function Cdashboard() {
           <div className="stat-card">
             <div className="stat-top">
               <div>
-                <h3>
-                  {loading
-                    ? "—"
-                    : followUps.length}
-                </h3>
+                <h3>{loading ? "—" : followUps.length}</h3>
 
-                <p>
-                  Follow-ups Due
-                </p>
+                <p>Follow-ups Due</p>
               </div>
 
               <div className="stat-icon">
@@ -956,130 +857,82 @@ function Cdashboard() {
               </div>
             </div>
           </div>
-
         </section>
 
         {/* MAIN CONTENT */}
         <div className="main-grid">
-
           {/* RECENT ACTIVITY */}
           <section className="dashboard-card">
-
             <div className="card-header">
-              <h2>
-                Recent Activity
-              </h2>
+              <h2>Recent Activity</h2>
 
-              <span>
-                Updates
-              </span>
+              <span>Updates</span>
             </div>
 
             {loading ? (
               <div className="loading-activity">
-                <Loader2
-                  size={18}
-                  className="animate-spin"
-                />
+                <Loader2 size={18} className="animate-spin" />
                 Loading activity...
               </div>
             ) : recentActivity.length === 0 ? (
               <div className="empty-activity">
-                No counselling activity has been
-                recorded yet.
+                No counselling activity has been recorded yet.
               </div>
             ) : (
               <div className="timeline">
+                {recentActivity.map((activity, index) => (
+                  <div
+                    className="timeline-item"
+                    key={activity.record?._id || `${activity.type}-${index}`}
+                  >
+                    <span className="timeline-dot" />
 
-                {recentActivity.map(
-                  (activity, index) => (
-                    <div
-                      className="timeline-item"
-                      key={
-                        activity.record?._id ||
-                        `${activity.type}-${index}`
-                      }
-                    >
-                      <span className="timeline-dot" />
+                    <div className="timeline-copy">
+                      <strong>{getActivityTitle(activity)}</strong>
 
-                      <div className="timeline-copy">
+                      <p>{getActivityDescription(activity)}</p>
 
-                        <strong>
-                          {getActivityTitle(
-                            activity
-                          )}
-                        </strong>
+                      <div className="timeline-meta">
+                        <span className="badge">
+                          {activity.type === "follow_up"
+                            ? "Follow-up"
+                            : activity.record?.status || "Case"}
+                        </span>
 
-                        <p>
-                          {getActivityDescription(
-                            activity
-                          )}
-                        </p>
-
-                        <div className="timeline-meta">
-
-                          <span className="badge">
-                            {activity.type ===
-                            "follow_up"
-                              ? "Follow-up"
-                              : activity.record
-                                  ?.status ||
-                                "Case"}
-                          </span>
-
-                          <span className="time-stamp">
-                            {formatDate(
-                              activity.date
-                            )}
-                          </span>
-
-                        </div>
+                        <span className="time-stamp">
+                          {formatDate(activity.date)}
+                        </span>
                       </div>
                     </div>
-                  )
-                )}
-
+                  </div>
+                ))}
               </div>
             )}
           </section>
 
           {/* QUICK ACTIONS */}
           <aside className="dashboard-card">
-
             <div className="card-header">
-              <h2>
-                Quick Actions
-              </h2>
+              <h2>Quick Actions</h2>
             </div>
 
             <div className="quick-actions">
-
               {/* STUDENTS */}
               <button
                 type="button"
                 className="action-button"
-                onClick={() =>
-                  navigate(
-                    "/counsellor/students"
-                  )
-                }
+                onClick={() => navigate("/counsellor/students")}
               >
                 <div className="action-left">
-
                   <div className="action-icon">
                     <Users size={18} />
                   </div>
 
                   <div className="action-text">
-                    <strong>
-                      View Students
-                    </strong>
+                    <strong>View Students</strong>
 
-                    <span>
-                      Browse student records
-                    </span>
+                    <span>Browse student records</span>
                   </div>
-
                 </div>
 
                 <ArrowRight size={17} />
@@ -1089,28 +942,18 @@ function Cdashboard() {
               <button
                 type="button"
                 className="action-button"
-                onClick={() =>
-                  navigate(
-                    "/counsellor/counselling"
-                  )
-                }
+                onClick={() => navigate("/counsellor/counselling")}
               >
                 <div className="action-left">
-
                   <div className="action-icon">
                     <FileText size={18} />
                   </div>
 
                   <div className="action-text">
-                    <strong>
-                      Counselling Records
-                    </strong>
+                    <strong>Counselling Records</strong>
 
-                    <span>
-                      Manage counselling sessions
-                    </span>
+                    <span>Manage counselling sessions</span>
                   </div>
-
                 </div>
 
                 <ArrowRight size={17} />
@@ -1120,36 +963,24 @@ function Cdashboard() {
               <button
                 type="button"
                 className="action-button"
-                onClick={() =>
-                  navigate(
-                    "/counsellor/followups"
-                  )
-                }
+                onClick={() => navigate("/counsellor/followups")}
               >
                 <div className="action-left">
-
                   <div className="action-icon">
                     <CalendarDays size={18} />
                   </div>
 
                   <div className="action-text">
-                    <strong>
-                      Follow-ups
-                    </strong>
+                    <strong>Follow-ups</strong>
 
-                    <span>
-                      Manage follow-up records
-                    </span>
+                    <span>Manage follow-up records</span>
                   </div>
-
                 </div>
 
                 <ArrowRight size={17} />
               </button>
-
             </div>
           </aside>
-
         </div>
       </div>
     </div>

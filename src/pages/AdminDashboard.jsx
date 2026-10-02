@@ -1,15 +1,33 @@
-
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Header from "../components/Header";
-import {useAuth,getEffectiveRole,} from "../context/AuthContext";
+import { useAuth, getEffectiveRole } from "../context/authcontext";
 import { getAdminDashboardOverview } from "../api/admin.dashboard.api";
-import { Users,UserCog,GraduationCap,Wallet,Clock3,CalendarCheck,Award,
-  ClipboardCheck,Megaphone,Bell,FileText,UserPlus,BookOpen,ArrowUpRight,
-  MoreHorizontal,ShieldOff,CheckCircle2,AlertCircle,RefreshCw,UserRound,} from "lucide-react";
+import {
+  Users,
+  UserCog,
+  GraduationCap,
+  Wallet,
+  Clock3,
+  CalendarCheck,
+  Award,
+  ClipboardCheck,
+  Megaphone,
+  Bell,
+  FileText,
+  UserPlus,
+  BookOpen,
+  ArrowUpRight,
+  MoreHorizontal,
+  ShieldOff,
+  CheckCircle2,
+  AlertCircle,
+  RefreshCw,
+  UserRound,
+} from "lucide-react";
 import "./AdminDashboard.css";
 
-  //  ROLE GUARD
+//  ROLE GUARD
 function RequireRole({ children }) {
   const { user } = useAuth();
   if (!user || getEffectiveRole(user) !== "admin") {
@@ -17,15 +35,14 @@ function RequireRole({ children }) {
       <div className="admin-denied">
         <ShieldOff size={36} />
         <h2>Access Restricted</h2>
-        <p>
-          This dashboard is only available to school
-          administrators.</p>
+        <p>This dashboard is only available to school administrators.</p>
       </div>
     );
-  }return children;
+  }
+  return children;
 }
 
-  //  STAT CARD
+//  STAT CARD
 function StatCard({
   icon: Icon,
   title,
@@ -42,37 +59,24 @@ function StatCard({
         <button
           type="button"
           className="admin-more-button"
-          aria-label={`${title} options`}>
+          aria-label={`${title} options`}
+        >
           <MoreHorizontal size={18} />
         </button>
       </div>
-      <div className="admin-stat-value">
-        {value}
-      </div>
-      <div className="admin-stat-title">
-        {title}
-      </div>
+      <div className="admin-stat-value">{value}</div>
+      <div className="admin-stat-title">{title}</div>
       <div className="admin-stat-footer">
-        <span className="admin-stat-description">
-          {description}
-        </span>
+        <span className="admin-stat-description">{description}</span>
       </div>
     </div>
   );
 }
 
-  //  QUICK ACTION
-function QuickAction({
-  icon: Icon,
-  title,
-  description,
-  onClick,
-}) {
+//  QUICK ACTION
+function QuickAction({ icon: Icon, title, description, onClick }) {
   return (
-    <button
-      type="button"
-      className="quick-action"
-      onClick={onClick}>
+    <button type="button" className="quick-action" onClick={onClick}>
       <div className="quick-action-icon">
         <Icon size={19} />
       </div>
@@ -80,19 +84,13 @@ function QuickAction({
         <strong>{title}</strong>
         <span>{description}</span>
       </div>
-      <ArrowUpRight
-        size={17}
-        className="quick-action-arrow"/>
+      <ArrowUpRight size={17} className="quick-action-arrow" />
     </button>
   );
 }
 
-  //  PROGRESS BAR
-function ProgressBar({
-  label,
-  value,
-  percentage,
-}) {
+//  PROGRESS BAR
+function ProgressBar({ label, value, percentage }) {
   return (
     <div className="progress-item">
       <div className="progress-header">
@@ -103,14 +101,15 @@ function ProgressBar({
         <div
           className="progress-fill"
           style={{
-            width: `${Math.min(
-              Math.max(Number(percentage) || 0,0),100)}%`,}}/>
+            width: `${Math.min(Math.max(Number(percentage) || 0, 0), 100)}%`,
+          }}
+        />
       </div>
     </div>
   );
 }
 
-  //  ACTIVITY ITEM
+//  ACTIVITY ITEM
 function ActivityItem({
   icon: Icon,
   title,
@@ -132,7 +131,7 @@ function ActivityItem({
   );
 }
 
-  //  ADMIN DASHBOARD BODY
+//  ADMIN DASHBOARD BODY
 function AdminDashboardBody() {
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -140,36 +139,33 @@ function AdminDashboardBody() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-    //  SCHOOL
-  const schoolName =
-    user?.school?.name ||
-    user?.schoolName ||
-    "My School";
+  //  SCHOOL
+  const schoolName = user?.school?.name || user?.schoolName || "My School";
 
-    //  LOAD DASHBOARD
+  //  LOAD DASHBOARD
   const loadDashboardData = async () => {
     try {
       setLoading(true);
       setError("");
-      const response =
-        await getAdminDashboardOverview();
+      const response = await getAdminDashboardOverview();
       const data = response?.data ?? response;
       setDashboard(data);
     } catch (err) {
-      console.error(
-        "Failed to load admin dashboard:",err);
+      console.error("Failed to load admin dashboard:", err);
       setError(
         err?.response?.data?.message ||
           err?.message ||
-          "Unable to load dashboard data.");
+          "Unable to load dashboard data.",
+      );
     } finally {
       setLoading(false);
-    }};
+    }
+  };
   useEffect(() => {
     loadDashboardData();
   }, []);
 
-    //  SAFE DASHBOARD DATA
+  //  SAFE DASHBOARD DATA
   const overview = dashboard?.overview || {};
   const students = dashboard?.students || {};
   const teachers = dashboard?.teachers || {};
@@ -178,12 +174,10 @@ function AdminDashboardBody() {
   const parents = dashboard?.parents || {};
   const enrollment = dashboard?.enrollment || {};
   const attendance = dashboard?.attendance || {};
-  const recentStudents =
-    dashboard?.recentStudents || [];
-  const recentEnrollments =
-    dashboard?.recentEnrollments || [];
+  const recentStudents = dashboard?.recentStudents || [];
+  const recentEnrollments = dashboard?.recentEnrollments || [];
 
-    //  ATTENDANCE
+  //  ATTENDANCE
   const attendanceTotal =
     Number(attendance.present || 0) +
     Number(attendance.absent || 0) +
@@ -193,38 +187,26 @@ function AdminDashboardBody() {
   const attendancePercentage = useMemo(() => {
     if (!attendanceTotal) return 0;
     return Math.round(
-      ((Number(attendance.present || 0) +
-        Number(attendance.late || 0)) /
+      ((Number(attendance.present || 0) + Number(attendance.late || 0)) /
         attendanceTotal) *
-        100);},
-       [attendanceTotal, attendance.present, attendance.late]);
+        100,
+    );
+  }, [attendanceTotal, attendance.present, attendance.late]);
 
-    //  PAYMENT
-  const paidStudents =
-    Number(students.payments?.paid || 0);
-  const unpaidStudents =
-    Number(students.payments?.unpaid || 0);
-  const refundedStudents =
-    Number(students.payments?.refunded || 0);
-  const paymentTotal =
-    paidStudents +
-    unpaidStudents +
-    refundedStudents;
+  //  PAYMENT
+  const paidStudents = Number(students.payments?.paid || 0);
+  const unpaidStudents = Number(students.payments?.unpaid || 0);
+  const refundedStudents = Number(students.payments?.refunded || 0);
+  const paymentTotal = paidStudents + unpaidStudents + refundedStudents;
   const feeCollectionPercentage =
-    paymentTotal > 0
-      ? Math.round(
-          (paidStudents / paymentTotal) * 100
-        )
-      : 0;
+    paymentTotal > 0 ? Math.round((paidStudents / paymentTotal) * 100) : 0;
 
-    //  ADMISSIONS
+  //  ADMISSIONS
   const pendingAdmissions =
-    Number(
-      students.registration?.initiated || 0) +
-    Number(
-      students.registration?.incomplete || 0);
+    Number(students.registration?.initiated || 0) +
+    Number(students.registration?.incomplete || 0);
 
-    //  FORMAT DATE
+  //  FORMAT DATE
   const formatDate = (date) => {
     if (!date) return "—";
     const parsedDate = new Date(date);
@@ -238,17 +220,13 @@ function AdminDashboardBody() {
     });
   };
 
-    //  LOADING STATE
+  //  LOADING STATE
   if (loading && !dashboard) {
     return (
       <div className="admin-dashboard">
-       <Header
-      title={schoolName}
-        subtitle="Admin Dashboard"/>
+        <Header title={schoolName} subtitle="Admin Dashboard" />
         <div className="admin-dashboard-loading">
-          <RefreshCw
-            size={28}
-            className="admin-spin"/>
+          <RefreshCw size={28} className="admin-spin" />
           <h3>Loading dashboard...</h3>
           <p>We're getting your school's latest information.</p>
         </div>
@@ -256,21 +234,23 @@ function AdminDashboardBody() {
     );
   }
 
-    //  ERROR STATE
+  //  ERROR STATE
   if (error && !dashboard) {
     return (
       <div className="admin-dashboard">
         <Header
           title="Admin Dashboard"
-          subtitle={`Welcome back. Here's what's happening at ${schoolName}.`}/>
-      <div className="admin-dashboard-error">
+          subtitle={`Welcome back. Here's what's happening at ${schoolName}.`}
+        />
+        <div className="admin-dashboard-error">
           <AlertCircle size={32} />
           <h3>Unable to load dashboard</h3>
           <p>{error}</p>
           <button
             type="button"
             className="secondary-button"
-            onClick={loadDashboardData}>
+            onClick={loadDashboardData}
+          >
             <RefreshCw size={15} />
             Try Again
           </button>
@@ -279,15 +259,15 @@ function AdminDashboardBody() {
     );
   }
 
-    //  RENDER
+  //  RENDER
   return (
     <div className="admin-dashboard">
       {/*HEADER */}
       <Header
         title="Admin Dashboard"
-        subtitle={`Welcome back. Here's what's happening at ${schoolName}.`}/>
+        subtitle={`Welcome back. Here's what's happening at ${schoolName}.`}
+      />
       <div className="admin-dashboard-content">
-
         {/*OVERVIEW */}
         <section className="admin-section">
           <div className="admin-section-heading">
@@ -299,11 +279,10 @@ function AdminDashboardBody() {
               type="button"
               className="secondary-button"
               onClick={loadDashboardData}
-              disabled={loading}>
-              <RefreshCw
-                size={15}
-                className={loading? "admin-spin": "" }/>
-              {loading? "Refreshing...": "Refresh"}
+              disabled={loading}
+            >
+              <RefreshCw size={15} className={loading ? "admin-spin" : ""} />
+              {loading ? "Refreshing..." : "Refresh"}
             </button>
           </div>
           {error && (
@@ -316,45 +295,45 @@ function AdminDashboardBody() {
             <StatCard
               icon={Users}
               title="Total Students"
-              value={
-                overview.students ?? 0 }
+              value={overview.students ?? 0}
               description="Students registered in your school"
-              iconClass="blue"/>
+              iconClass="blue"
+            />
             <StatCard
               icon={GraduationCap}
               title="Teachers"
-              value={
-                overview.teachers ?? 0}
+              value={overview.teachers ?? 0}
               description={`${teachers.active ?? 0} active teachers`}
-              iconClass="green"/>
+              iconClass="green"
+            />
             <StatCard
               icon={UserCog}
               title="Staff Members"
-              value={
-                overview.staff ?? 0 }
+              value={overview.staff ?? 0}
               description={`${staff.active ?? 0} active staff`}
-              iconClass="purple"/>
+              iconClass="purple"
+            />
             <StatCard
               icon={BookOpen}
               title="Classes"
-              value={
-                overview.classes ?? 0}
+              value={overview.classes ?? 0}
               description={`${classes.active ?? 0} active classes`}
-              iconClass="orange" />
+              iconClass="orange"
+            />
             <StatCard
               icon={UserRound}
               title="Parents"
-              value={
-                overview.parents ?? 0}
+              value={overview.parents ?? 0}
               description="Parents connected to students"
-              iconClass="blue"/>
+              iconClass="blue"
+            />
             <StatCard
               icon={ClipboardCheck}
               title="Enrollments"
-              value={
-                enrollment.active ?? 0}
+              value={enrollment.active ?? 0}
               description="Currently active enrollments"
-              iconClass="green"/>
+              iconClass="green"
+            />
           </div>
         </section>
 
@@ -393,17 +372,16 @@ function AdminDashboardBody() {
                   className="progress-fill finance"
                   style={{
                     width: `${feeCollectionPercentage}%`,
-                  }}/>
+                  }}
+                />
               </div>
-              <p className="panel-small-text">
-                {refundedStudents} refunded</p>
+              <p className="panel-small-text">{refundedStudents} refunded</p>
             </div>
             <button
               type="button"
               className="secondary-button"
-              onClick={() =>
-                navigate("/finance")
-              }>
+              onClick={() => navigate("/finance")}
+            >
               View Finance
               <ArrowUpRight size={15} />
             </button>
@@ -422,46 +400,50 @@ function AdminDashboardBody() {
               <div
                 className="attendance-circle"
                 style={{
-                  "--attendance":
-                    `${attendancePercentage}%`,}}>
+                  "--attendance": `${attendancePercentage}%`,
+                }}
+              >
                 <div>
-                  <strong>
-                    {attendancePercentage}%</strong>
+                  <strong>{attendancePercentage}%</strong>
                   <span> Present </span>
                 </div>
               </div>
               <div className="attendance-details">
                 <div className="attendance-item">
                   <span>
-                    <i className="attendance-dot present" />Present </span>
+                    <i className="attendance-dot present" />
+                    Present{" "}
+                  </span>
                   <strong>{attendance.present ?? 0} </strong>
                 </div>
                 <div className="attendance-item">
                   <span>
-                    <i className="attendance-dot absent" /> Absent </span>
+                    <i className="attendance-dot absent" /> Absent{" "}
+                  </span>
                   <strong>{attendance.absent ?? 0}</strong>
                 </div>
                 <div className="attendance-item">
-                  <span><i className="attendance-dot late" />Late</span>
-                  <strong>
-                    {attendance.late ?? 0}
-                  </strong>
+                  <span>
+                    <i className="attendance-dot late" />
+                    Late
+                  </span>
+                  <strong>{attendance.late ?? 0}</strong>
                 </div>
                 <div className="attendance-item">
                   <span>
                     <i className="attendance-dot excused" />
-                    Excused</span>
-                  <strong>
-                    {attendance.excused ?? 0}
-                  </strong>
+                    Excused
+                  </span>
+                  <strong>{attendance.excused ?? 0}</strong>
                 </div>
               </div>
             </div>
             <button
               type="button"
               className="secondary-button"
-              onClick={() =>
-                navigate("/attendance")}>View Attendance
+              onClick={() => navigate("/attendance")}
+            >
+              View Attendance
               <ArrowUpRight size={15} />
             </button>
           </div>
@@ -578,20 +560,16 @@ function AdminDashboardBody() {
             </div>
             <div className="class-overview-list">
               {classes.studentsPerClass?.length ? (
-                classes.studentsPerClass
-                  .slice(0, 5)
-                  .map((item) => (
-                    <div
-                      className="attendance-item"
-                      key={item.classId}>
-                      <span>
-                        {item.className || "Unnamed Class"}
-                        {item.arm
-                          ? ` - ${item.arm}`
-                          : ""}</span>
-                      <strong>{item.studentCount ?? 0}</strong>
-                    </div>
-                  ))) : (
+                classes.studentsPerClass.slice(0, 5).map((item) => (
+                  <div className="attendance-item" key={item.classId}>
+                    <span>
+                      {item.className || "Unnamed Class"}
+                      {item.arm ? ` - ${item.arm}` : ""}
+                    </span>
+                    <strong>{item.studentCount ?? 0}</strong>
+                  </div>
+                ))
+              ) : (
                 <div className="admin-empty-state">
                   <BookOpen size={24} />
                   <span>No class enrollment data available.</span>
@@ -612,8 +590,9 @@ function AdminDashboardBody() {
             <button
               type="button"
               className="panel-link"
-              onClick={() =>
-                navigate("/students")}>View All
+              onClick={() => navigate("/students")}
+            >
+              View All
               <ArrowUpRight size={15} />
             </button>
           </div>
@@ -626,15 +605,18 @@ function AdminDashboardBody() {
                   title={
                     `${student.firstName || ""} ${
                       student.lastName || ""
-                    }`.trim() ||
-                    "Student"}
+                    }`.trim() || "Student"
+                  }
                   description={
                     student.registrationNumber ||
                     student.registrationStatus ||
-                    "Recently registered"}
+                    "Recently registered"
+                  }
                   time={formatDate(student.createdAt)}
-                  type="blue"/>
-              ))) : (
+                  type="blue"
+                />
+              ))
+            ) : (
               <div className="admin-empty-state">
                 <Users size={24} />
                 <span>No students found.</span>
@@ -663,19 +645,25 @@ function AdminDashboardBody() {
                       ? `${item.student.firstName || ""} ${
                           item.student.lastName || ""
                         }`.trim()
-                      : "Student enrollment"}
+                      : "Student enrollment"
+                  }
                   description={
-                    item.class? `${item.class.name || "Class"}${
-                          item.class.arm? ` - ${item.class.arm}`
-                            : ""}`: "Class enrollment"}
-                  time={formatDate(
-                    item.enrollmentDate ||
-                      item.createdAt)}
-                  type="purple"/>))) : (
+                    item.class
+                      ? `${item.class.name || "Class"}${
+                          item.class.arm ? ` - ${item.class.arm}` : ""
+                        }`
+                      : "Class enrollment"
+                  }
+                  time={formatDate(item.enrollmentDate || item.createdAt)}
+                  type="purple"
+                />
+              ))
+            ) : (
               <div className="admin-empty-state">
                 <ClipboardCheck size={24} />
                 <span>No recent enrollments found.</span>
-              </div>)}
+              </div>
+            )}
           </div>
         </section>
 
@@ -692,38 +680,38 @@ function AdminDashboardBody() {
               icon={UserPlus}
               title="Add Student"
               description="Register a new student"
-              onClick={() =>
-                navigate("/students")}/>
+              onClick={() => navigate("/students")}
+            />
             <QuickAction
               icon={UserCog}
               title="Manage Staff"
               description="View and manage staff"
-              onClick={() =>
-                navigate("/staff")}/>
+              onClick={() => navigate("/staff")}
+            />
             <QuickAction
               icon={CalendarCheck}
               title="Attendance"
               description="Manage attendance"
-              onClick={() =>
-                navigate("/attendance")}/>
+              onClick={() => navigate("/attendance")}
+            />
             <QuickAction
               icon={Award}
               title="Results"
               description="Manage student results"
-              onClick={() =>
-                navigate("/results")}/>
+              onClick={() => navigate("/results")}
+            />
             <QuickAction
               icon={Megaphone}
               title="Announcement"
               description="Create an announcement"
-              onClick={() =>
-                navigate("/announcements")}/>
+              onClick={() => navigate("/announcements")}
+            />
             <QuickAction
               icon={Wallet}
               title="Finance"
               description="Manage school finances"
-              onClick={() =>
-                navigate("/finance")}/>
+              onClick={() => navigate("/finance")}
+            />
           </div>
         </section>
 
@@ -745,20 +733,27 @@ function AdminDashboardBody() {
             <ProgressBar
               label="Fee Payment"
               value={`${feeCollectionPercentage}%`}
-              percentage={feeCollectionPercentage}/>
+              percentage={feeCollectionPercentage}
+            />
             <ProgressBar
               label="Enrollment"
               value={`${enrollment.active ?? 0}`}
               percentage={
                 overview.students
                   ? Math.round(
-                      ((enrollment.active || 0) /overview.students) *100): 0}/>
+                      ((enrollment.active || 0) / overview.students) * 100,
+                    )
+                  : 0
+              }
+            />
           </div>
         </section>
       </div>
-    </div>);}
+    </div>
+  );
+}
 
-  //  EXPORT
+//  EXPORT
 export default function AdminDashboard() {
   return (
     <RequireRole>

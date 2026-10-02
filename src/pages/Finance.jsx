@@ -14,7 +14,7 @@ import {
 } from "lucide-react";
 
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "../context/authcontext";
 
 import {
   getPayments,
@@ -41,9 +41,7 @@ export default function Finance() {
   const isParent = user?.role === "parent";
 
   const schoolId =
-    typeof user?.school === "object"
-      ? user?.school?._id
-      : user?.school;
+    typeof user?.school === "object" ? user?.school?._id : user?.school;
 
   const loadPayments = async (isRefresh = false) => {
     try {
@@ -66,28 +64,18 @@ export default function Finance() {
         console.log("PARENT PAYMENTS RESPONSE:", response);
 
         const paymentList =
-          response?.payments ??
-          response?.data?.payments ??
-          [];
+          response?.payments ?? response?.data?.payments ?? [];
 
-        const safePayments = Array.isArray(paymentList)
-          ? paymentList
-          : [];
+        const safePayments = Array.isArray(paymentList) ? paymentList : [];
 
         setPayments(safePayments);
 
         // Calculate total paid by the parent's children
         const parentRevenue = safePayments
           .filter(
-            (payment) =>
-              String(payment.status || "").toLowerCase() ===
-              "paid"
+            (payment) => String(payment.status || "").toLowerCase() === "paid",
           )
-          .reduce(
-            (total, payment) =>
-              total + Number(payment.amount || 0),
-            0
-          );
+          .reduce((total, payment) => total + Number(payment.amount || 0), 0);
 
         setTotalRevenue(parentRevenue);
 
@@ -102,46 +90,31 @@ export default function Finance() {
       if (!schoolId) {
         setPayments([]);
         setTotalRevenue(0);
-        setError(
-          "No school is associated with this account."
-        );
+        setError("No school is associated with this account.");
         return;
       }
 
-      const [paymentsResponse, revenueResponse] =
-        await Promise.all([
-          getPayments({
-            school: schoolId,
-            page: 1,
-            limit: 100,
-          }),
+      const [paymentsResponse, revenueResponse] = await Promise.all([
+        getPayments({
+          school: schoolId,
+          page: 1,
+          limit: 100,
+        }),
 
-          getTotalRevenue(schoolId),
-        ]);
+        getTotalRevenue(schoolId),
+      ]);
 
-      console.log(
-        "FINANCE PAYMENTS RESPONSE:",
-        paymentsResponse
-      );
+      console.log("FINANCE PAYMENTS RESPONSE:", paymentsResponse);
 
-      console.log(
-        "FINANCE REVENUE RESPONSE:",
-        revenueResponse
-      );
+      console.log("FINANCE REVENUE RESPONSE:", revenueResponse);
 
       const paymentList =
-        paymentsResponse?.payments ??
-        paymentsResponse?.data?.payments ??
-        [];
+        paymentsResponse?.payments ?? paymentsResponse?.data?.payments ?? [];
 
-      setPayments(
-        Array.isArray(paymentList) ? paymentList : []
-      );
+      setPayments(Array.isArray(paymentList) ? paymentList : []);
 
       const revenue =
-        revenueResponse?.total ??
-        revenueResponse?.data?.total ??
-        0;
+        revenueResponse?.total ?? revenueResponse?.data?.total ?? 0;
 
       setTotalRevenue(Number(revenue) || 0);
     } catch (err) {
@@ -150,7 +123,7 @@ export default function Finance() {
       setError(
         err?.response?.data?.message ||
           err?.message ||
-          "Failed to load payment records."
+          "Failed to load payment records.",
       );
 
       setPayments([]);
@@ -171,24 +144,18 @@ export default function Finance() {
     return payments.filter((payment) => {
       const student = payment.student || {};
 
-      const studentName =
-        `${student.firstName || ""} ${
-          student.lastName || ""
-        }`.trim();
+      const studentName = `${student.firstName || ""} ${
+        student.lastName || ""
+      }`.trim();
 
-      const registrationNumber =
-        student.registrationNumber || "";
+      const registrationNumber = student.registrationNumber || "";
 
       const reference = payment.reference || "";
 
       const matchesSearch =
         !searchValue ||
-        studentName
-          .toLowerCase()
-          .includes(searchValue) ||
-        registrationNumber
-          .toLowerCase()
-          .includes(searchValue) ||
+        studentName.toLowerCase().includes(searchValue) ||
+        registrationNumber.toLowerCase().includes(searchValue) ||
         reference.toLowerCase().includes(searchValue);
 
       const matchesStatus =
@@ -201,33 +168,20 @@ export default function Finance() {
         String(payment.feeType || "").toLowerCase() ===
           feeTypeFilter.toLowerCase();
 
-      return (
-        matchesSearch &&
-        matchesStatus &&
-        matchesFeeType
-      );
+      return matchesSearch && matchesStatus && matchesFeeType;
     });
-  }, [
-    payments,
-    search,
-    statusFilter,
-    feeTypeFilter,
-  ]);
+  }, [payments, search, statusFilter, feeTypeFilter]);
 
   const paidCount = payments.filter(
-    (payment) =>
-      String(payment.status || "").toLowerCase() === "paid"
+    (payment) => String(payment.status || "").toLowerCase() === "paid",
   ).length;
 
   const pendingCount = payments.filter(
-    (payment) =>
-      String(payment.status || "").toLowerCase() ===
-      "pending"
+    (payment) => String(payment.status || "").toLowerCase() === "pending",
   ).length;
 
   const failedCount = payments.filter(
-    (payment) =>
-      String(payment.status || "").toLowerCase() === "failed"
+    (payment) => String(payment.status || "").toLowerCase() === "failed",
   ).length;
 
   const formatMoney = (amount) => {
@@ -251,10 +205,7 @@ export default function Finance() {
   const getStudentName = (payment) => {
     const student = payment.student || {};
 
-    const name =
-      `${student.firstName || ""} ${
-        student.lastName || ""
-      }`.trim();
+    const name = `${student.firstName || ""} ${student.lastName || ""}`.trim();
 
     return name || "Unknown Student";
   };
@@ -288,12 +239,7 @@ export default function Finance() {
           onClick={() => loadPayments(true)}
           disabled={refreshing}
         >
-          <RefreshCw
-            size={17}
-            className={
-              refreshing ? "finance-spin" : ""
-            }
-          />
+          <RefreshCw size={17} className={refreshing ? "finance-spin" : ""} />
 
           {refreshing ? "Refreshing..." : "Refresh"}
         </button>
@@ -313,15 +259,9 @@ export default function Finance() {
           </div>
 
           <div>
-            <span>
-              {isParent
-                ? "Children's Payments"
-                : "Total Revenue"}
-            </span>
+            <span>{isParent ? "Children's Payments" : "Total Revenue"}</span>
 
-            <strong>
-              {formatMoney(totalRevenue)}
-            </strong>
+            <strong>{formatMoney(totalRevenue)}</strong>
           </div>
         </div>
 
@@ -379,17 +319,13 @@ export default function Finance() {
               type="text"
               placeholder="Search student, registration number or reference..."
               value={search}
-              onChange={(e) =>
-                setSearch(e.target.value)
-              }
+              onChange={(e) => setSearch(e.target.value)}
             />
           </div>
 
           <select
             value={statusFilter}
-            onChange={(e) =>
-              setStatusFilter(e.target.value)
-            }
+            onChange={(e) => setStatusFilter(e.target.value)}
           >
             <option value="all">All Statuses</option>
             <option value="paid">Paid</option>
@@ -399,14 +335,10 @@ export default function Finance() {
 
           <select
             value={feeTypeFilter}
-            onChange={(e) =>
-              setFeeTypeFilter(e.target.value)
-            }
+            onChange={(e) => setFeeTypeFilter(e.target.value)}
           >
             <option value="all">All Fee Types</option>
-            <option value="school_fees">
-              School Fees
-            </option>
+            <option value="school_fees">School Fees</option>
             <option value="transport">Transport</option>
             <option value="uniform">Uniform</option>
             <option value="exam">Exam</option>
@@ -421,9 +353,7 @@ export default function Finance() {
 
               <p>
                 {filteredPayments.length} payment
-                {filteredPayments.length === 1
-                  ? ""
-                  : "s"} found
+                {filteredPayments.length === 1 ? "" : "s"} found
               </p>
             </div>
 
@@ -431,9 +361,7 @@ export default function Finance() {
               <button
                 type="button"
                 className="finance-record-button"
-                onClick={() =>
-                  navigate("/record-payment")
-                }
+                onClick={() => navigate("/record-payment")}
               >
                 <WalletCards size={17} />
                 Record Payment
@@ -443,22 +371,15 @@ export default function Finance() {
 
           {loading ? (
             <div className="finance-empty">
-              <RefreshCw
-                size={25}
-                className="finance-spin"
-              />
+              <RefreshCw size={25} className="finance-spin" />
 
-              <p>
-                Loading payment records...
-              </p>
+              <p>Loading payment records...</p>
             </div>
           ) : filteredPayments.length === 0 ? (
             <div className="finance-empty">
               <Receipt size={34} />
 
-              <h3>
-                No payment records found
-              </h3>
+              <h3>No payment records found</h3>
 
               <p>
                 {isParent
@@ -483,88 +404,65 @@ export default function Finance() {
                 </thead>
 
                 <tbody>
-                  {filteredPayments.map(
-                    (payment) => (
-                      <tr key={payment._id}>
-                        <td>
-                          <div className="finance-student">
-                            <div className="finance-student-avatar">
-                              <Users size={17} />
-                            </div>
-
-                            <div>
-                              <strong>
-                                {getStudentName(
-                                  payment
-                                )}
-                              </strong>
-                            </div>
+                  {filteredPayments.map((payment) => (
+                    <tr key={payment._id}>
+                      <td>
+                        <div className="finance-student">
+                          <div className="finance-student-avatar">
+                            <Users size={17} />
                           </div>
-                        </td>
 
-                        <td>
-                          {payment.student
-                            ?.registrationNumber ||
-                            "—"}
-                        </td>
+                          <div>
+                            <strong>{getStudentName(payment)}</strong>
+                          </div>
+                        </div>
+                      </td>
 
-                        <td>
-                          <span className="fee-type">
-                            {String(
-                              payment.feeType ||
-                                "Other"
-                            ).replaceAll("_", " ")}
-                          </span>
-                        </td>
+                      <td>{payment.student?.registrationNumber || "—"}</td>
 
-                        <td>
-                          <strong>
-                            {formatMoney(
-                              payment.amount
-                            )}
-                          </strong>
-                        </td>
-
-                        <td>
-                          {payment.paymentMethod ||
-                            "—"}
-                        </td>
-
-                        <td>
-                          <span
-                            className={`finance-status ${getStatusClass(
-                              payment.status
-                            )}`}
-                          >
-                            {payment.status ||
-                              "Unknown"}
-                          </span>
-                        </td>
-
-                        <td>
-                          {formatDate(
-                            payment.paymentDate ||
-                              payment.createdAt
+                      <td>
+                        <span className="fee-type">
+                          {String(payment.feeType || "Other").replaceAll(
+                            "_",
+                            " ",
                           )}
-                        </td>
+                        </span>
+                      </td>
 
-                        <td>
-                          <button
-                            type="button"
-                            className="finance-view-button"
-                            title="View payment"
-                            onClick={() =>
-                              navigate(
-                                `/finance/invoice/${payment._id}`
-                              )
-                            }
-                          >
-                            <Eye size={17} />
-                          </button>
-                        </td>
-                      </tr>
-                    )
-                  )}
+                      <td>
+                        <strong>{formatMoney(payment.amount)}</strong>
+                      </td>
+
+                      <td>{payment.paymentMethod || "—"}</td>
+
+                      <td>
+                        <span
+                          className={`finance-status ${getStatusClass(
+                            payment.status,
+                          )}`}
+                        >
+                          {payment.status || "Unknown"}
+                        </span>
+                      </td>
+
+                      <td>
+                        {formatDate(payment.paymentDate || payment.createdAt)}
+                      </td>
+
+                      <td>
+                        <button
+                          type="button"
+                          className="finance-view-button"
+                          title="View payment"
+                          onClick={() =>
+                            navigate(`/finance/invoice/${payment._id}`)
+                          }
+                        >
+                          <Eye size={17} />
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
                 </tbody>
               </table>
             </div>

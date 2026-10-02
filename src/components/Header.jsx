@@ -1,4 +1,4 @@
-import { useAuth, getEffectiveRole } from "../context/AuthContext";
+import { useAuth, getEffectiveRole } from "../context/authcontext";
 import { useTheme } from "../context/ThemeContext";
 import { useNavigate } from "react-router-dom";
 import { Bell, Sun, Moon } from "lucide-react";
@@ -20,10 +20,10 @@ export default function Header({ title, subtitle }) {
     role === "counsellor"
       ? "Counsellor"
       : role === "super_admin"
-      ? "Super Admin"
-      : role
-      ? role.charAt(0).toUpperCase() + role.slice(1)
-      : "User";
+        ? "Super Admin"
+        : role
+          ? role.charAt(0).toUpperCase() + role.slice(1)
+          : "User";
 
   return (
     <header className="app-header">
@@ -31,16 +31,11 @@ export default function Header({ title, subtitle }) {
       <div className="header-left">
         <h1 className="page-title">{title}</h1>
 
-        {subtitle && (
-          <p className="page-subtitle">
-            {subtitle}
-          </p>
-        )}
+        {subtitle && <p className="page-subtitle">{subtitle}</p>}
       </div>
 
       {/* Header actions */}
       <div className="header-actions">
-
         {/* Theme toggle */}
         <button
           type="button"
@@ -48,16 +43,10 @@ export default function Header({ title, subtitle }) {
           onClick={toggleTheme}
           aria-label="Toggle theme"
           title={
-            theme === "dark"
-              ? "Switch to light mode"
-              : "Switch to dark mode"
+            theme === "dark" ? "Switch to light mode" : "Switch to dark mode"
           }
         >
-          {theme === "dark" ? (
-            <Moon size={20} />
-          ) : (
-            <Sun size={20} />
-          )}
+          {theme === "dark" ? <Moon size={20} /> : <Sun size={20} />}
         </button>
 
         {/* Notifications */}
@@ -80,16 +69,11 @@ export default function Header({ title, subtitle }) {
           </div>
 
           <div className="header-user-info">
-            <span className="header-user-name">
-              {userName}
-            </span>
+            <span className="header-user-name">{userName}</span>
 
-            <span className="header-user-role">
-              {roleLabel}
-            </span>
+            <span className="header-user-role">{roleLabel}</span>
           </div>
         </div>
-
       </div>
     </header>
   );

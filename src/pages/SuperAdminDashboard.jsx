@@ -27,12 +27,9 @@ import {
 
 import "./SuperAdminDashboard.css";
 
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "../context/authcontext";
 
-import {
-  getSchools,
-  createSchool,
-} from "../api/school.api";
+import { getSchools, createSchool } from "../api/school.api";
 
 /* =========================================================================
    STATUS BADGE
@@ -41,18 +38,11 @@ import {
 function StatusBadge({ isActive, status }) {
   const normalizedStatus = String(status || "").toLowerCase();
 
-  const active =
-    isActive === true ||
-    normalizedStatus === "active";
+  const active = isActive === true || normalizedStatus === "active";
 
-  const pending =
-    normalizedStatus === "pending";
+  const pending = normalizedStatus === "pending";
 
-  const label = active
-    ? "Active"
-    : pending
-    ? "Pending"
-    : "Inactive";
+  const label = active ? "Active" : pending ? "Pending" : "Inactive";
 
   return (
     <span
@@ -60,15 +50,11 @@ function StatusBadge({ isActive, status }) {
         active
           ? "sa-status-active"
           : pending
-          ? "sa-status-pending"
-          : "sa-status-inactive"
+            ? "sa-status-pending"
+            : "sa-status-inactive"
       }`}
     >
-      {active ? (
-        <CheckCircle2 size={13} />
-      ) : (
-        <Clock3 size={13} />
-      )}
+      {active ? <CheckCircle2 size={13} /> : <Clock3 size={13} />}
 
       {label}
     </span>
@@ -79,12 +65,7 @@ function StatusBadge({ isActive, status }) {
    STAT CARD
    ========================================================================= */
 
-function StatCard({
-  title,
-  value,
-  icon: Icon,
-  description,
-}) {
+function StatCard({ title, value, icon: Icon, description }) {
   return (
     <div className="sa-stat-card">
       <div className="sa-stat-top">
@@ -97,19 +78,11 @@ function StatCard({
         </span>
       </div>
 
-      <div className="sa-stat-value">
-        {value}
-      </div>
+      <div className="sa-stat-value">{value}</div>
 
-      <div className="sa-stat-title">
-        {title}
-      </div>
+      <div className="sa-stat-title">{title}</div>
 
-      {description && (
-        <div className="sa-stat-description">
-          {description}
-        </div>
-      )}
+      {description && <div className="sa-stat-description">{description}</div>}
     </div>
   );
 }
@@ -119,10 +92,7 @@ function StatCard({
    ========================================================================= */
 
 function SuperAdminDashboard() {
-  const {
-    user,
-    logout,
-  } = useAuth();
+  const { user, logout } = useAuth();
 
   const navigate = useNavigate();
 
@@ -132,41 +102,32 @@ function SuperAdminDashboard() {
 
   const [schools, setSchools] = useState([]);
 
-  const [loading, setLoading] =
-    useState(true);
+  const [loading, setLoading] = useState(true);
 
-  const [error, setError] =
-    useState("");
+  const [error, setError] = useState("");
 
-  const [searchTerm, setSearchTerm] =
-    useState("");
+  const [searchTerm, setSearchTerm] = useState("");
 
-  const [showAddSchool, setShowAddSchool] =
-    useState(false);
+  const [showAddSchool, setShowAddSchool] = useState(false);
 
-  const [showAllSchools, setShowAllSchools] =
-    useState(false);
+  const [showAllSchools, setShowAllSchools] = useState(false);
 
-  const [creatingSchool, setCreatingSchool] =
-    useState(false);
+  const [creatingSchool, setCreatingSchool] = useState(false);
 
-  const [createSchoolError, setCreateSchoolError] =
-    useState("");
+  const [createSchoolError, setCreateSchoolError] = useState("");
 
-  const [mobileSidebarOpen, setMobileSidebarOpen] =
-    useState(false);
+  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
 
-  const [schoolForm, setSchoolForm] =
-    useState({
-      name: "",
-      schoolType: "Primary",
-      email: "",
-      phone: "",
-      address: "",
-      city: "",
-      state: "",
-      country: "Nigeria",
-    });
+  const [schoolForm, setSchoolForm] = useState({
+    name: "",
+    schoolType: "Primary",
+    email: "",
+    phone: "",
+    address: "",
+    city: "",
+    state: "",
+    country: "Nigeria",
+  });
 
   /* =========================================================================
      LOAD SCHOOLS
@@ -181,22 +142,15 @@ function SuperAdminDashboard() {
 
       console.log("SCHOOLS RESPONSE:", response);
 
-      const schoolData =
-        Array.isArray(response?.schools)
-          ? response.schools
-          : [];
+      const schoolData = Array.isArray(response?.schools)
+        ? response.schools
+        : [];
 
       setSchools(schoolData);
     } catch (err) {
-      console.error(
-        "FAILED TO LOAD SCHOOLS:",
-        err
-      );
+      console.error("FAILED TO LOAD SCHOOLS:", err);
 
-      setError(
-        err?.message ||
-          "Failed to load schools."
-      );
+      setError(err?.message || "Failed to load schools.");
     } finally {
       setLoading(false);
     }
@@ -210,44 +164,29 @@ function SuperAdminDashboard() {
      STATISTICS
      ========================================================================= */
 
-  const totalSchools =
-    schools.length;
+  const totalSchools = schools.length;
 
-  const activeSchools =
-    schools.filter(
-      (school) =>
-        school?.isActive === true ||
-        String(
-          school?.status || ""
-        ).toLowerCase() === "active"
-    ).length;
+  const activeSchools = schools.filter(
+    (school) =>
+      school?.isActive === true ||
+      String(school?.status || "").toLowerCase() === "active",
+  ).length;
 
-  const pendingSchools =
-    schools.filter(
-      (school) =>
-        String(
-          school?.status || ""
-        ).toLowerCase() === "pending"
-    ).length;
+  const pendingSchools = schools.filter(
+    (school) => String(school?.status || "").toLowerCase() === "pending",
+  ).length;
 
-  const primarySchools =
-    schools.filter(
-      (school) =>
-        school?.schoolType === "Primary"
-    ).length;
+  const primarySchools = schools.filter(
+    (school) => school?.schoolType === "Primary",
+  ).length;
 
-  const secondarySchools =
-    schools.filter(
-      (school) =>
-        school?.schoolType === "Secondary"
-    ).length;
+  const secondarySchools = schools.filter(
+    (school) => school?.schoolType === "Secondary",
+  ).length;
 
-  const combinedSchools =
-    schools.filter(
-      (school) =>
-        school?.schoolType ===
-        "Primary & Secondary"
-    ).length;
+  const combinedSchools = schools.filter(
+    (school) => school?.schoolType === "Primary & Secondary",
+  ).length;
 
   /* =========================================================================
      RECENT SCHOOLS
@@ -255,15 +194,7 @@ function SuperAdminDashboard() {
 
   const recentSchools = useMemo(() => {
     return [...schools]
-      .sort(
-        (a, b) =>
-          new Date(
-            b?.createdAt || 0
-          ) -
-          new Date(
-            a?.createdAt || 0
-          )
-      )
+      .sort((a, b) => new Date(b?.createdAt || 0) - new Date(a?.createdAt || 0))
       .slice(0, 5);
   }, [schools]);
 
@@ -272,15 +203,10 @@ function SuperAdminDashboard() {
      ========================================================================= */
 
   const filteredSchools = useMemo(() => {
-    const term =
-      searchTerm
-        .trim()
-        .toLowerCase();
+    const term = searchTerm.trim().toLowerCase();
 
     if (!term) {
-      return showAllSchools
-        ? schools
-        : recentSchools;
+      return showAllSchools ? schools : recentSchools;
     }
 
     return schools.filter((school) => {
@@ -295,32 +221,17 @@ function SuperAdminDashboard() {
 
       return values
         .filter(Boolean)
-        .some((value) =>
-          String(value)
-            .toLowerCase()
-            .includes(term)
-        );
+        .some((value) => String(value).toLowerCase().includes(term));
     });
-  }, [
-    schools,
-    recentSchools,
-    searchTerm,
-    showAllSchools,
-  ]);
+  }, [schools, recentSchools, searchTerm, showAllSchools]);
 
   /* =========================================================================
      ADMIN DETAILS
      ========================================================================= */
 
-  const adminName =
-    user?.fullName ||
-    user?.name ||
-    "Super Admin";
+  const adminName = user?.fullName || user?.name || "Super Admin";
 
-  const adminInitial =
-    adminName
-      .charAt(0)
-      .toUpperCase();
+  const adminInitial = adminName.charAt(0).toUpperCase();
 
   /* =========================================================================
      NAVIGATION
@@ -338,61 +249,50 @@ function SuperAdminDashboard() {
      FORM
      ========================================================================= */
 
-  const handleSchoolFormChange =
-    (event) => {
-      const {
-        name,
-        value,
-      } = event.target;
+  const handleSchoolFormChange = (event) => {
+    const { name, value } = event.target;
 
-      setSchoolForm((previous) => ({
-        ...previous,
-        [name]: value,
-      }));
-    };
+    setSchoolForm((previous) => ({
+      ...previous,
+      [name]: value,
+    }));
+  };
 
   /* =========================================================================
      CREATE SCHOOL
      ========================================================================= */
 
-  const handleCreateSchool =
-    async (event) => {
-      event.preventDefault();
+  const handleCreateSchool = async (event) => {
+    event.preventDefault();
 
-      try {
-        setCreatingSchool(true);
-        setCreateSchoolError("");
+    try {
+      setCreatingSchool(true);
+      setCreateSchoolError("");
 
-        await createSchool(schoolForm);
+      await createSchool(schoolForm);
 
-        setSchoolForm({
-          name: "",
-          schoolType: "Primary",
-          email: "",
-          phone: "",
-          address: "",
-          city: "",
-          state: "",
-          country: "Nigeria",
-        });
+      setSchoolForm({
+        name: "",
+        schoolType: "Primary",
+        email: "",
+        phone: "",
+        address: "",
+        city: "",
+        state: "",
+        country: "Nigeria",
+      });
 
-        setShowAddSchool(false);
+      setShowAddSchool(false);
 
-        await loadSchools();
-      } catch (err) {
-        console.error(
-          "FAILED TO CREATE SCHOOL:",
-          err
-        );
+      await loadSchools();
+    } catch (err) {
+      console.error("FAILED TO CREATE SCHOOL:", err);
 
-        setCreateSchoolError(
-          err?.message ||
-            "Failed to create school."
-        );
-      } finally {
-        setCreatingSchool(false);
-      }
-    };
+      setCreateSchoolError(err?.message || "Failed to create school.");
+    } finally {
+      setCreatingSchool(false);
+    }
+  };
 
   /* =========================================================================
      LOGOUT
@@ -411,14 +311,11 @@ function SuperAdminDashboard() {
       return "—";
     }
 
-    return new Date(date).toLocaleDateString(
-      "en-NG",
-      {
-        day: "2-digit",
-        month: "short",
-        year: "numeric",
-      }
-    );
+    return new Date(date).toLocaleDateString("en-NG", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    });
   };
 
   /* =========================================================================
@@ -435,40 +332,26 @@ function SuperAdminDashboard() {
 
   return (
     <div className="super-admin-dashboard">
-
       {/* MOBILE OVERLAY */}
 
       {mobileSidebarOpen && (
-        <div
-          className="sa-sidebar-overlay"
-          onClick={closeMobileSidebar}
-        />
+        <div className="sa-sidebar-overlay" onClick={closeMobileSidebar} />
       )}
 
       {/* SIDEBAR */}
 
       <aside
-        className={`sa-sidebar ${
-          mobileSidebarOpen
-            ? "sa-sidebar-open"
-            : ""
-        }`}
+        className={`sa-sidebar ${mobileSidebarOpen ? "sa-sidebar-open" : ""}`}
       >
-
         <div className="sa-sidebar-brand">
-
           <div className="sa-brand-logo">
             <GraduationCap size={27} />
           </div>
 
           <div>
-            <div className="sa-brand-name">
-              EduNigeria
-            </div>
+            <div className="sa-brand-name">EduNigeria</div>
 
-            <div className="sa-brand-subtitle">
-              Platform Administration
-            </div>
+            <div className="sa-brand-subtitle">Platform Administration</div>
           </div>
 
           <button
@@ -478,7 +361,6 @@ function SuperAdminDashboard() {
           >
             <X size={21} />
           </button>
-
         </div>
 
         <div className="sa-sidebar-divider" />
@@ -486,22 +368,14 @@ function SuperAdminDashboard() {
         {/* MAIN MENU */}
 
         <div className="sa-sidebar-section">
-
-          <span className="sa-sidebar-label">
-            MAIN MENU
-          </span>
+          <span className="sa-sidebar-label">MAIN MENU</span>
 
           <nav className="sa-sidebar-nav">
-
             <NavLink
               to="/super-admin"
               end
               className={({ isActive }) =>
-                `sa-nav-item ${
-                  isActive
-                    ? "sa-nav-active"
-                    : ""
-                }`
+                `sa-nav-item ${isActive ? "sa-nav-active" : ""}`
               }
               onClick={closeMobileSidebar}
             >
@@ -512,11 +386,7 @@ function SuperAdminDashboard() {
             <NavLink
               to="/schools"
               className={({ isActive }) =>
-                `sa-nav-item ${
-                  isActive
-                    ? "sa-nav-active"
-                    : ""
-                }`
+                `sa-nav-item ${isActive ? "sa-nav-active" : ""}`
               }
               onClick={closeMobileSidebar}
             >
@@ -541,9 +411,7 @@ function SuperAdminDashboard() {
             <button
               className="sa-nav-item"
               type="button"
-              onClick={() =>
-                navigate("/reports")
-              }
+              onClick={() => navigate("/reports")}
             >
               <FileBarChart size={19} />
               <span>Reports</span>
@@ -557,58 +425,37 @@ function SuperAdminDashboard() {
               <Activity size={19} />
               <span>Activity</span>
             </button>
-
           </nav>
-
         </div>
 
         {/* SYSTEM */}
 
         <div className="sa-sidebar-section sa-sidebar-system">
-
-          <span className="sa-sidebar-label">
-            SYSTEM
-          </span>
+          <span className="sa-sidebar-label">SYSTEM</span>
 
           <nav className="sa-sidebar-nav">
-
             <button
               className="sa-nav-item"
               type="button"
-              onClick={() =>
-                navigate("/settings")
-              }
+              onClick={() => navigate("/settings")}
             >
               <Settings size={19} />
               <span>Settings</span>
             </button>
-
           </nav>
-
         </div>
 
         {/* SIDEBAR USER */}
 
         <div className="sa-sidebar-bottom">
-
           <div className="sa-sidebar-user">
-
-            <div className="sa-sidebar-avatar">
-              {adminInitial}
-            </div>
+            <div className="sa-sidebar-avatar">{adminInitial}</div>
 
             <div className="sa-sidebar-user-info">
+              <strong>{adminName}</strong>
 
-              <strong>
-                {adminName}
-              </strong>
-
-              <span>
-                Super Administrator
-              </span>
-
+              <span>Super Administrator</span>
             </div>
-
           </div>
 
           <button
@@ -619,141 +466,85 @@ function SuperAdminDashboard() {
             <LogOut size={18} />
             <span>Logout</span>
           </button>
-
         </div>
-
       </aside>
 
       {/* MAIN WRAPPER */}
 
       <div className="sa-main-wrapper">
-
         {/* TOPBAR */}
 
         <header className="sa-topbar">
-
           <div className="sa-topbar-left">
-
             <button
               className="sa-mobile-menu"
-              onClick={() =>
-                setMobileSidebarOpen(true)
-              }
+              onClick={() => setMobileSidebarOpen(true)}
               type="button"
             >
               <Menu size={22} />
             </button>
 
             <div>
+              <span className="sa-topbar-label">PLATFORM ADMINISTRATION</span>
 
-              <span className="sa-topbar-label">
-                PLATFORM ADMINISTRATION
-              </span>
-
-              <h1>
-                Super Admin Dashboard
-              </h1>
-
+              <h1>Super Admin Dashboard</h1>
             </div>
-
           </div>
 
           <div className="sa-topbar-right">
-
             <div className="sa-search">
-
               <Search size={18} />
 
               <input
                 type="text"
                 placeholder="Search schools..."
                 value={searchTerm}
-                onChange={(event) =>
-                  setSearchTerm(
-                    event.target.value
-                  )
-                }
+                onChange={(event) => setSearchTerm(event.target.value)}
               />
-
             </div>
 
-            <button
-              className="sa-icon-button"
-              type="button"
-            >
+            <button className="sa-icon-button" type="button">
               <Bell size={19} />
               <span className="sa-notification-dot" />
             </button>
 
             <div className="sa-topbar-profile">
-
-              <div className="sa-topbar-avatar">
-                {adminInitial}
-              </div>
+              <div className="sa-topbar-avatar">{adminInitial}</div>
 
               <div className="sa-topbar-profile-info">
+                <strong>{adminName}</strong>
 
-                <strong>
-                  {adminName}
-                </strong>
-
-                <span>
-                  Super Admin
-                </span>
-
+                <span>Super Admin</span>
               </div>
-
             </div>
-
           </div>
-
         </header>
 
         {/* MAIN CONTENT */}
 
         <main className="sa-main-content">
-
           {/* PAGE INTRO */}
 
           <section className="sa-page-intro">
-
             <div>
+              <span className="sa-page-eyebrow">OVERVIEW</span>
 
-              <span className="sa-page-eyebrow">
-                OVERVIEW
-              </span>
-
-              <h2>
-                Welcome back,{" "}
-                {adminName.split(" ")[0]}.
-              </h2>
+              <h2>Welcome back, {adminName.split(" ")[0]}.</h2>
 
               <p>
-                Monitor schools, users
-                and platform activity
-                from one central
+                Monitor schools, users and platform activity from one central
                 dashboard.
               </p>
-
             </div>
 
             <div className="sa-page-actions">
-
               <button
                 className="sa-secondary-button"
                 onClick={loadSchools}
                 disabled={loading}
                 type="button"
               >
-                <RefreshCw
-                  size={17}
-                  className={
-                    loading
-                      ? "sa-spin"
-                      : ""
-                  }
-                />
-
+                <RefreshCw size={17} className={loading ? "sa-spin" : ""} />
                 Refresh
               </button>
 
@@ -768,66 +559,43 @@ function SuperAdminDashboard() {
                 <Plus size={18} />
                 Add School
               </button>
-
             </div>
-
           </section>
 
           {/* ERROR */}
 
           {error && (
             <div className="sa-error-box">
-
               <AlertCircle size={19} />
 
               <div>
+                <strong>Unable to load schools</strong>
 
-                <strong>
-                  Unable to load schools
-                </strong>
-
-                <p>
-                  {error}
-                </p>
-
+                <p>{error}</p>
               </div>
-
             </div>
           )}
 
           {/* STAT CARDS */}
 
           <section className="sa-stat-grid">
-
             <StatCard
               title="Total Schools"
-              value={
-                loading
-                  ? "—"
-                  : totalSchools
-              }
+              value={loading ? "—" : totalSchools}
               icon={Building2}
               description="Registered on EduNigeria"
             />
 
             <StatCard
               title="Active Schools"
-              value={
-                loading
-                  ? "—"
-                  : activeSchools
-              }
+              value={loading ? "—" : activeSchools}
               icon={CheckCircle2}
               description="Currently active"
             />
 
             <StatCard
               title="Pending Schools"
-              value={
-                loading
-                  ? "—"
-                  : pendingSchools
-              }
+              value={loading ? "—" : pendingSchools}
               icon={Clock3}
               description="Awaiting activation"
             />
@@ -840,7 +608,6 @@ function SuperAdminDashboard() {
               onClick={openUsers}
             >
               <div className="sa-stat-top">
-
                 <div className="sa-stat-icon">
                   <Users size={21} />
                 </div>
@@ -848,185 +615,110 @@ function SuperAdminDashboard() {
                 <span className="sa-stat-arrow">
                   <ChevronRight size={18} />
                 </span>
-
               </div>
 
-              <div className="sa-stat-value">
-                —
-              </div>
+              <div className="sa-stat-value">—</div>
 
-              <div className="sa-stat-title">
-                Platform Users
-              </div>
+              <div className="sa-stat-title">Platform Users</div>
 
-              <div className="sa-stat-description">
-                User management
-              </div>
+              <div className="sa-stat-description">User management</div>
             </button>
-
           </section>
 
           {/* SCHOOL BREAKDOWN */}
 
           <section className="sa-section">
-
             <div className="sa-section-heading">
-
               <div>
+                <span>REGISTRATION BREAKDOWN</span>
 
-                <span>
-                  REGISTRATION BREAKDOWN
-                </span>
-
-                <h3>
-                  Schools by Type
-                </h3>
-
+                <h3>Schools by Type</h3>
               </div>
-
             </div>
 
             <div className="sa-breakdown-grid">
-
               <div className="sa-breakdown-card">
-
                 <div className="sa-breakdown-icon">
                   <GraduationCap size={21} />
                 </div>
 
                 <div>
-                  <strong>
-                    {primarySchools}
-                  </strong>
+                  <strong>{primarySchools}</strong>
 
-                  <span>
-                    Primary Schools
-                  </span>
+                  <span>Primary Schools</span>
                 </div>
-
               </div>
 
               <div className="sa-breakdown-card">
-
                 <div className="sa-breakdown-icon">
                   <School size={21} />
                 </div>
 
                 <div>
-                  <strong>
-                    {secondarySchools}
-                  </strong>
+                  <strong>{secondarySchools}</strong>
 
-                  <span>
-                    Secondary Schools
-                  </span>
+                  <span>Secondary Schools</span>
                 </div>
-
               </div>
 
               <div className="sa-breakdown-card">
-
                 <div className="sa-breakdown-icon">
                   <Building2 size={21} />
                 </div>
 
                 <div>
-                  <strong>
-                    {combinedSchools}
-                  </strong>
+                  <strong>{combinedSchools}</strong>
 
-                  <span>
-                    Primary & Secondary
-                  </span>
+                  <span>Primary & Secondary</span>
                 </div>
-
               </div>
-
             </div>
-
           </section>
 
           {/* SCHOOLS */}
 
           <section className="sa-section">
-
             <div className="sa-section-heading">
-
               <div>
-
-                <span>
-                  REGISTERED SCHOOLS
-                </span>
+                <span>REGISTERED SCHOOLS</span>
 
                 <h3>
-                  {showAllSchools ||
-                  searchTerm
+                  {showAllSchools || searchTerm
                     ? "All Schools"
                     : "Recent Schools"}
                 </h3>
-
               </div>
 
               <button
                 className="sa-text-button"
-                onClick={() =>
-                  setShowAllSchools(
-                    (value) => !value
-                  )
-                }
+                onClick={() => setShowAllSchools((value) => !value)}
                 type="button"
               >
-                {showAllSchools
-                  ? "Show Recent"
-                  : "View All"}
+                {showAllSchools ? "Show Recent" : "View All"}
 
                 <ChevronRight size={16} />
               </button>
-
             </div>
 
             <div className="sa-school-panel">
-
               {loading ? (
-
                 <div className="sa-empty-state">
+                  <RefreshCw size={25} className="sa-spin" />
 
-                  <RefreshCw
-                    size={25}
-                    className="sa-spin"
-                  />
-
-                  <span>
-                    Loading schools...
-                  </span>
-
+                  <span>Loading schools...</span>
                 </div>
-
               ) : filteredSchools.length === 0 ? (
-
                 <div className="sa-empty-state">
-
                   <Building2 size={28} />
 
-                  <strong>
-                    No schools found
-                  </strong>
+                  <strong>No schools found</strong>
 
-                  <span>
-                    Try another search or
-                    add a new school.
-                  </span>
-
+                  <span>Try another search or add a new school.</span>
                 </div>
-
               ) : (
-
                 <>
-
                   <div className="sa-table-wrapper">
-
                     <table className="sa-school-table">
-
                       <thead>
                         <tr>
                           <th>School</th>
@@ -1038,345 +730,202 @@ function SuperAdminDashboard() {
                       </thead>
 
                       <tbody>
+                        {filteredSchools.map((school) => {
+                          const schoolId = school?._id || school?.id;
 
-                        {filteredSchools.map(
-                          (school) => {
-
-                            const schoolId =
-                              school?._id ||
-                              school?.id;
-
-                            return (
-                              <tr
-                                key={schoolId}
-                                className="sa-school-row"
-                                onClick={openSchools}
-                              >
-
-                                <td>
-
-                                  <div className="sa-school-name-cell">
-
-                                    <div className="sa-school-logo">
-                                      <Building2 size={18} />
-                                    </div>
-
-                                    <div>
-
-                                      <strong>
-                                        {school?.name ||
-                                          "Unnamed School"}
-                                      </strong>
-
-                                      <span>
-                                        {school?.email ||
-                                          "No email"}
-                                      </span>
-
-                                    </div>
-
+                          return (
+                            <tr
+                              key={schoolId}
+                              className="sa-school-row"
+                              onClick={openSchools}
+                            >
+                              <td>
+                                <div className="sa-school-name-cell">
+                                  <div className="sa-school-logo">
+                                    <Building2 size={18} />
                                   </div>
 
-                                </td>
+                                  <div>
+                                    <strong>
+                                      {school?.name || "Unnamed School"}
+                                    </strong>
 
-                                <td>
+                                    <span>{school?.email || "No email"}</span>
+                                  </div>
+                                </div>
+                              </td>
 
-                                  <span className="sa-location">
+                              <td>
+                                <span className="sa-location">
+                                  {[school?.city, school?.state]
+                                    .filter(Boolean)
+                                    .join(", ") || "—"}
+                                </span>
+                              </td>
 
-                                    {[
-                                      school?.city,
-                                      school?.state,
-                                    ]
-                                      .filter(Boolean)
-                                      .join(", ") ||
-                                      "—"}
+                              <td>
+                                <span className="sa-type-pill">
+                                  {school?.schoolType || "—"}
+                                </span>
+                              </td>
 
-                                  </span>
+                              <td>{formatDate(school?.createdAt)}</td>
 
-                                </td>
-
-                                <td>
-
-                                  <span className="sa-type-pill">
-                                    {school?.schoolType ||
-                                      "—"}
-                                  </span>
-
-                                </td>
-
-                                <td>
-                                  {formatDate(
-                                    school?.createdAt
-                                  )}
-                                </td>
-
-                                <td>
-
-                                  <StatusBadge
-                                    isActive={
-                                      school?.isActive
-                                    }
-                                    status={
-                                      school?.status
-                                    }
-                                  />
-
-                                </td>
-
-                              </tr>
-                            );
-                          }
-                        )}
-
+                              <td>
+                                <StatusBadge
+                                  isActive={school?.isActive}
+                                  status={school?.status}
+                                />
+                              </td>
+                            </tr>
+                          );
+                        })}
                       </tbody>
-
                     </table>
-
                   </div>
 
                   <div className="sa-mobile-school-list">
+                    {filteredSchools.map((school) => {
+                      const schoolId = school?._id || school?.id;
 
-                    {filteredSchools.map(
-                      (school) => {
-
-                        const schoolId =
-                          school?._id ||
-                          school?.id;
-
-                        return (
-                          <div
-                            className="sa-mobile-school-card"
-                            key={schoolId}
-                            onClick={openSchools}
-                          >
-
-                            <div className="sa-mobile-school-top">
-
-                              <div className="sa-school-logo">
-                                <Building2 size={18} />
-                              </div>
-
-                              <div>
-
-                                <strong>
-                                  {school?.name ||
-                                    "Unnamed School"}
-                                </strong>
-
-                                <span>
-                                  {school?.email ||
-                                    "No email"}
-                                </span>
-
-                              </div>
-
+                      return (
+                        <div
+                          className="sa-mobile-school-card"
+                          key={schoolId}
+                          onClick={openSchools}
+                        >
+                          <div className="sa-mobile-school-top">
+                            <div className="sa-school-logo">
+                              <Building2 size={18} />
                             </div>
 
-                            <div className="sa-mobile-school-details">
+                            <div>
+                              <strong>
+                                {school?.name || "Unnamed School"}
+                              </strong>
 
-                              <div>
-                                <span>
-                                  Location
-                                </span>
-
-                                <strong>
-                                  {[
-                                    school?.city,
-                                    school?.state,
-                                  ]
-                                    .filter(Boolean)
-                                    .join(", ") ||
-                                    "—"}
-                                </strong>
-                              </div>
-
-                              <div>
-                                <span>
-                                  Type
-                                </span>
-
-                                <strong>
-                                  {school?.schoolType ||
-                                    "—"}
-                                </strong>
-                              </div>
-
-                              <div>
-                                <span>
-                                  Registered
-                                </span>
-
-                                <strong>
-                                  {formatDate(
-                                    school?.createdAt
-                                  )}
-                                </strong>
-                              </div>
-
+                              <span>{school?.email || "No email"}</span>
                             </div>
-
-                            <StatusBadge
-                              isActive={
-                                school?.isActive
-                              }
-                              status={
-                                school?.status
-                              }
-                            />
-
                           </div>
-                        );
-                      }
-                    )}
 
+                          <div className="sa-mobile-school-details">
+                            <div>
+                              <span>Location</span>
+
+                              <strong>
+                                {[school?.city, school?.state]
+                                  .filter(Boolean)
+                                  .join(", ") || "—"}
+                              </strong>
+                            </div>
+
+                            <div>
+                              <span>Type</span>
+
+                              <strong>{school?.schoolType || "—"}</strong>
+                            </div>
+
+                            <div>
+                              <span>Registered</span>
+
+                              <strong>{formatDate(school?.createdAt)}</strong>
+                            </div>
+                          </div>
+
+                          <StatusBadge
+                            isActive={school?.isActive}
+                            status={school?.status}
+                          />
+                        </div>
+                      );
+                    })}
                   </div>
-
                 </>
-
               )}
-
             </div>
-
           </section>
 
           {/* BOTTOM GRID */}
 
           <section className="sa-bottom-grid">
-
             {/* PLATFORM HEALTH */}
 
             <div className="sa-health-panel">
-
               <div className="sa-panel-heading">
-
                 <div>
+                  <span>PLATFORM</span>
 
-                  <span>
-                    PLATFORM
-                  </span>
-
-                  <h3>
-                    System Status
-                  </h3>
-
+                  <h3>System Status</h3>
                 </div>
 
                 <span className="sa-health-indicator">
-
                   <span />
 
-                  {error
-                    ? "Attention Required"
-                    : "Operational"}
-
+                  {error ? "Attention Required" : "Operational"}
                 </span>
-
               </div>
 
               <div className="sa-health-list">
-
                 <div className="sa-health-row">
-
                   <div>
                     <CheckCircle2 size={18} />
 
-                    <span>
-                      School Data Service
-                    </span>
+                    <span>School Data Service</span>
                   </div>
 
-                  <strong>
-                    {error
-                      ? "Unavailable"
-                      : "Connected"}
-                  </strong>
-
+                  <strong>{error ? "Unavailable" : "Connected"}</strong>
                 </div>
 
                 <div className="sa-health-row">
-
                   <div>
                     <ShieldCheck size={18} />
 
-                    <span>
-                      Authentication
-                    </span>
+                    <span>Authentication</span>
                   </div>
 
-                  <strong>
-                    {user
-                      ? "Active"
-                      : "Inactive"}
-                  </strong>
-
+                  <strong>{user ? "Active" : "Inactive"}</strong>
                 </div>
 
                 <div className="sa-health-row">
-
                   <div>
                     <Activity size={18} />
 
-                    <span>
-                      Platform Activity
-                    </span>
+                    <span>Platform Activity</span>
                   </div>
 
-                  <strong>
-                    Available
-                  </strong>
-
+                  <strong>Available</strong>
                 </div>
-
               </div>
-
             </div>
 
             {/* QUICK ACTIONS */}
 
             <div className="sa-actions-panel">
-
               <div className="sa-panel-heading">
-
                 <div>
+                  <span>QUICK ACCESS</span>
 
-                  <span>
-                    QUICK ACCESS
-                  </span>
-
-                  <h3>
-                    Platform Management
-                  </h3>
-
+                  <h3>Platform Management</h3>
                 </div>
-
               </div>
 
               <div className="sa-management-grid">
-
                 <button
                   className="sa-management-card"
                   type="button"
                   onClick={openSchools}
                 >
-
                   <div className="sa-management-icon">
                     <Building2 size={20} />
                   </div>
 
                   <div>
+                    <strong>Manage Schools</strong>
 
-                    <strong>
-                      Manage Schools
-                    </strong>
-
-                    <span>
-                      View registered schools
-                    </span>
-
+                    <span>View registered schools</span>
                   </div>
 
                   <ChevronRight size={17} />
-
                 </button>
 
                 {/* SCHOOL ADMINISTRATORS */}
@@ -1386,25 +935,17 @@ function SuperAdminDashboard() {
                   type="button"
                   onClick={openUsers}
                 >
-
                   <div className="sa-management-icon">
                     <UserCog size={20} />
                   </div>
 
                   <div>
+                    <strong>School Administrators</strong>
 
-                    <strong>
-                      School Administrators
-                    </strong>
-
-                    <span>
-                      Manage school admins
-                    </span>
-
+                    <span>Manage school admins</span>
                   </div>
 
                   <ChevronRight size={17} />
-
                 </button>
 
                 {/* PLATFORM USERS */}
@@ -1414,315 +955,189 @@ function SuperAdminDashboard() {
                   type="button"
                   onClick={openUsers}
                 >
-
                   <div className="sa-management-icon">
                     <Users size={20} />
                   </div>
 
                   <div>
+                    <strong>Platform Users</strong>
 
-                    <strong>
-                      Platform Users
-                    </strong>
-
-                    <span>
-                      Manage system users
-                    </span>
-
+                    <span>Manage system users</span>
                   </div>
 
                   <ChevronRight size={17} />
-
                 </button>
 
-                <button
-                  className="sa-management-card"
-                  type="button"
-                >
-
+                <button className="sa-management-card" type="button">
                   <div className="sa-management-icon">
                     <Activity size={20} />
                   </div>
 
                   <div>
+                    <strong>Platform Activity</strong>
 
-                    <strong>
-                      Platform Activity
-                    </strong>
-
-                    <span>
-                      Review system activity
-                    </span>
-
+                    <span>Review system activity</span>
                   </div>
 
                   <ChevronRight size={17} />
-
                 </button>
-
               </div>
-
             </div>
-
           </section>
-
         </main>
-
       </div>
 
       {/* ADD SCHOOL MODAL */}
 
       {showAddSchool && (
-
         <div
           className="sa-modal-overlay"
           onMouseDown={(event) => {
-
-            if (
-              event.target ===
-              event.currentTarget
-            ) {
+            if (event.target === event.currentTarget) {
               setShowAddSchool(false);
             }
-
           }}
         >
-
           <div className="sa-modal">
-
             <div className="sa-modal-header">
-
               <div>
+                <span>PLATFORM ADMINISTRATION</span>
 
-                <span>
-                  PLATFORM ADMINISTRATION
-                </span>
+                <h2>Add New School</h2>
 
-                <h2>
-                  Add New School
-                </h2>
-
-                <p>
-                  Register a school on the
-                  EduNigeria platform.
-                </p>
-
+                <p>Register a school on the EduNigeria platform.</p>
               </div>
 
               <button
                 className="sa-modal-close"
-                onClick={() =>
-                  setShowAddSchool(false)
-                }
+                onClick={() => setShowAddSchool(false)}
                 type="button"
               >
                 <X size={20} />
               </button>
-
             </div>
 
             {createSchoolError && (
-
               <div className="sa-modal-error">
-
                 <AlertCircle size={18} />
 
                 {createSchoolError}
-
               </div>
-
             )}
 
-            <form
-              className="sa-school-form"
-              onSubmit={handleCreateSchool}
-            >
-
+            <form className="sa-school-form" onSubmit={handleCreateSchool}>
               <div className="sa-form-grid">
-
                 <div className="sa-form-field sa-form-full">
-
-                  <label>
-                    School Name
-                  </label>
+                  <label>School Name</label>
 
                   <input
                     type="text"
                     name="name"
-                    value={
-                      schoolForm.name
-                    }
-                    onChange={
-                      handleSchoolFormChange
-                    }
+                    value={schoolForm.name}
+                    onChange={handleSchoolFormChange}
                     placeholder="Enter school name"
                     required
                   />
-
                 </div>
 
                 <div className="sa-form-field">
-
-                  <label>
-                    School Type
-                  </label>
+                  <label>School Type</label>
 
                   <select
                     name="schoolType"
-                    value={
-                      schoolForm.schoolType
-                    }
-                    onChange={
-                      handleSchoolFormChange
-                    }
+                    value={schoolForm.schoolType}
+                    onChange={handleSchoolFormChange}
                     required
                   >
-                    <option value="Primary">
-                      Primary
-                    </option>
+                    <option value="Primary">Primary</option>
 
-                    <option value="Secondary">
-                      Secondary
-                    </option>
+                    <option value="Secondary">Secondary</option>
 
                     <option value="Primary & Secondary">
                       Primary & Secondary
                     </option>
                   </select>
-
                 </div>
 
                 <div className="sa-form-field">
-
-                  <label>
-                    Email
-                  </label>
+                  <label>Email</label>
 
                   <input
                     type="email"
                     name="email"
-                    value={
-                      schoolForm.email
-                    }
-                    onChange={
-                      handleSchoolFormChange
-                    }
+                    value={schoolForm.email}
+                    onChange={handleSchoolFormChange}
                     placeholder="school@example.com"
                     required
                   />
-
                 </div>
 
                 <div className="sa-form-field">
-
-                  <label>
-                    Phone
-                  </label>
+                  <label>Phone</label>
 
                   <input
                     type="text"
                     name="phone"
-                    value={
-                      schoolForm.phone
-                    }
-                    onChange={
-                      handleSchoolFormChange
-                    }
+                    value={schoolForm.phone}
+                    onChange={handleSchoolFormChange}
                     placeholder="School phone number"
                   />
-
                 </div>
 
                 <div className="sa-form-field">
-
-                  <label>
-                    City
-                  </label>
+                  <label>City</label>
 
                   <input
                     type="text"
                     name="city"
-                    value={
-                      schoolForm.city
-                    }
-                    onChange={
-                      handleSchoolFormChange
-                    }
+                    value={schoolForm.city}
+                    onChange={handleSchoolFormChange}
                     placeholder="City"
                   />
-
                 </div>
 
                 <div className="sa-form-field">
-
-                  <label>
-                    State
-                  </label>
+                  <label>State</label>
 
                   <input
                     type="text"
                     name="state"
-                    value={
-                      schoolForm.state
-                    }
-                    onChange={
-                      handleSchoolFormChange
-                    }
+                    value={schoolForm.state}
+                    onChange={handleSchoolFormChange}
                     placeholder="State"
                   />
-
                 </div>
 
                 <div className="sa-form-field sa-form-full">
-
-                  <label>
-                    Address
-                  </label>
+                  <label>Address</label>
 
                   <input
                     type="text"
                     name="address"
-                    value={
-                      schoolForm.address
-                    }
-                    onChange={
-                      handleSchoolFormChange
-                    }
+                    value={schoolForm.address}
+                    onChange={handleSchoolFormChange}
                     placeholder="School address"
                   />
-
                 </div>
 
                 <div className="sa-form-field">
-
-                  <label>
-                    Country
-                  </label>
+                  <label>Country</label>
 
                   <input
                     type="text"
                     name="country"
-                    value={
-                      schoolForm.country
-                    }
-                    onChange={
-                      handleSchoolFormChange
-                    }
+                    value={schoolForm.country}
+                    onChange={handleSchoolFormChange}
                     placeholder="Country"
                   />
-
                 </div>
-
               </div>
 
               <div className="sa-modal-actions">
-
                 <button
                   type="button"
                   className="sa-cancel-button"
-                  onClick={() =>
-                    setShowAddSchool(false)
-                  }
+                  onClick={() => setShowAddSchool(false)}
                 >
                   Cancel
                 </button>
@@ -1732,36 +1147,23 @@ function SuperAdminDashboard() {
                   className="sa-primary-button"
                   disabled={creatingSchool}
                 >
-
                   {creatingSchool ? (
                     <>
-                      <RefreshCw
-                        size={17}
-                        className="sa-spin"
-                      />
-
+                      <RefreshCw size={17} className="sa-spin" />
                       Creating...
                     </>
                   ) : (
                     <>
                       <Plus size={18} />
-
                       Create School
                     </>
                   )}
-
                 </button>
-
               </div>
-
             </form>
-
           </div>
-
         </div>
-
       )}
-
     </div>
   );
 }

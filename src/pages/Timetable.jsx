@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import Header from "../components/Header";
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "../context/authcontext";
 
 import { classApi } from "../api/class.api";
 import { getSchoolSubjects } from "../api/subject.api";
@@ -8,13 +8,7 @@ import { timetableApi } from "../api/timetable.api";
 import { teacherApi } from "../api/teacher.api";
 import { getMyStudentProfile } from "../api/student.api";
 
-const DAYS = [
-  "Monday",
-  "Tuesday",
-  "Wednesday",
-  "Thursday",
-  "Friday",
-];
+const DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
 
 const ACADEMIC_SESSION_ID = "6aa71820239080fa23f5f8eb";
 
@@ -23,11 +17,7 @@ export default function Timetable() {
 
   const role = user?.role?.toLowerCase();
 
-  const canManage = [
-    "admin",
-    "super_admin",
-    "teacher",
-  ].includes(role);
+  const canManage = ["admin", "super_admin", "teacher"].includes(role);
 
   const isStudent = role === "student";
 
@@ -56,10 +46,7 @@ export default function Timetable() {
     room: "",
   });
 
-  const schoolId =
-    user?.school?._id ||
-    user?.school?.id ||
-    user?.school;
+  const schoolId = user?.school?._id || user?.school?.id || user?.school;
 
   /*
    * =========================================================
@@ -87,17 +74,11 @@ export default function Timetable() {
        */
 
       if (isStudent) {
-        console.log(
-          "STUDENT TIMETABLE: loading profile..."
-        );
+        console.log("STUDENT TIMETABLE: loading profile...");
 
-        const response =
-          await getMyStudentProfile();
+        const response = await getMyStudentProfile();
 
-        console.log(
-          "STUDENT TIMETABLE PROFILE RESPONSE:",
-          response
-        );
+        console.log("STUDENT TIMETABLE PROFILE RESPONSE:", response);
 
         const studentData =
           response?.student ||
@@ -105,23 +86,14 @@ export default function Timetable() {
           response?.data ||
           null;
 
-        console.log(
-          "STUDENT TIMETABLE STUDENT:",
-          studentData
-        );
+        console.log("STUDENT TIMETABLE STUDENT:", studentData);
 
-        const classId =
-          studentData?.enrollment?.class?._id;
+        const classId = studentData?.enrollment?.class?._id;
 
-        console.log(
-          "STUDENT TIMETABLE CLASS ID:",
-          classId
-        );
+        console.log("STUDENT TIMETABLE CLASS ID:", classId);
 
         if (!classId) {
-          setError(
-            "Your class information is missing."
-          );
+          setError("Your class information is missing.");
           return;
         }
 
@@ -142,81 +114,41 @@ export default function Timetable() {
        */
 
       if (!schoolId) {
-        setError(
-          "School information is missing."
-        );
+        setError("School information is missing.");
         return;
       }
 
-      const [
-        classResponse,
-        subjectResponse,
-        teacherResponse,
-      ] = await Promise.all([
-        classApi.getClasses(
-          schoolId,
-          ACADEMIC_SESSION_ID
-        ),
+      const [classResponse, subjectResponse, teacherResponse] =
+        await Promise.all([
+          classApi.getClasses(schoolId, ACADEMIC_SESSION_ID),
 
-        getSchoolSubjects(schoolId),
+          getSchoolSubjects(schoolId),
 
-        teacherApi.getTeachersBySchool(
-          schoolId
-        ),
-      ]);
+          teacherApi.getTeachersBySchool(schoolId),
+        ]);
 
-      console.log(
-        "TIMETABLE CLASSES:",
-        classResponse
-      );
+      console.log("TIMETABLE CLASSES:", classResponse);
 
-      console.log(
-        "TIMETABLE SUBJECTS:",
-        subjectResponse
-      );
+      console.log("TIMETABLE SUBJECTS:", subjectResponse);
 
-      console.log(
-        "TIMETABLE TEACHERS:",
-        teacherResponse
-      );
+      console.log("TIMETABLE TEACHERS:", teacherResponse);
 
-      const classData =
-        classResponse?.classes ||
-        classResponse?.data ||
-        [];
+      const classData = classResponse?.classes || classResponse?.data || [];
 
       const subjectData =
-        subjectResponse?.subjects ||
-        subjectResponse?.data ||
-        [];
+        subjectResponse?.subjects || subjectResponse?.data || [];
 
       const teacherData =
-        teacherResponse?.teachers ||
-        teacherResponse?.data ||
-        [];
+        teacherResponse?.teachers || teacherResponse?.data || [];
 
-      setClasses(
-        Array.isArray(classData)
-          ? classData
-          : []
-      );
+      setClasses(Array.isArray(classData) ? classData : []);
 
-      setSubjects(
-        Array.isArray(subjectData)
-          ? subjectData
-          : []
-      );
+      setSubjects(Array.isArray(subjectData) ? subjectData : []);
 
-      setTeachers(
-        Array.isArray(teacherData)
-          ? teacherData
-          : []
-      );
+      setTeachers(Array.isArray(teacherData) ? teacherData : []);
 
       if (classData.length > 0) {
-        const firstClassId =
-          classData[0]._id ||
-          classData[0].id;
+        const firstClassId = classData[0]._id || classData[0].id;
 
         setSelectedClass(firstClassId);
 
@@ -225,20 +157,12 @@ export default function Timetable() {
           classId: firstClassId,
         }));
 
-        await loadTimetable(
-          firstClassId
-        );
+        await loadTimetable(firstClassId);
       }
     } catch (err) {
-      console.error(
-        "Failed to load timetable data:",
-        err
-      );
+      console.error("Failed to load timetable data:", err);
 
-      setError(
-        err?.message ||
-          "Failed to load timetable data."
-      );
+      setError(err?.message || "Failed to load timetable data.");
     } finally {
       setLoading(false);
     }
@@ -254,37 +178,21 @@ export default function Timetable() {
     try {
       setError("");
 
-      const response =
-        await timetableApi.getClassTimetable(
-          classId,
-          ACADEMIC_SESSION_ID
-        );
-
-      console.log(
-        "TIMETABLE RESPONSE:",
-        response
+      const response = await timetableApi.getClassTimetable(
+        classId,
+        ACADEMIC_SESSION_ID,
       );
+
+      console.log("TIMETABLE RESPONSE:", response);
 
       const timetableData =
-        response?.timetable ||
-        response?.data?.timetable ||
-        [];
+        response?.timetable || response?.data?.timetable || [];
 
-      setEntries(
-        Array.isArray(timetableData)
-          ? timetableData
-          : []
-      );
+      setEntries(Array.isArray(timetableData) ? timetableData : []);
     } catch (err) {
-      console.error(
-        "Failed to load timetable:",
-        err
-      );
+      console.error("Failed to load timetable:", err);
 
-      setError(
-        err?.message ||
-          "Failed to load timetable."
-      );
+      setError(err?.message || "Failed to load timetable.");
 
       setEntries([]);
     }
@@ -322,30 +230,22 @@ export default function Timetable() {
       setSuccess("");
 
       if (!schoolId) {
-        setError(
-          "School information is missing."
-        );
+        setError("School information is missing.");
         return;
       }
 
       if (!form.classId) {
-        setError(
-          "Please select a class."
-        );
+        setError("Please select a class.");
         return;
       }
 
       if (!form.subjectId) {
-        setError(
-          "Please select a subject."
-        );
+        setError("Please select a subject.");
         return;
       }
 
       if (!form.teacherId) {
-        setError(
-          "Please select a teacher."
-        );
+        setError("Please select a teacher.");
         return;
       }
 
@@ -354,26 +254,18 @@ export default function Timetable() {
         class: form.classId,
         subject: form.subjectId,
         teacher: form.teacherId,
-        academicSession:
-          ACADEMIC_SESSION_ID,
+        academicSession: ACADEMIC_SESSION_ID,
         day: form.day,
         startTime: form.startTime,
         endTime: form.endTime,
         room: form.room,
       };
 
-      console.log(
-        "CREATING TIMETABLE:",
-        payload
-      );
+      console.log("CREATING TIMETABLE:", payload);
 
-      await timetableApi.createTimetable(
-        payload
-      );
+      await timetableApi.createTimetable(payload);
 
-      setSuccess(
-        "Timetable entry created successfully."
-      );
+      setSuccess("Timetable entry created successfully.");
 
       setShowForm(false);
 
@@ -387,19 +279,11 @@ export default function Timetable() {
         room: "",
       });
 
-      await loadTimetable(
-        selectedClass
-      );
+      await loadTimetable(selectedClass);
     } catch (err) {
-      console.error(
-        "Failed to create timetable:",
-        err
-      );
+      console.error("Failed to create timetable:", err);
 
-      setError(
-        err?.message ||
-          "Failed to create timetable entry."
-      );
+      setError(err?.message || "Failed to create timetable entry.");
     } finally {
       setSaving(false);
     }
@@ -413,14 +297,8 @@ export default function Timetable() {
 
   const entriesForDay = (day) => {
     return entries
-      .filter(
-        (entry) => entry.day === day
-      )
-      .sort((a, b) =>
-        (a.startTime || "").localeCompare(
-          b.startTime || ""
-        )
-      );
+      .filter((entry) => entry.day === day)
+      .sort((a, b) => (a.startTime || "").localeCompare(b.startTime || ""));
   };
 
   /*
@@ -463,17 +341,9 @@ export default function Timetable() {
         }
       />
 
-      {error && (
-        <div className="alert alert-error">
-          {error}
-        </div>
-      )}
+      {error && <div className="alert alert-error">{error}</div>}
 
-      {success && (
-        <div className="alert alert-success">
-          {success}
-        </div>
-      )}
+      {success && <div className="alert alert-success">{success}</div>}
 
       <div className="page-actions">
         {!isStudent && (
@@ -486,23 +356,13 @@ export default function Timetable() {
           >
             <label>Class</label>
 
-            <select
-              value={selectedClass}
-              onChange={handleClassChange}
-            >
-              <option value="">
-                Select Class
-              </option>
+            <select value={selectedClass} onChange={handleClassChange}>
+              <option value="">Select Class</option>
 
               {classes.map((item) => (
-                <option
-                  key={item._id}
-                  value={item._id}
-                >
+                <option key={item._id} value={item._id}>
                   {item.name}
-                  {item.arm
-                    ? ` (${item.arm})`
-                    : ""}
+                  {item.arm ? ` (${item.arm})` : ""}
                 </option>
               ))}
             </select>
@@ -524,26 +384,11 @@ export default function Timetable() {
       </div>
 
       {showForm && canManage && (
-        <div
-          className="modal-overlay"
-          onClick={() =>
-            setShowForm(false)
-          }
-        >
-          <div
-            className="modal"
-            onClick={(e) =>
-              e.stopPropagation()
-            }
-          >
-            <h2>
-              Add Timetable Period
-            </h2>
+        <div className="modal-overlay" onClick={() => setShowForm(false)}>
+          <div className="modal" onClick={(e) => e.stopPropagation()}>
+            <h2>Add Timetable Period</h2>
 
-            <form
-              onSubmit={handleSubmit}
-              className="form-grid"
-            >
+            <form onSubmit={handleSubmit} className="form-grid">
               <div className="form-group">
                 <label>Class</label>
 
@@ -553,24 +398,16 @@ export default function Timetable() {
                   onChange={(e) =>
                     setForm({
                       ...form,
-                      classId:
-                        e.target.value,
+                      classId: e.target.value,
                     })
                   }
                 >
-                  <option value="">
-                    Select Class
-                  </option>
+                  <option value="">Select Class</option>
 
                   {classes.map((item) => (
-                    <option
-                      key={item._id}
-                      value={item._id}
-                    >
+                    <option key={item._id} value={item._id}>
                       {item.name}
-                      {item.arm
-                        ? ` (${item.arm})`
-                        : ""}
+                      {item.arm ? ` (${item.arm})` : ""}
                     </option>
                   ))}
                 </select>
@@ -589,10 +426,7 @@ export default function Timetable() {
                   }
                 >
                   {DAYS.map((day) => (
-                    <option
-                      key={day}
-                      value={day}
-                    >
+                    <option key={day} value={day}>
                       {day}
                     </option>
                   ))}
@@ -608,30 +442,18 @@ export default function Timetable() {
                   onChange={(e) =>
                     setForm({
                       ...form,
-                      subjectId:
-                        e.target.value,
+                      subjectId: e.target.value,
                     })
                   }
                 >
-                  <option value="">
-                    Select Subject
-                  </option>
+                  <option value="">Select Subject</option>
 
-                  {subjects.map(
-                    (subject) => (
-                      <option
-                        key={subject._id}
-                        value={
-                          subject._id
-                        }
-                      >
-                        {subject.name}
-                        {subject.code
-                          ? ` (${subject.code})`
-                          : ""}
-                      </option>
-                    )
-                  )}
+                  {subjects.map((subject) => (
+                    <option key={subject._id} value={subject._id}>
+                      {subject.name}
+                      {subject.code ? ` (${subject.code})` : ""}
+                    </option>
+                  ))}
                 </select>
               </div>
 
@@ -644,35 +466,22 @@ export default function Timetable() {
                   onChange={(e) =>
                     setForm({
                       ...form,
-                      teacherId:
-                        e.target.value,
+                      teacherId: e.target.value,
                     })
                   }
                 >
-                  <option value="">
-                    Select Teacher
-                  </option>
+                  <option value="">Select Teacher</option>
 
-                  {teachers.map(
-                    (teacher) => (
-                      <option
-                        key={teacher._id}
-                        value={
-                          teacher._id
-                        }
-                      >
-                        {teacher.firstName}{" "}
-                        {teacher.lastName}
-                      </option>
-                    )
-                  )}
+                  {teachers.map((teacher) => (
+                    <option key={teacher._id} value={teacher._id}>
+                      {teacher.firstName} {teacher.lastName}
+                    </option>
+                  ))}
                 </select>
               </div>
 
               <div className="form-group">
-                <label>
-                  Start Time
-                </label>
+                <label>Start Time</label>
 
                 <input
                   type="time"
@@ -681,17 +490,14 @@ export default function Timetable() {
                   onChange={(e) =>
                     setForm({
                       ...form,
-                      startTime:
-                        e.target.value,
+                      startTime: e.target.value,
                     })
                   }
                 />
               </div>
 
               <div className="form-group">
-                <label>
-                  End Time
-                </label>
+                <label>End Time</label>
 
                 <input
                   type="time"
@@ -700,8 +506,7 @@ export default function Timetable() {
                   onChange={(e) =>
                     setForm({
                       ...form,
-                      endTime:
-                        e.target.value,
+                      endTime: e.target.value,
                     })
                   }
                 />
@@ -727,21 +532,13 @@ export default function Timetable() {
                 <button
                   type="button"
                   className="btn-secondary"
-                  onClick={() =>
-                    setShowForm(false)
-                  }
+                  onClick={() => setShowForm(false)}
                 >
                   Cancel
                 </button>
 
-                <button
-                  type="submit"
-                  className="btn-primary"
-                  disabled={saving}
-                >
-                  {saving
-                    ? "Saving..."
-                    : "Save"}
+                <button type="submit" className="btn-primary" disabled={saving}>
+                  {saving ? "Saving..." : "Save"}
                 </button>
               </div>
             </form>
@@ -751,57 +548,38 @@ export default function Timetable() {
 
       <div className="timetable-grid">
         {DAYS.map((day) => {
-          const dayEntries =
-            entriesForDay(day);
+          const dayEntries = entriesForDay(day);
 
           return (
-            <div
-              key={day}
-              className="timetable-day"
-            >
+            <div key={day} className="timetable-day">
               <h3>{day}</h3>
 
               {dayEntries.length === 0 ? (
-                <p className="empty-day">
-                  No periods
-                </p>
+                <p className="empty-day">No periods</p>
               ) : (
-                dayEntries.map(
-                  (entry) => (
-                    <div
-                      key={entry._id}
-                      className="timetable-period"
-                    >
-                      <div className="period-time">
-                        {entry.startTime} -{" "}
-                        {entry.endTime}
-                      </div>
-
-                      <div className="period-subject">
-                        {entry.subject
-                          ?.name ||
-                          "Subject"}
-                      </div>
-
-                      <div className="period-meta">
-                        {entry.subject
-                          ?.code
-                          ? `${entry.subject.code} • `
-                          : ""}
-
-                        {entry.teacher
-                          ? `${entry.teacher.firstName || ""} ${
-                              entry.teacher.lastName || ""
-                            }`.trim()
-                          : "Teacher not assigned"}
-
-                        {entry.room
-                          ? ` • ${entry.room}`
-                          : ""}
-                      </div>
+                dayEntries.map((entry) => (
+                  <div key={entry._id} className="timetable-period">
+                    <div className="period-time">
+                      {entry.startTime} - {entry.endTime}
                     </div>
-                  )
-                )
+
+                    <div className="period-subject">
+                      {entry.subject?.name || "Subject"}
+                    </div>
+
+                    <div className="period-meta">
+                      {entry.subject?.code ? `${entry.subject.code} • ` : ""}
+
+                      {entry.teacher
+                        ? `${entry.teacher.firstName || ""} ${
+                            entry.teacher.lastName || ""
+                          }`.trim()
+                        : "Teacher not assigned"}
+
+                      {entry.room ? ` • ${entry.room}` : ""}
+                    </div>
+                  </div>
+                ))
               )}
             </div>
           );

@@ -24,10 +24,7 @@ import {
   HeartHandshake,
 } from "lucide-react";
 
-import {
-  useAuth,
-  getEffectiveRole,
-} from "../context/AuthContext";
+import { useAuth, getEffectiveRole } from "../context/authcontext";
 
 import "./Sidebar.css";
 
@@ -99,20 +96,17 @@ export default function Sidebar() {
         path: "/dashboard",
         icon: LayoutDashboard,
       },
-      { label: "Admissions", 
-        path: "/admissions", 
-        icon: FileText, 
+      { label: "Admissions", path: "/admissions", icon: FileText },
+      {
+        label: "Subjects",
+        path: "/subjects",
+        icon: BookOpen,
       },
       {
-  label: "Subjects",
-  path: "/subjects",
-  icon: BookOpen,
-},
-{
-  label: "Class Subjects",
-  path: "/class-subjects",
-  icon: BookOpen,
-},
+        label: "Class Subjects",
+        path: "/class-subjects",
+        icon: BookOpen,
+      },
       {
         label: "Students",
         path: "/students",
@@ -174,10 +168,10 @@ export default function Sidebar() {
         icon: Megaphone,
       },
       {
-  label: "Announcements",
-  path: "/announcement-management",
-  icon: Megaphone,
-},
+        label: "Announcements",
+        path: "/announcement-management",
+        icon: Megaphone,
+      },
       {
         label: "Notifications",
         path: "/notifications",
@@ -475,43 +469,43 @@ export default function Sidebar() {
     // =======================================================
 
     bursar: [
-  {
-    label: "Dashboard",
-    path: "/Bdashboard",
-    icon: LayoutDashboard,
-  },
-  {
-    label: "Students",
-    path: "/students",
-    icon: GraduationCap,
-  },
-  {
-    label: "Fees & Finance",
-    path: "/finance",
-    icon: WalletCards,
-  },
-  {
-    label: "Record Payment",
-    path: "/record-payment",
-    icon: WalletCards,
-  },
-  {
-    label: "Reports",
-    path: "/reports",
-    icon: BarChart3,
-  },
-  {
-    label: "Notifications",
-    path: "/notifications",
-    icon: Bell,
-  },
-  {
-    label: "Settings",
-    path: "/settings",
-    icon: Settings,
-  },
-],
-  }
+      {
+        label: "Dashboard",
+        path: "/Bdashboard",
+        icon: LayoutDashboard,
+      },
+      {
+        label: "Students",
+        path: "/students",
+        icon: GraduationCap,
+      },
+      {
+        label: "Fees & Finance",
+        path: "/finance",
+        icon: WalletCards,
+      },
+      {
+        label: "Record Payment",
+        path: "/record-payment",
+        icon: WalletCards,
+      },
+      {
+        label: "Reports",
+        path: "/reports",
+        icon: BarChart3,
+      },
+      {
+        label: "Notifications",
+        path: "/notifications",
+        icon: Bell,
+      },
+      {
+        label: "Settings",
+        path: "/settings",
+        icon: Settings,
+      },
+    ],
+  };
 
   // =========================================================
   // CURRENT ROLE NAVIGATION
@@ -544,9 +538,7 @@ export default function Sidebar() {
       return user.fullName;
     }
 
-    const name = `${user.firstName || ""} ${
-      user.lastName || ""
-    }`.trim();
+    const name = `${user.firstName || ""} ${user.lastName || ""}`.trim();
 
     return name || "User";
   };
@@ -612,19 +604,12 @@ export default function Sidebar() {
       {/* MOBILE OVERLAY */}
 
       {isOpen && (
-        <div
-          className="sidebar-overlay"
-          onClick={closeMobileSidebar}
-        />
+        <div className="sidebar-overlay" onClick={closeMobileSidebar} />
       )}
 
       {/* SIDEBAR */}
 
-      <aside
-        className={`sidebar ${
-          isOpen ? "sidebar-open" : ""
-        }`}
-      >
+      <aside className={`sidebar ${isOpen ? "sidebar-open" : ""}`}>
         {/* HEADER */}
 
         <div className="sidebar-header">
@@ -657,17 +642,13 @@ export default function Sidebar() {
 
           <div className="school-info">
             <strong>
-              {role === "super_admin" ||
-              role === "superadmin"
+              {role === "super_admin" || role === "superadmin"
                 ? "EduNigeria Platform"
-                : user?.school?.name ||
-                  user?.schoolName ||
-                  "My School"}
+                : user?.school?.name || user?.schoolName || "My School"}
             </strong>
 
             <span>
-              {role === "super_admin" ||
-              role === "superadmin"
+              {role === "super_admin" || role === "superadmin"
                 ? "Platform Administration"
                 : "School Portal"}
             </span>
@@ -689,9 +670,7 @@ export default function Sidebar() {
                 end={item.label === "Dashboard"}
                 onClick={closeMobileSidebar}
                 className={({ isActive }) =>
-                  `nav-link ${
-                    isActive ? "active" : ""
-                  }`
+                  `nav-link ${isActive ? "active" : ""}`
                 }
               >
                 <Icon size={20} />
@@ -707,25 +686,16 @@ export default function Sidebar() {
           <div className="profile-wrapper">
             <button
               className="profile-button"
-              onClick={() =>
-                setProfileOpen(!profileOpen)
-              }
+              onClick={() => setProfileOpen(!profileOpen)}
             >
-              <div className="profile-avatar">
-                {getInitial()}
-              </div>
+              <div className="profile-avatar">{getInitial()}</div>
 
               <div className="profile-info">
                 <strong>{getUserName()}</strong>
                 <span>{getUserRole()}</span>
               </div>
 
-              <ChevronDown
-                size={17}
-                className={
-                  profileOpen ? "rotate" : ""
-                }
-              />
+              <ChevronDown size={17} className={profileOpen ? "rotate" : ""} />
             </button>
 
             {/* PROFILE MENU */}
@@ -752,10 +722,7 @@ export default function Sidebar() {
                   Settings
                 </button>
 
-                <button
-                  className="logout-button"
-                  onClick={handleLogout}
-                >
+                <button className="logout-button" onClick={handleLogout}>
                   <LogOut size={17} />
                   Logout
                 </button>

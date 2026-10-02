@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect } from "react";
 import { Navigate } from "react-router-dom";
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "../context/authcontext";
 import { Search, Users } from "lucide-react";
 import { getStudentsBySchool } from "../api/student.api";
 
@@ -33,12 +33,9 @@ function CounsellorStudents() {
   // GET EFFECTIVE ROLE
   // =========================================================
 
-  const effectiveRole = user
-    ? getEffectiveRole(user)
-    : "";
+  const effectiveRole = user ? getEffectiveRole(user) : "";
 
-  const isCounsellorRole =
-    effectiveRole === "counsellor";
+  const isCounsellorRole = effectiveRole === "counsellor";
 
   // =========================================================
   // LOAD SCHOOL STUDENTS
@@ -54,45 +51,26 @@ function CounsellorStudents() {
       try {
         setLoading(true);
 
-        const schoolId =
-          user?.school?._id ||
-          user?.school;
+        const schoolId = user?.school?._id || user?.school;
 
-        console.log(
-          "COUNSELLOR USER:",
-          user
-        );
+        console.log("COUNSELLOR USER:", user);
 
-        console.log(
-          "COUNSELLOR SCHOOL ID:",
-          schoolId
-        );
+        console.log("COUNSELLOR SCHOOL ID:", schoolId);
 
         if (!schoolId) {
-          console.error(
-            "COUNSELLOR SCHOOL ID NOT FOUND"
-          );
+          console.error("COUNSELLOR SCHOOL ID NOT FOUND");
 
           setStudents([]);
           return;
         }
 
-        const response =
-          await getStudentsBySchool(schoolId);
+        const response = await getStudentsBySchool(schoolId);
 
-        console.log(
-          "COUNSELLOR STUDENTS RESPONSE:",
-          response
-        );
+        console.log("COUNSELLOR STUDENTS RESPONSE:", response);
 
-        setStudents(
-          response?.students || []
-        );
+        setStudents(response?.students || []);
       } catch (err) {
-        console.error(
-          "COUNSELLOR STUDENTS ERROR:",
-          err
-        );
+        console.error("COUNSELLOR STUDENTS ERROR:", err);
 
         setStudents([]);
       } finally {
@@ -108,19 +86,14 @@ function CounsellorStudents() {
   // =========================================================
 
   const filteredStudents = useMemo(() => {
-    const query =
-      search.trim().toLowerCase();
+    const query = search.trim().toLowerCase();
 
     return students.filter((student) => {
-      const fullName =
-        `${student.firstName || ""} ${
-          student.lastName || ""
-        }`
-          .trim()
-          .toLowerCase();
+      const fullName = `${student.firstName || ""} ${student.lastName || ""}`
+        .trim()
+        .toLowerCase();
 
-      const email =
-        student.email?.toLowerCase() || "";
+      const email = student.email?.toLowerCase() || "";
 
       const studentClassName =
         student.studentClass?.toLowerCase() ||
@@ -128,46 +101,25 @@ function CounsellorStudents() {
         "";
 
       const matchesSearch =
-        !query ||
-        fullName.includes(query) ||
-        email.includes(query);
+        !query || fullName.includes(query) || email.includes(query);
 
       const matchesClass =
-        !studentClass ||
-        studentClassName ===
-          studentClass.toLowerCase();
+        !studentClass || studentClassName === studentClass.toLowerCase();
 
-      return (
-        matchesSearch &&
-        matchesClass
-      );
+      return matchesSearch && matchesClass;
     });
-  }, [
-    students,
-    search,
-    studentClass,
-  ]);
+  }, [students, search, studentClass]);
 
   // =========================================================
   // AUTH GUARD
   // =========================================================
 
   if (!user) {
-    return (
-      <Navigate
-        to="/login"
-        replace
-      />
-    );
+    return <Navigate to="/login" replace />;
   }
 
   if (!isCounsellorRole) {
-    return (
-      <Navigate
-        to="/Cdashboard"
-        replace
-      />
-    );
+    return <Navigate to="/Cdashboard" replace />;
   }
 
   // =========================================================
@@ -331,25 +283,20 @@ function CounsellorStudents() {
       `}</style>
 
       <div className="csl-inner">
-
         {/* HEADER */}
         <div className="csl-header">
-          <Users
-            size={22}
-            color="#1557b0"
-          />
+          <Users size={22} color="#1557b0" />
 
           <h1>Students</h1>
         </div>
 
         <p className="csl-subtitle">
-          Full list of enrolled students. Search by
-          name or email, or filter by class.
+          Full list of enrolled students. Search by name or email, or filter by
+          class.
         </p>
 
         {/* CONTROLS */}
         <div className="csl-controls">
-
           <div className="csl-search-wrap">
             <Search size={16} />
 
@@ -358,58 +305,39 @@ function CounsellorStudents() {
               className="csl-search"
               placeholder="Search by name or email..."
               value={search}
-              onChange={(e) =>
-                setSearch(e.target.value)
-              }
+              onChange={(e) => setSearch(e.target.value)}
             />
           </div>
 
           <select
             className="csl-select"
             value={studentClass}
-            onChange={(e) =>
-              setStudentClass(e.target.value)
-            }
+            onChange={(e) => setStudentClass(e.target.value)}
           >
-            <option value="">
-              All classes
-            </option>
+            <option value="">All classes</option>
 
             {CLASS_OPTIONS.map((c) => (
-              <option
-                key={c}
-                value={c}
-              >
+              <option key={c} value={c}>
                 {c}
               </option>
             ))}
           </select>
-
         </div>
 
         {/* COUNT */}
         <p className="csl-count">
           {filteredStudents.length} student
-          {filteredStudents.length !== 1
-            ? "s"
-            : ""}{" "}
-          found
+          {filteredStudents.length !== 1 ? "s" : ""} found
         </p>
 
         {/* TABLE */}
         <div className="csl-table-wrap">
-
           {loading ? (
-            <div className="csl-loading">
-              Loading students...
-            </div>
+            <div className="csl-loading">Loading students...</div>
           ) : filteredStudents.length === 0 ? (
-            <div className="csl-empty">
-              No students match your search.
-            </div>
+            <div className="csl-empty">No students match your search.</div>
           ) : (
             <table className="csl-table">
-
               <thead>
                 <tr>
                   <th>Name</th>
@@ -422,47 +350,28 @@ function CounsellorStudents() {
 
               <tbody>
                 {filteredStudents.map((s) => (
-                  <tr
-                    key={
-                      s._id ||
-                      s.id
-                    }
-                  >
+                  <tr key={s._id || s.id}>
                     <td>
-                      {s.firstName}{" "}
-                      {s.lastName}
+                      {s.firstName} {s.lastName}
                     </td>
 
-                    <td>
-                      {s.email || "—"}
-                    </td>
+                    <td>{s.email || "—"}</td>
 
                     <td>
                       <span className="csl-badge">
-                        {s.studentClass ||
-                          s.class?.name ||
-                          s.class ||
-                          "—"}
+                        {s.studentClass || s.class?.name || s.class || "—"}
                       </span>
                     </td>
 
-                    <td>
-                      {s.gender || "—"}
-                    </td>
+                    <td>{s.gender || "—"}</td>
 
-                    <td>
-                      {s.previousSchool ||
-                        "—"}
-                    </td>
+                    <td>{s.previousSchool || "—"}</td>
                   </tr>
                 ))}
               </tbody>
-
             </table>
           )}
-
         </div>
-
       </div>
     </div>
   );

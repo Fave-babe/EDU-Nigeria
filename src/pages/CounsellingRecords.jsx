@@ -16,7 +16,7 @@ import {
   Trash2,
 } from "lucide-react";
 
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "../context/authcontext";
 
 import { getStudentsBySchool } from "../api/student.api";
 
@@ -66,9 +66,7 @@ export default function CounsellingRecords() {
       setLoading(true);
 
       if (!schoolId) {
-        console.error(
-          "COUNSELLING: School ID is missing"
-        );
+        console.error("COUNSELLING: School ID is missing");
 
         setStudents([]);
         setRecords([]);
@@ -77,58 +75,34 @@ export default function CounsellingRecords() {
       }
 
       if (!counsellorId) {
-        console.error(
-          "COUNSELLING: Counsellor ID is missing"
-        );
+        console.error("COUNSELLING: Counsellor ID is missing");
 
         setRecords([]);
 
         return;
       }
 
-      console.log(
-        "COUNSELLING SCHOOL ID:",
-        schoolId
-      );
+      console.log("COUNSELLING SCHOOL ID:", schoolId);
 
-      console.log(
-        "COUNSELLOR ID:",
-        counsellorId
-      );
+      console.log("COUNSELLOR ID:", counsellorId);
 
       // ==========================================
       // LOAD STUDENTS
       // ==========================================
 
       try {
-        const studentsResponse =
-          await getStudentsBySchool(schoolId);
+        const studentsResponse = await getStudentsBySchool(schoolId);
 
-        console.log(
-          "COUNSELLING STUDENTS RESPONSE:",
-          studentsResponse
-        );
+        console.log("COUNSELLING STUDENTS RESPONSE:", studentsResponse);
 
         const studentList =
-          studentsResponse?.students ||
-          studentsResponse?.data?.students ||
-          [];
+          studentsResponse?.students || studentsResponse?.data?.students || [];
 
-        console.log(
-          "COUNSELLING STUDENT LIST:",
-          studentList
-        );
+        console.log("COUNSELLING STUDENT LIST:", studentList);
 
-        setStudents(
-          Array.isArray(studentList)
-            ? studentList
-            : []
-        );
+        setStudents(Array.isArray(studentList) ? studentList : []);
       } catch (studentError) {
-        console.error(
-          "FAILED TO LOAD COUNSELLING STUDENTS:",
-          studentError
-        );
+        console.error("FAILED TO LOAD COUNSELLING STUDENTS:", studentError);
 
         setStudents([]);
       }
@@ -139,38 +113,21 @@ export default function CounsellingRecords() {
 
       try {
         const recordsResponse =
-          await getCounsellingRecordsByCounsellor(
-            counsellorId
-          );
+          await getCounsellingRecordsByCounsellor(counsellorId);
 
-        console.log(
-          "COUNSELLING RECORDS RESPONSE:",
-          recordsResponse
-        );
+        console.log("COUNSELLING RECORDS RESPONSE:", recordsResponse);
 
         const recordList =
-          recordsResponse?.records ||
-          recordsResponse?.data?.records ||
-          [];
+          recordsResponse?.records || recordsResponse?.data?.records || [];
 
-        setRecords(
-          Array.isArray(recordList)
-            ? recordList
-            : []
-        );
+        setRecords(Array.isArray(recordList) ? recordList : []);
       } catch (recordError) {
-        console.error(
-          "FAILED TO LOAD COUNSELLING RECORDS:",
-          recordError
-        );
+        console.error("FAILED TO LOAD COUNSELLING RECORDS:", recordError);
 
         setRecords([]);
       }
     } catch (error) {
-      console.error(
-        "FAILED TO LOAD COUNSELLING DATA:",
-        error
-      );
+      console.error("FAILED TO LOAD COUNSELLING DATA:", error);
     } finally {
       setLoading(false);
     }
@@ -202,9 +159,7 @@ export default function CounsellingRecords() {
     }
 
     if (!form.reason.trim()) {
-      alert(
-        "Please enter the counselling reason."
-      );
+      alert("Please enter the counselling reason.");
       return;
     }
 
@@ -230,10 +185,7 @@ export default function CounsellingRecords() {
         status: form.status,
       };
 
-      console.log(
-        "CREATING COUNSELLING RECORD:",
-        payload
-      );
+      console.log("CREATING COUNSELLING RECORD:", payload);
 
       await createCounsellingRecord(payload);
 
@@ -248,10 +200,7 @@ export default function CounsellingRecords() {
 
       await loadData();
     } catch (error) {
-      console.error(
-        "FAILED TO CREATE COUNSELLING RECORD:",
-        error
-      );
+      console.error("FAILED TO CREATE COUNSELLING RECORD:", error);
 
       const message =
         error?.response?.data?.message ||
@@ -270,7 +219,7 @@ export default function CounsellingRecords() {
 
   async function handleDelete(recordId) {
     const confirmed = window.confirm(
-      "Are you sure you want to delete this counselling record?"
+      "Are you sure you want to delete this counselling record?",
     );
 
     if (!confirmed) return;
@@ -279,24 +228,16 @@ export default function CounsellingRecords() {
       await deleteCounsellingRecord(recordId);
 
       setRecords((previous) =>
-        previous.filter(
-          (record) =>
-            record._id !== recordId
-        )
+        previous.filter((record) => record._id !== recordId),
       );
 
       if (expandedRecord === recordId) {
         setExpandedRecord(null);
       }
 
-      alert(
-        "Counselling record deleted successfully."
-      );
+      alert("Counselling record deleted successfully.");
     } catch (error) {
-      console.error(
-        "FAILED TO DELETE COUNSELLING RECORD:",
-        error
-      );
+      console.error("FAILED TO DELETE COUNSELLING RECORD:", error);
 
       const message =
         error?.response?.data?.message ||
@@ -311,89 +252,59 @@ export default function CounsellingRecords() {
   // FILTER RECORDS
   // ==========================================
 
-  const filteredRecords = records.filter(
-    (record) => {
-      const student = record.student;
+  const filteredRecords = records.filter((record) => {
+    const student = record.student;
 
-      const studentName =
-        `${student?.firstName || ""} ${
-          student?.lastName || ""
-        }`.trim();
+    const studentName = `${student?.firstName || ""} ${
+      student?.lastName || ""
+    }`.trim();
 
-      const registrationNumber =
-        student?.registrationNumber || "";
+    const registrationNumber = student?.registrationNumber || "";
 
-      const searchText =
-        search.trim().toLowerCase();
+    const searchText = search.trim().toLowerCase();
 
-      return (
-        studentName
-          .toLowerCase()
-          .includes(searchText) ||
-        registrationNumber
-          .toLowerCase()
-          .includes(searchText) ||
-        record.reason
-          ?.toLowerCase()
-          .includes(searchText) ||
-        record.status
-          ?.toLowerCase()
-          .includes(searchText)
-      );
-    }
-  );
+    return (
+      studentName.toLowerCase().includes(searchText) ||
+      registrationNumber.toLowerCase().includes(searchText) ||
+      record.reason?.toLowerCase().includes(searchText) ||
+      record.status?.toLowerCase().includes(searchText)
+    );
+  });
 
   // ==========================================
   // AUTH
   // ==========================================
 
   if (!user) {
-    return (
-      <Navigate
-        to="/login"
-        replace
-      />
-    );
+    return <Navigate to="/login" replace />;
   }
 
   if (!isCounsellor(user)) {
-    return (
-      <Navigate
-        to="/Cdashboard"
-        replace
-      />
-    );
+    return <Navigate to="/Cdashboard" replace />;
   }
 
   return (
     <div style={styles.page}>
       <div style={styles.container}>
-
         {/* =====================================
             HEADER
         ====================================== */}
 
         <div style={styles.header}>
           <div>
-            <h1 style={styles.title}>
-              Counselling Records
-            </h1>
+            <h1 style={styles.title}>Counselling Records</h1>
 
             <p style={styles.subtitle}>
-              Manage and track counselling
-              sessions for students.
+              Manage and track counselling sessions for students.
             </p>
           </div>
 
           <button
             type="button"
             style={styles.primaryButton}
-            onClick={() =>
-              setShowModal(true)
-            }
+            onClick={() => setShowModal(true)}
           >
             <Plus size={18} />
-
             New Record
           </button>
         </div>
@@ -403,57 +314,35 @@ export default function CounsellingRecords() {
         ====================================== */}
 
         <div style={styles.statsGrid}>
-
           <StatCard
-            icon={
-              <FileText size={21} />
-            }
+            icon={<FileText size={21} />}
             label="Total Records"
             value={records.length}
           />
 
           <StatCard
-            icon={
-              <Clock3 size={21} />
-            }
+            icon={<Clock3 size={21} />}
             label="Active Cases"
             value={
-              records.filter(
-                (record) =>
-                  record.status ===
-                  "active"
-              ).length
+              records.filter((record) => record.status === "active").length
             }
           />
 
           <StatCard
-            icon={
-              <CheckCircle2 size={21} />
-            }
+            icon={<CheckCircle2 size={21} />}
             label="Resolved"
             value={
-              records.filter(
-                (record) =>
-                  record.status ===
-                  "resolved"
-              ).length
+              records.filter((record) => record.status === "resolved").length
             }
           />
 
           <StatCard
-            icon={
-              <CalendarDays size={21} />
-            }
+            icon={<CalendarDays size={21} />}
             label="Follow-ups"
             value={
-              records.filter(
-                (record) =>
-                  record.status ===
-                  "follow_up"
-              ).length
+              records.filter((record) => record.status === "follow_up").length
             }
           />
-
         </div>
 
         {/* =====================================
@@ -462,19 +351,15 @@ export default function CounsellingRecords() {
 
         <div style={styles.toolbar}>
           <div style={styles.searchBox}>
-
             <Search size={18} />
 
             <input
               type="text"
               placeholder="Search student, reason or status..."
               value={search}
-              onChange={(e) =>
-                setSearch(e.target.value)
-              }
+              onChange={(e) => setSearch(e.target.value)}
               style={styles.searchInput}
             />
-
           </div>
         </div>
 
@@ -483,456 +368,249 @@ export default function CounsellingRecords() {
         ====================================== */}
 
         <div style={styles.card}>
-
           {loading ? (
             <div style={styles.loading}>
-
               <Loader2
                 size={28}
                 style={{
-                  animation:
-                    "spin 1s linear infinite",
+                  animation: "spin 1s linear infinite",
                 }}
               />
 
-              <span>
-                Loading counselling records...
-              </span>
-
+              <span>Loading counselling records...</span>
             </div>
-          ) : filteredRecords.length ===
-            0 ? (
-
+          ) : filteredRecords.length === 0 ? (
             <div style={styles.empty}>
-
               <FileText size={45} />
 
-              <h3>
-                No counselling records
-              </h3>
+              <h3>No counselling records</h3>
 
               <p>
-                Create a counselling record
-                when a student receives
-                counselling.
+                Create a counselling record when a student receives counselling.
               </p>
 
               <button
                 type="button"
                 style={styles.primaryButton}
-                onClick={() =>
-                  setShowModal(true)
-                }
+                onClick={() => setShowModal(true)}
               >
                 <Plus size={18} />
-
                 Create Record
               </button>
-
             </div>
-
           ) : (
-
             <div style={styles.tableWrapper}>
-
               <table style={styles.table}>
-
                 <thead>
                   <tr>
+                    <th style={styles.th}>Student</th>
 
-                    <th style={styles.th}>
-                      Student
-                    </th>
+                    <th style={styles.th}>Reason</th>
 
-                    <th style={styles.th}>
-                      Reason
-                    </th>
+                    <th style={styles.th}>Date</th>
 
-                    <th style={styles.th}>
-                      Date
-                    </th>
+                    <th style={styles.th}>Status</th>
 
-                    <th style={styles.th}>
-                      Status
-                    </th>
-
-                    <th style={styles.th}>
-                      Action
-                    </th>
-
+                    <th style={styles.th}>Action</th>
                   </tr>
                 </thead>
 
                 <tbody>
+                  {filteredRecords.map((record) => {
+                    const student = record.student;
 
-                  {filteredRecords.map(
-                    (record) => {
+                    const studentName =
+                      `${student?.firstName || ""} ${
+                        student?.lastName || ""
+                      }`.trim() || "Unknown Student";
 
-                      const student =
-                        record.student;
+                    const isExpanded = expandedRecord === record._id;
 
-                      const studentName =
-                        `${student?.firstName || ""} ${
-                          student?.lastName || ""
-                        }`.trim() ||
-                        "Unknown Student";
-
-                      const isExpanded =
-                        expandedRecord ===
-                        record._id;
-
-                      return (
-                        <React.Fragment
-                          key={record._id}
-                        >
-
-                          {/* =================================
+                    return (
+                      <React.Fragment key={record._id}>
+                        {/* =================================
                               MAIN ROW
                           ================================= */}
 
-                          <tr
-                            style={
-                              isExpanded
-                                ? styles.expandedRow
-                                : undefined
-                            }
-                          >
-
-                            <td style={styles.td}>
-
-                              <div
-                                style={
-                                  styles.studentCell
-                                }
-                              >
-
-                                <div
-                                  style={
-                                    styles.avatar
-                                  }
-                                >
-                                  <UserRound
-                                    size={18}
-                                  />
-                                </div>
-
-                                <div>
-
-                                  <strong>
-                                    {studentName}
-                                  </strong>
-
-                                  <small>
-                                    {student?.registrationNumber ||
-                                      student?.email ||
-                                      "No registration number"}
-                                  </small>
-
-                                </div>
-
+                        <tr style={isExpanded ? styles.expandedRow : undefined}>
+                          <td style={styles.td}>
+                            <div style={styles.studentCell}>
+                              <div style={styles.avatar}>
+                                <UserRound size={18} />
                               </div>
 
-                            </td>
+                              <div>
+                                <strong>{studentName}</strong>
 
-                            <td style={styles.td}>
-                              <span
-                                style={
-                                  styles.reasonText
-                                }
-                              >
-                                {record.reason ||
-                                  "-"}
-                              </span>
-                            </td>
-
-                            <td style={styles.td}>
-
-                              {record.date
-                                ? new Date(
-                                    record.date
-                                  ).toLocaleDateString()
-                                : "-"}
-
-                            </td>
-
-                            <td style={styles.td}>
-
-                              <StatusBadge
-                                status={
-                                  record.status
-                                }
-                              />
-
-                            </td>
-
-                            <td style={styles.td}>
-
-                              <div
-                                style={
-                                  styles.actionButtons
-                                }
-                              >
-
-                                {/* DROPDOWN */}
-                                <button
-                                  type="button"
-                                  style={
-                                    styles.detailsButton
-                                  }
-                                  onClick={() =>
-                                    setExpandedRecord(
-                                      isExpanded
-                                        ? null
-                                        : record._id
-                                    )
-                                  }
-                                >
-
-                                  {isExpanded ? (
-                                    <ChevronUp
-                                      size={16}
-                                    />
-                                  ) : (
-                                    <ChevronDown
-                                      size={16}
-                                    />
-                                  )}
-
-                                  {isExpanded
-                                    ? "Hide"
-                                    : "Details"}
-
-                                </button>
-
-                                {/* DELETE */}
-                                <button
-                                  type="button"
-                                  style={
-                                    styles.deleteButton
-                                  }
-                                  title="Delete record"
-                                  onClick={() =>
-                                    handleDelete(
-                                      record._id
-                                    )
-                                  }
-                                >
-                                  <Trash2
-                                    size={16}
-                                  />
-                                </button>
-
+                                <small>
+                                  {student?.registrationNumber ||
+                                    student?.email ||
+                                    "No registration number"}
+                                </small>
                               </div>
+                            </div>
+                          </td>
 
-                            </td>
+                          <td style={styles.td}>
+                            <span style={styles.reasonText}>
+                              {record.reason || "-"}
+                            </span>
+                          </td>
 
-                          </tr>
+                          <td style={styles.td}>
+                            {record.date
+                              ? new Date(record.date).toLocaleDateString()
+                              : "-"}
+                          </td>
 
-                          {/* =================================
+                          <td style={styles.td}>
+                            <StatusBadge status={record.status} />
+                          </td>
+
+                          <td style={styles.td}>
+                            <div style={styles.actionButtons}>
+                              {/* DROPDOWN */}
+                              <button
+                                type="button"
+                                style={styles.detailsButton}
+                                onClick={() =>
+                                  setExpandedRecord(
+                                    isExpanded ? null : record._id,
+                                  )
+                                }
+                              >
+                                {isExpanded ? (
+                                  <ChevronUp size={16} />
+                                ) : (
+                                  <ChevronDown size={16} />
+                                )}
+
+                                {isExpanded ? "Hide" : "Details"}
+                              </button>
+
+                              {/* DELETE */}
+                              <button
+                                type="button"
+                                style={styles.deleteButton}
+                                title="Delete record"
+                                onClick={() => handleDelete(record._id)}
+                              >
+                                <Trash2 size={16} />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+
+                        {/* =================================
                               DROPDOWN DETAILS
                           ================================= */}
 
-                          {isExpanded && (
-                            <tr>
+                        {isExpanded && (
+                          <tr>
+                            <td colSpan="5" style={styles.detailsTd}>
+                              <div style={styles.detailsPanel}>
+                                {/* STUDENT INFORMATION */}
 
-                              <td
-                                colSpan="5"
-                                style={
-                                  styles.detailsTd
-                                }
-                              >
-
-                                <div
-                                  style={
-                                    styles.detailsPanel
-                                  }
-                                >
-
-                                  {/* STUDENT INFORMATION */}
-
-                                  <div
-                                    style={
-                                      styles.detailsSection
-                                    }
-                                  >
-
-                                    <div
-                                      style={
-                                        styles.detailsHeading
-                                      }
-                                    >
-                                      <UserRound
-                                        size={17}
-                                      />
-
-                                      Student
-                                      Information
-                                    </div>
-
-                                    <div
-                                      style={
-                                        styles.detailsGrid
-                                      }
-                                    >
-
-                                      <DetailItem
-                                        label="Full Name"
-                                        value={
-                                          studentName
-                                        }
-                                      />
-
-                                      <DetailItem
-                                        label="Registration Number"
-                                        value={
-                                          student?.registrationNumber ||
-                                          "Not available"
-                                        }
-                                      />
-
-                                      <DetailItem
-                                        label="Email"
-                                        value={
-                                          student?.email ||
-                                          "Not available"
-                                        }
-                                      />
-
-                                      <DetailItem
-                                        label="Phone"
-                                        value={
-                                          student?.phone ||
-                                          "Not available"
-                                        }
-                                      />
-
-                                      <DetailItem
-                                        label="Gender"
-                                        value={
-                                          student?.gender ||
-                                          "Not available"
-                                        }
-                                      />
-
-                                    </div>
-
+                                <div style={styles.detailsSection}>
+                                  <div style={styles.detailsHeading}>
+                                    <UserRound size={17} />
+                                    Student Information
                                   </div>
 
-                                  {/* COUNSELLING INFORMATION */}
+                                  <div style={styles.detailsGrid}>
+                                    <DetailItem
+                                      label="Full Name"
+                                      value={studentName}
+                                    />
 
-                                  <div
-                                    style={
-                                      styles.detailsSection
-                                    }
-                                  >
-
-                                    <div
-                                      style={
-                                        styles.detailsHeading
+                                    <DetailItem
+                                      label="Registration Number"
+                                      value={
+                                        student?.registrationNumber ||
+                                        "Not available"
                                       }
-                                    >
-                                      <FileText
-                                        size={17}
-                                      />
+                                    />
 
-                                      Counselling
-                                      Information
-                                    </div>
+                                    <DetailItem
+                                      label="Email"
+                                      value={student?.email || "Not available"}
+                                    />
 
-                                    <div
-                                      style={
-                                        styles.detailsGrid
-                                      }
-                                    >
+                                    <DetailItem
+                                      label="Phone"
+                                      value={student?.phone || "Not available"}
+                                    />
 
-                                      <DetailItem
-                                        label="Reason"
-                                        value={
-                                          record.reason ||
-                                          "No reason provided"
-                                        }
-                                      />
-
-                                      <DetailItem
-                                        label="Date"
-                                        value={
-                                          record.date
-                                            ? new Date(
-                                                record.date
-                                              ).toLocaleDateString()
-                                            : "Not available"
-                                        }
-                                      />
-
-                                      <DetailItem
-                                        label="Status"
-                                        value={
-                                          record.status
-                                            ? formatStatus(
-                                                record.status
-                                              )
-                                            : "Not available"
-                                        }
-                                      />
-
-                                    </div>
-
+                                    <DetailItem
+                                      label="Gender"
+                                      value={student?.gender || "Not available"}
+                                    />
                                   </div>
-
-                                  {/* NOTES */}
-
-                                  <div
-                                    style={
-                                      styles.notesSection
-                                    }
-                                  >
-
-                                    <div
-                                      style={
-                                        styles.detailsHeading
-                                      }
-                                    >
-                                      <FileText
-                                        size={17}
-                                      />
-
-                                      Counselling
-                                      Notes
-                                    </div>
-
-                                    <div
-                                      style={
-                                        styles.notesBox
-                                      }
-                                    >
-                                      {record.notes ||
-                                        "No counselling notes have been added."}
-                                    </div>
-
-                                  </div>
-
                                 </div>
 
-                              </td>
+                                {/* COUNSELLING INFORMATION */}
 
-                            </tr>
-                          )}
+                                <div style={styles.detailsSection}>
+                                  <div style={styles.detailsHeading}>
+                                    <FileText size={17} />
+                                    Counselling Information
+                                  </div>
 
-                        </React.Fragment>
-                      );
-                    }
-                  )}
+                                  <div style={styles.detailsGrid}>
+                                    <DetailItem
+                                      label="Reason"
+                                      value={
+                                        record.reason || "No reason provided"
+                                      }
+                                    />
 
+                                    <DetailItem
+                                      label="Date"
+                                      value={
+                                        record.date
+                                          ? new Date(
+                                              record.date,
+                                            ).toLocaleDateString()
+                                          : "Not available"
+                                      }
+                                    />
+
+                                    <DetailItem
+                                      label="Status"
+                                      value={
+                                        record.status
+                                          ? formatStatus(record.status)
+                                          : "Not available"
+                                      }
+                                    />
+                                  </div>
+                                </div>
+
+                                {/* NOTES */}
+
+                                <div style={styles.notesSection}>
+                                  <div style={styles.detailsHeading}>
+                                    <FileText size={17} />
+                                    Counselling Notes
+                                  </div>
+
+                                  <div style={styles.notesBox}>
+                                    {record.notes ||
+                                      "No counselling notes have been added."}
+                                  </div>
+                                </div>
+                              </div>
+                            </td>
+                          </tr>
+                        )}
+                      </React.Fragment>
+                    );
+                  })}
                 </tbody>
-
               </table>
-
             </div>
-
           )}
-
         </div>
-
       </div>
 
       {/* ==========================================
@@ -941,63 +619,30 @@ export default function CounsellingRecords() {
 
       {showModal && (
         <div style={styles.overlay}>
-
           <div style={styles.modal}>
-
-            <div
-              style={styles.modalHeader}
-            >
-
+            <div style={styles.modalHeader}>
               <div>
+                <h2 style={styles.modalTitle}>New Counselling Record</h2>
 
-                <h2
-                  style={
-                    styles.modalTitle
-                  }
-                >
-                  New Counselling Record
-                </h2>
-
-                <p
-                  style={
-                    styles.modalSubtitle
-                  }
-                >
-                  Record a counselling
-                  session for a student.
+                <p style={styles.modalSubtitle}>
+                  Record a counselling session for a student.
                 </p>
-
               </div>
 
               <button
                 type="button"
-                style={
-                  styles.closeButton
-                }
-                onClick={() =>
-                  setShowModal(false)
-                }
+                style={styles.closeButton}
+                onClick={() => setShowModal(false)}
               >
                 <X size={20} />
               </button>
-
             </div>
 
-            <form
-              onSubmit={handleSubmit}
-            >
-
+            <form onSubmit={handleSubmit}>
               {/* STUDENT */}
 
-              <div
-                style={styles.formGroup}
-              >
-
-                <label
-                  style={styles.label}
-                >
-                  Student
-                </label>
+              <div style={styles.formGroup}>
+                <label style={styles.label}>Student</label>
 
                 <select
                   name="student"
@@ -1006,47 +651,26 @@ export default function CounsellingRecords() {
                   style={styles.input}
                   required
                 >
-
-                  <option value="">
-                    Select student
-                  </option>
+                  <option value="">Select student</option>
 
                   {students.length > 0 ? (
-                    students.map(
-                      (student) => (
-                        <option
-                          key={student._id}
-                          value={student._id}
-                        >
-                          {student.firstName}{" "}
-                          {student.lastName}
-                        </option>
-                      )
-                    )
+                    students.map((student) => (
+                      <option key={student._id} value={student._id}>
+                        {student.firstName} {student.lastName}
+                      </option>
+                    ))
                   ) : (
-                    <option
-                      value=""
-                      disabled
-                    >
+                    <option value="" disabled>
                       No students found
                     </option>
                   )}
-
                 </select>
-
               </div>
 
               {/* REASON */}
 
-              <div
-                style={styles.formGroup}
-              >
-
-                <label
-                  style={styles.label}
-                >
-                  Counselling Reason
-                </label>
+              <div style={styles.formGroup}>
+                <label style={styles.label}>Counselling Reason</label>
 
                 <input
                   type="text"
@@ -1057,20 +681,12 @@ export default function CounsellingRecords() {
                   style={styles.input}
                   required
                 />
-
               </div>
 
               {/* NOTES */}
 
-              <div
-                style={styles.formGroup}
-              >
-
-                <label
-                  style={styles.label}
-                >
-                  Notes
-                </label>
+              <div style={styles.formGroup}>
+                <label style={styles.label}>Notes</label>
 
                 <textarea
                   name="notes"
@@ -1083,20 +699,12 @@ export default function CounsellingRecords() {
                     resize: "vertical",
                   }}
                 />
-
               </div>
 
               {/* STATUS */}
 
-              <div
-                style={styles.formGroup}
-              >
-
-                <label
-                  style={styles.label}
-                >
-                  Status
-                </label>
+              <div style={styles.formGroup}>
+                <label style={styles.label}>Status</label>
 
                 <select
                   name="status"
@@ -1104,73 +712,45 @@ export default function CounsellingRecords() {
                   onChange={handleChange}
                   style={styles.input}
                 >
+                  <option value="active">Active</option>
 
-                  <option value="active">
-                    Active
-                  </option>
+                  <option value="follow_up">Follow-up</option>
 
-                  <option value="follow_up">
-                    Follow-up
-                  </option>
-
-                  <option value="resolved">
-                    Resolved
-                  </option>
-
+                  <option value="resolved">Resolved</option>
                 </select>
-
               </div>
 
               {/* ACTIONS */}
 
-              <div
-                style={styles.modalActions}
-              >
-
+              <div style={styles.modalActions}>
                 <button
                   type="button"
-                  style={
-                    styles.cancelButton
-                  }
-                  onClick={() =>
-                    setShowModal(false)
-                  }
+                  style={styles.cancelButton}
+                  onClick={() => setShowModal(false)}
                 >
                   Cancel
                 </button>
 
                 <button
                   type="submit"
-                  style={
-                    styles.primaryButton
-                  }
+                  style={styles.primaryButton}
                   disabled={saving}
                 >
-
                   {saving ? (
                     <>
-                      <Loader2
-                        size={17}
-                      />
+                      <Loader2 size={17} />
                       Saving...
                     </>
                   ) : (
                     <>
-                      <Plus
-                        size={17}
-                      />
+                      <Plus size={17} />
                       Create Record
                     </>
                   )}
-
                 </button>
-
               </div>
-
             </form>
-
           </div>
-
         </div>
       )}
 
@@ -1189,7 +769,6 @@ export default function CounsellingRecords() {
           }
         `}
       </style>
-
     </div>
   );
 }
@@ -1198,34 +777,16 @@ export default function CounsellingRecords() {
    STAT CARD
 ========================================== */
 
-function StatCard({
-  icon,
-  label,
-  value,
-}) {
+function StatCard({ icon, label, value }) {
   return (
     <div style={styles.statCard}>
-
-      <div style={styles.statIcon}>
-        {icon}
-      </div>
+      <div style={styles.statIcon}>{icon}</div>
 
       <div>
+        <p style={styles.statLabel}>{label}</p>
 
-        <p
-          style={styles.statLabel}
-        >
-          {label}
-        </p>
-
-        <h2
-          style={styles.statValue}
-        >
-          {value}
-        </h2>
-
+        <h2 style={styles.statValue}>{value}</h2>
       </div>
-
     </div>
   );
 }
@@ -1234,9 +795,7 @@ function StatCard({
    STATUS BADGE
 ========================================== */
 
-function StatusBadge({
-  status,
-}) {
+function StatusBadge({ status }) {
   const labels = {
     active: "Active",
     resolved: "Resolved",
@@ -1250,13 +809,11 @@ function StatusBadge({
         ...(status === "resolved"
           ? styles.resolvedBadge
           : status === "follow_up"
-          ? styles.followupBadge
-          : {}),
+            ? styles.followupBadge
+            : {}),
       }}
     >
-      {labels[status] ||
-        status ||
-        "Unknown"}
+      {labels[status] || status || "Unknown"}
     </span>
   );
 }
@@ -1265,29 +822,12 @@ function StatusBadge({
    DETAIL ITEM
 ========================================== */
 
-function DetailItem({
-  label,
-  value,
-}) {
+function DetailItem({ label, value }) {
   return (
     <div style={styles.detailItem}>
+      <span style={styles.detailLabel}>{label}</span>
 
-      <span
-        style={
-          styles.detailLabel
-        }
-      >
-        {label}
-      </span>
-
-      <strong
-        style={
-          styles.detailValue
-        }
-      >
-        {value}
-      </strong>
-
+      <strong style={styles.detailValue}>{value}</strong>
     </div>
   );
 }
@@ -1303,10 +843,7 @@ function formatStatus(status) {
     follow_up: "Follow-up",
   };
 
-  return (
-    labels[status] ||
-    status
-  );
+  return labels[status] || status;
 }
 
 /* ==========================================
@@ -1362,8 +899,7 @@ const styles = {
 
   statsGrid: {
     display: "grid",
-    gridTemplateColumns:
-      "repeat(auto-fit, minmax(210px, 1fr))",
+    gridTemplateColumns: "repeat(auto-fit, minmax(210px, 1fr))",
     gap: "18px",
     marginBottom: "24px",
   },
@@ -1448,14 +984,12 @@ const styles = {
     textTransform: "uppercase",
     color: "#64748b",
     background: "#f8fafc",
-    borderBottom:
-      "1px solid #e5e7eb",
+    borderBottom: "1px solid #e5e7eb",
   },
 
   td: {
     padding: "16px 18px",
-    borderBottom:
-      "1px solid #eef2f7",
+    borderBottom: "1px solid #eef2f7",
     fontSize: "14px",
     color: "#334155",
   },
@@ -1546,14 +1080,12 @@ const styles = {
   detailsTd: {
     padding: 0,
     background: "#f8fafc",
-    borderBottom:
-      "1px solid #e5e7eb",
+    borderBottom: "1px solid #e5e7eb",
   },
 
   detailsPanel: {
     padding: "22px 28px 25px",
-    borderTop:
-      "1px solid #e5e7eb",
+    borderTop: "1px solid #e5e7eb",
   },
 
   detailsSection: {
@@ -1572,15 +1104,13 @@ const styles = {
 
   detailsGrid: {
     display: "grid",
-    gridTemplateColumns:
-      "repeat(auto-fit, minmax(180px, 1fr))",
+    gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
     gap: "12px",
   },
 
   detailItem: {
     background: "#fff",
-    border:
-      "1px solid #e5e7eb",
+    border: "1px solid #e5e7eb",
     borderRadius: "8px",
     padding: "12px",
   },
@@ -1608,8 +1138,7 @@ const styles = {
 
   notesBox: {
     background: "#fff",
-    border:
-      "1px solid #e5e7eb",
+    border: "1px solid #e5e7eb",
     borderRadius: "8px",
     padding: "14px",
     color: "#475569",
@@ -1643,8 +1172,7 @@ const styles = {
   overlay: {
     position: "fixed",
     inset: 0,
-    background:
-      "rgba(15, 23, 42, 0.45)",
+    background: "rgba(15, 23, 42, 0.45)",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
@@ -1660,8 +1188,7 @@ const styles = {
     background: "#fff",
     borderRadius: "14px",
     padding: "24px",
-    boxShadow:
-      "0 20px 50px rgba(0,0,0,0.18)",
+    boxShadow: "0 20px 50px rgba(0,0,0,0.18)",
   },
 
   modalHeader: {
@@ -1711,8 +1238,7 @@ const styles = {
   input: {
     width: "100%",
     boxSizing: "border-box",
-    border:
-      "1px solid #dbe2ea",
+    border: "1px solid #dbe2ea",
     borderRadius: "8px",
     padding: "11px 12px",
     outline: "none",
@@ -1728,8 +1254,7 @@ const styles = {
   },
 
   cancelButton: {
-    border:
-      "1px solid #dbe2ea",
+    border: "1px solid #dbe2ea",
     background: "#fff",
     color: "#475569",
     padding: "11px 17px",

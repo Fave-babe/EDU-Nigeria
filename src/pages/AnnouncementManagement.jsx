@@ -12,7 +12,7 @@ import {
   RefreshCw,
 } from "lucide-react";
 
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "../context/authcontext";
 import http from "../api/http";
 
 export default function AnnouncementManagement() {
@@ -57,22 +57,17 @@ export default function AnnouncementManagement() {
         return;
       }
 
-      const response = await http.get(
-        `/announcements/school/${schoolId}`,
-        {
-          params: {
-            includeExpired: true,
-          },
-        }
-      );
+      const response = await http.get(`/announcements/school/${schoolId}`, {
+        params: {
+          includeExpired: true,
+        },
+      });
 
       setAnnouncements(response.announcements || []);
     } catch (err) {
       console.error("ANNOUNCEMENTS ERROR:", err);
 
-      setError(
-        err.message || "Unable to load announcements."
-      );
+      setError(err.message || "Unable to load announcements.");
     } finally {
       setLoading(false);
     }
@@ -133,37 +128,21 @@ export default function AnnouncementManagement() {
       };
 
       if (editingId) {
-        await http.patch(
-          `/announcements/${editingId}`,
-          payload
-        );
+        await http.patch(`/announcements/${editingId}`, payload);
 
-        setSuccess(
-          "Announcement updated successfully."
-        );
+        setSuccess("Announcement updated successfully.");
       } else {
-        await http.post(
-          "/announcements",
-          payload
-        );
+        await http.post("/announcements", payload);
 
-        setSuccess(
-          "Announcement created successfully."
-        );
+        setSuccess("Announcement created successfully.");
       }
 
       resetForm();
       await loadAnnouncements();
     } catch (err) {
-      console.error(
-        "SAVE ANNOUNCEMENT ERROR:",
-        err
-      );
+      console.error("SAVE ANNOUNCEMENT ERROR:", err);
 
-      setError(
-        err.message ||
-          "Unable to save announcement."
-      );
+      setError(err.message || "Unable to save announcement.");
     } finally {
       setSaving(false);
     }
@@ -191,22 +170,15 @@ export default function AnnouncementManagement() {
       setError("");
       setSuccess("");
 
-      await http.patch(
-        `/announcements/${id}/publish`
-      );
+      await http.patch(`/announcements/${id}/publish`);
 
-      setSuccess(
-        "Announcement published successfully."
-      );
+      setSuccess("Announcement published successfully.");
 
       await loadAnnouncements();
     } catch (err) {
       console.error("PUBLISH ERROR:", err);
 
-      setError(
-        err.message ||
-          "Unable to publish announcement."
-      );
+      setError(err.message || "Unable to publish announcement.");
     }
   };
 
@@ -215,31 +187,21 @@ export default function AnnouncementManagement() {
       setError("");
       setSuccess("");
 
-      await http.patch(
-        `/announcements/${id}/unpublish`
-      );
+      await http.patch(`/announcements/${id}/unpublish`);
 
-      setSuccess(
-        "Announcement unpublished successfully."
-      );
+      setSuccess("Announcement unpublished successfully.");
 
       await loadAnnouncements();
     } catch (err) {
-      console.error(
-        "UNPUBLISH ERROR:",
-        err
-      );
+      console.error("UNPUBLISH ERROR:", err);
 
-      setError(
-        err.message ||
-          "Unable to unpublish announcement."
-      );
+      setError(err.message || "Unable to unpublish announcement.");
     }
   };
 
   const handleDelete = async (id) => {
     const confirmed = window.confirm(
-      "Are you sure you want to delete this announcement?"
+      "Are you sure you want to delete this announcement?",
     );
 
     if (!confirmed) return;
@@ -248,25 +210,15 @@ export default function AnnouncementManagement() {
       setError("");
       setSuccess("");
 
-      await http.delete(
-        `/announcements/${id}`
-      );
+      await http.delete(`/announcements/${id}`);
 
-      setSuccess(
-        "Announcement deleted successfully."
-      );
+      setSuccess("Announcement deleted successfully.");
 
       await loadAnnouncements();
     } catch (err) {
-      console.error(
-        "DELETE ANNOUNCEMENT ERROR:",
-        err
-      );
+      console.error("DELETE ANNOUNCEMENT ERROR:", err);
 
-      setError(
-        err.message ||
-          "Unable to delete announcement."
-      );
+      setError(err.message || "Unable to delete announcement.");
     }
   };
 
@@ -275,9 +227,7 @@ export default function AnnouncementManagement() {
       <div className="page-header">
         <div>
           <h1>Announcement Management</h1>
-          <p>
-            Create and manage school announcements.
-          </p>
+          <p>Create and manage school announcements.</p>
         </div>
 
         <div className="page-header-icon">
@@ -347,16 +297,9 @@ export default function AnnouncementManagement() {
               marginBottom: "20px",
             }}
           >
-            <h2>
-              {editingId
-                ? "Edit Announcement"
-                : "Create Announcement"}
-            </h2>
+            <h2>{editingId ? "Edit Announcement" : "Create Announcement"}</h2>
 
-            <button
-              className="back-button"
-              onClick={resetForm}
-            >
+            <button className="back-button" onClick={resetForm}>
               <X size={18} />
             </button>
           </div>
@@ -401,8 +344,7 @@ export default function AnnouncementManagement() {
             <div
               style={{
                 display: "grid",
-                gridTemplateColumns:
-                  "repeat(auto-fit, minmax(200px, 1fr))",
+                gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
                 gap: "16px",
                 marginBottom: "16px",
               }}
@@ -420,29 +362,17 @@ export default function AnnouncementManagement() {
                     marginTop: "6px",
                   }}
                 >
-                  <option value="general">
-                    General
-                  </option>
+                  <option value="general">General</option>
 
-                  <option value="academic">
-                    Academic
-                  </option>
+                  <option value="academic">Academic</option>
 
-                  <option value="event">
-                    Event
-                  </option>
+                  <option value="event">Event</option>
 
-                  <option value="meeting">
-                    Meeting
-                  </option>
+                  <option value="meeting">Meeting</option>
 
-                  <option value="finance">
-                    Finance
-                  </option>
+                  <option value="finance">Finance</option>
 
-                  <option value="emergency">
-                    Emergency
-                  </option>
+                  <option value="emergency">Emergency</option>
                 </select>
               </div>
 
@@ -459,33 +389,19 @@ export default function AnnouncementManagement() {
                     marginTop: "6px",
                   }}
                 >
-                  <option value="all">
-                    Everyone
-                  </option>
+                  <option value="all">Everyone</option>
 
-                  <option value="students">
-                    Students
-                  </option>
+                  <option value="students">Students</option>
 
-                  <option value="parents">
-                    Parents
-                  </option>
+                  <option value="parents">Parents</option>
 
-                  <option value="teachers">
-                    Teachers
-                  </option>
+                  <option value="teachers">Teachers</option>
 
-                  <option value="staff">
-                    Staff
-                  </option>
+                  <option value="staff">Staff</option>
 
-                  <option value="bursars">
-                    Bursars
-                  </option>
+                  <option value="bursars">Bursars</option>
 
-                  <option value="counsellors">
-                    Counsellors
-                  </option>
+                  <option value="counsellors">Counsellors</option>
                 </select>
               </div>
 
@@ -502,25 +418,17 @@ export default function AnnouncementManagement() {
                     marginTop: "6px",
                   }}
                 >
-                  <option value="low">
-                    Low
-                  </option>
+                  <option value="low">Low</option>
 
-                  <option value="normal">
-                    Normal
-                  </option>
+                  <option value="normal">Normal</option>
 
-                  <option value="high">
-                    High
-                  </option>
+                  <option value="high">High</option>
                 </select>
               </div>
             </div>
 
             <div style={{ marginBottom: "20px" }}>
-              <label>
-                Expiry Date
-              </label>
+              <label>Expiry Date</label>
 
               <input
                 type="date"
@@ -536,16 +444,12 @@ export default function AnnouncementManagement() {
               />
             </div>
 
-            <button
-              type="submit"
-              className="back-button"
-              disabled={saving}
-            >
+            <button type="submit" className="back-button" disabled={saving}>
               {saving
                 ? "Saving..."
                 : editingId
-                ? "Update Announcement"
-                : "Save Announcement"}
+                  ? "Update Announcement"
+                  : "Save Announcement"}
             </button>
           </form>
         </div>
@@ -563,9 +467,7 @@ export default function AnnouncementManagement() {
           <div className="empty-state">
             <Megaphone size={48} />
             <h3>No announcements yet</h3>
-            <p>
-              Create your first school announcement.
-            </p>
+            <p>Create your first school announcement.</p>
           </div>
         ) : (
           <div
@@ -576,8 +478,7 @@ export default function AnnouncementManagement() {
             }}
           >
             {announcements.map((announcement) => {
-              const published =
-                announcement.published === true;
+              const published = announcement.published === true;
 
               return (
                 <div
@@ -591,38 +492,23 @@ export default function AnnouncementManagement() {
                   <div
                     style={{
                       display: "flex",
-                      justifyContent:
-                        "space-between",
+                      justifyContent: "space-between",
                       gap: "15px",
                     }}
                   >
                     <div>
-                      <h3>
-                        {announcement.title}
-                      </h3>
+                      <h3>{announcement.title}</h3>
 
-                      <p>
-                        {announcement.message}
-                      </p>
+                      <p>{announcement.message}</p>
 
-                      <small>
-                        Audience:{" "}
-                        {announcement.audience}
-                      </small>
+                      <small>Audience: {announcement.audience}</small>
 
                       <br />
 
-                      <small>
-                        Priority:{" "}
-                        {announcement.priority}
-                      </small>
+                      <small>Priority: {announcement.priority}</small>
                     </div>
 
-                    <strong>
-                      {published
-                        ? "Published"
-                        : "Draft"}
-                    </strong>
+                    <strong>{published ? "Published" : "Draft"}</strong>
                   </div>
 
                   <div
@@ -635,11 +521,7 @@ export default function AnnouncementManagement() {
                   >
                     <button
                       className="back-button"
-                      onClick={() =>
-                        handleEdit(
-                          announcement
-                        )
-                      }
+                      onClick={() => handleEdit(announcement)}
                     >
                       <Pencil size={16} />
                       Edit
@@ -648,11 +530,7 @@ export default function AnnouncementManagement() {
                     {!published ? (
                       <button
                         className="back-button"
-                        onClick={() =>
-                          handlePublish(
-                            announcement._id
-                          )
-                        }
+                        onClick={() => handlePublish(announcement._id)}
                       >
                         <Send size={16} />
                         Publish
@@ -660,11 +538,7 @@ export default function AnnouncementManagement() {
                     ) : (
                       <button
                         className="back-button"
-                        onClick={() =>
-                          handleUnpublish(
-                            announcement._id
-                          )
-                        }
+                        onClick={() => handleUnpublish(announcement._id)}
                       >
                         <EyeOff size={16} />
                         Unpublish
@@ -673,11 +547,7 @@ export default function AnnouncementManagement() {
 
                     <button
                       className="back-button"
-                      onClick={() =>
-                        handleDelete(
-                          announcement._id
-                        )
-                      }
+                      onClick={() => handleDelete(announcement._id)}
                     >
                       <Trash2 size={16} />
                       Delete

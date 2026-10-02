@@ -1,38 +1,37 @@
-
-import { useState } from 'react';
-import { useNavigate, Navigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
+import { useState } from "react";
+import { useNavigate, Navigate } from "react-router-dom";
+import { useAuth } from "../context/authcontext";
 
 // Decides where a user lands after login.
 // Must match the actual routes in App.jsx.
 export function getRedirectPath(user) {
-  if (!user) return '/login';
+  if (!user) return "/login";
 
-  if (user.role === 'super_admin') return '/super-admin';
+  if (user.role === "super_admin") return "/super-admin";
 
-  if (user.role === 'admin') return '/dashboard';
+  if (user.role === "admin") return "/dashboard";
 
-  if (user.role === 'staff') {
-    if (user.staffRole === 'Counsellor') return '/Cdashboard';
-    return '/Sdashboard';
+  if (user.role === "staff") {
+    if (user.staffRole === "Counsellor") return "/Cdashboard";
+    return "/Sdashboard";
   }
 
-  if (user.role === 'student') return '/Stdashboard';
+  if (user.role === "student") return "/Stdashboard";
 
-  if (user.role === 'teacher') return '/Tdashboard';
+  if (user.role === "teacher") return "/Tdashboard";
 
-  if (user.role === 'bursar') return '/Bdashboard';
+  if (user.role === "bursar") return "/Bdashboard";
 
-  if (user.role === 'parent') return '/Pdashboard';
+  if (user.role === "parent") return "/Pdashboard";
 
   // Unknown/unhandled role
-  return '/login';
+  return "/login";
 }
 
 export default function Login() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
 
   const { login, user } = useAuth();
   const navigate = useNavigate();
@@ -43,11 +42,11 @@ export default function Login() {
 
   async function handleSubmit(e) {
     e.preventDefault();
-    setError('');
+    setError("");
 
     const result = await login(email, password);
 
-    console.log('Login result:', result);
+    console.log("Login result:", result);
 
     if (result.success) {
       navigate(getRedirectPath(result.user));
@@ -59,7 +58,6 @@ export default function Login() {
   return (
     <div className="login-page">
       <div className="login-card">
-
         <div className="login-header">
           <div className="brand-icon-lg">E</div>
           <h1>EduNigeria</h1>
@@ -67,12 +65,7 @@ export default function Login() {
         </div>
 
         <form onSubmit={handleSubmit} className="login-form">
-
-          {error && (
-            <div className="error-msg">
-              {error}
-            </div>
-          )}
+          {error && <div className="error-msg">{error}</div>}
 
           <div className="form-group">
             <label>Email</label>
@@ -101,10 +94,8 @@ export default function Login() {
           <button type="submit" className="btn-primary">
             Sign In
           </button>
-
         </form>
       </div>
     </div>
   );
 }
-

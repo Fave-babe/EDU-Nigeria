@@ -19,7 +19,7 @@ import {
   Building2,
 } from "lucide-react";
 
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "../context/authcontext";
 
 import {
   getPayments,
@@ -47,14 +47,10 @@ export default function BursarDashboard() {
   // ==================================================
 
   const schoolId =
-    typeof user?.school === "object"
-      ? user?.school?._id
-      : user?.school;
+    typeof user?.school === "object" ? user?.school?._id : user?.school;
 
   const schoolName =
-    typeof user?.school === "object"
-      ? user?.school?.name
-      : "School";
+    typeof user?.school === "object" ? user?.school?.name : "School";
 
   // ==================================================
   // LOAD DASHBOARD DATA
@@ -71,45 +67,30 @@ export default function BursarDashboard() {
     try {
       setError("");
 
-      const [
-        revenueResponse,
-        todayRevenueResponse,
-        paymentsResponse,
-      ] = await Promise.all([
-        getTotalRevenue(schoolId),
+      const [revenueResponse, todayRevenueResponse, paymentsResponse] =
+        await Promise.all([
+          getTotalRevenue(schoolId),
 
-        getTodayRevenue(schoolId),
+          getTodayRevenue(schoolId),
 
-        getPayments({
-          school: schoolId,
-          page: 1,
-          limit: 5,
-        }),
-      ]);
+          getPayments({
+            school: schoolId,
+            page: 1,
+            limit: 5,
+          }),
+        ]);
 
-      console.log(
-        "BURSAR REVENUE RESPONSE:",
-        revenueResponse
-      );
+      console.log("BURSAR REVENUE RESPONSE:", revenueResponse);
 
-      console.log(
-        "BURSAR TODAY REVENUE RESPONSE:",
-        todayRevenueResponse
-      );
+      console.log("BURSAR TODAY REVENUE RESPONSE:", todayRevenueResponse);
 
-      console.log(
-        "BURSAR PAYMENTS RESPONSE:",
-        paymentsResponse
-      );
+      console.log("BURSAR PAYMENTS RESPONSE:", paymentsResponse);
 
       // ==================================================
       // TOTAL REVENUE
       // ==================================================
 
-      const total =
-        revenueResponse?.total ??
-        revenueResponse?.data?.total ??
-        0;
+      const total = revenueResponse?.total ?? revenueResponse?.data?.total ?? 0;
 
       setTotalRevenue(Number(total) || 0);
 
@@ -118,14 +99,10 @@ export default function BursarDashboard() {
       // ==================================================
 
       const todayTotal =
-        todayRevenueResponse?.total ??
-        todayRevenueResponse?.data?.total ??
-        0;
+        todayRevenueResponse?.total ?? todayRevenueResponse?.data?.total ?? 0;
 
       const todayCount =
-        todayRevenueResponse?.count ??
-        todayRevenueResponse?.data?.count ??
-        0;
+        todayRevenueResponse?.count ?? todayRevenueResponse?.data?.count ?? 0;
 
       setTodayRevenue(Number(todayTotal) || 0);
 
@@ -136,25 +113,16 @@ export default function BursarDashboard() {
       // ==================================================
 
       const paymentList =
-        paymentsResponse?.payments ??
-        paymentsResponse?.data?.payments ??
-        [];
+        paymentsResponse?.payments ?? paymentsResponse?.data?.payments ?? [];
 
-      setPayments(
-        Array.isArray(paymentList)
-          ? paymentList
-          : []
-      );
+      setPayments(Array.isArray(paymentList) ? paymentList : []);
     } catch (err) {
-      console.error(
-        "BURSAR DASHBOARD ERROR:",
-        err
-      );
+      console.error("BURSAR DASHBOARD ERROR:", err);
 
       setError(
         err?.response?.data?.message ||
           err?.message ||
-          "Failed to load financial information."
+          "Failed to load financial information.",
       );
     } finally {
       setLoading(false);
@@ -217,21 +185,15 @@ export default function BursarDashboard() {
   // ==================================================
 
   const paidPayments = payments.filter(
-    (payment) =>
-      String(payment.status || "").toLowerCase() ===
-      "paid"
+    (payment) => String(payment.status || "").toLowerCase() === "paid",
   ).length;
 
   const pendingPayments = payments.filter(
-    (payment) =>
-      String(payment.status || "").toLowerCase() ===
-      "pending"
+    (payment) => String(payment.status || "").toLowerCase() === "pending",
   ).length;
 
   const failedPayments = payments.filter(
-    (payment) =>
-      String(payment.status || "").toLowerCase() ===
-      "failed"
+    (payment) => String(payment.status || "").toLowerCase() === "failed",
   ).length;
 
   // ==================================================
@@ -241,10 +203,7 @@ export default function BursarDashboard() {
   if (loading) {
     return (
       <div className="bursar-loading">
-        <RefreshCw
-          size={30}
-          className="bursar-refresh-spin"
-        />
+        <RefreshCw size={30} className="bursar-refresh-spin" />
 
         <p>Loading financial dashboard...</p>
       </div>
@@ -257,16 +216,13 @@ export default function BursarDashboard() {
 
   return (
     <div className="bursar-dashboard">
-
       {/* ==================================================
           HEADER
       ================================================== */}
 
       <div className="bursar-header">
         <div className="bursar-header-left">
-          <h1 className="bursar-title">
-            Bursar Dashboard
-          </h1>
+          <h1 className="bursar-title">Bursar Dashboard</h1>
 
           <div className="bursar-school">
             <Building2 size={17} />
@@ -283,16 +239,10 @@ export default function BursarDashboard() {
           >
             <RefreshCw
               size={17}
-              className={
-                refreshing
-                  ? "bursar-refresh-spin"
-                  : ""
-              }
+              className={refreshing ? "bursar-refresh-spin" : ""}
             />
 
-            {refreshing
-              ? "Refreshing..."
-              : "Refresh"}
+            {refreshing ? "Refreshing..." : "Refresh"}
           </button>
 
           <button
@@ -315,9 +265,7 @@ export default function BursarDashboard() {
           <AlertCircle size={20} />
 
           <div>
-            <strong>
-              Unable to load some information
-            </strong>
+            <strong>Unable to load some information</strong>
 
             <p>{error}</p>
           </div>
@@ -329,7 +277,6 @@ export default function BursarDashboard() {
       ================================================== */}
 
       <div className="bursar-stats-grid">
-
         {/* TOTAL REVENUE */}
 
         <div className="bursar-stat-card">
@@ -338,9 +285,7 @@ export default function BursarDashboard() {
           </div>
 
           <div className="bursar-stat-content">
-            <span className="bursar-stat-label">
-              Total Revenue
-            </span>
+            <span className="bursar-stat-label">Total Revenue</span>
 
             <h2 className="bursar-stat-value">
               {formatCurrency(totalRevenue)}
@@ -360,9 +305,7 @@ export default function BursarDashboard() {
           </div>
 
           <div className="bursar-stat-content">
-            <span className="bursar-stat-label">
-              Payments Today
-            </span>
+            <span className="bursar-stat-label">Payments Today</span>
 
             <h2 className="bursar-stat-value">
               {formatCurrency(todayRevenue)}
@@ -370,9 +313,7 @@ export default function BursarDashboard() {
 
             <span className="bursar-stat-description">
               {todayPaymentCount} payment
-              {todayPaymentCount === 1
-                ? ""
-                : "s"} today
+              {todayPaymentCount === 1 ? "" : "s"} today
             </span>
           </div>
         </div>
@@ -385,17 +326,11 @@ export default function BursarDashboard() {
           </div>
 
           <div className="bursar-stat-content">
-            <span className="bursar-stat-label">
-              Recent Payments
-            </span>
+            <span className="bursar-stat-label">Recent Payments</span>
 
-            <h2 className="bursar-stat-value">
-              {payments.length}
-            </h2>
+            <h2 className="bursar-stat-value">{payments.length}</h2>
 
-            <span className="bursar-stat-description">
-              Latest transactions
-            </span>
+            <span className="bursar-stat-description">Latest transactions</span>
           </div>
         </div>
 
@@ -407,13 +342,9 @@ export default function BursarDashboard() {
           </div>
 
           <div className="bursar-stat-content">
-            <span className="bursar-stat-label">
-              Outstanding Fees
-            </span>
+            <span className="bursar-stat-label">Outstanding Fees</span>
 
-            <h2 className="bursar-stat-value">
-              —
-            </h2>
+            <h2 className="bursar-stat-value">—</h2>
 
             <span className="bursar-stat-description">
               Fee tracking will appear here
@@ -427,20 +358,15 @@ export default function BursarDashboard() {
       ================================================== */}
 
       <div className="bursar-section">
-
         <div className="bursar-section-header">
           <div>
             <h2>Finance Overview</h2>
 
-            <p>
-              Overview of the school's recorded
-              financial activity.
-            </p>
+            <p>Overview of the school's recorded financial activity.</p>
           </div>
         </div>
 
         <div className="bursar-overview-grid">
-
           {/* FEE COLLECTION */}
 
           <div className="bursar-card">
@@ -448,9 +374,7 @@ export default function BursarDashboard() {
               <div>
                 <h3>Fee Collection</h3>
 
-                <p>
-                  Recorded payment activity
-                </p>
+                <p>Recorded payment activity</p>
               </div>
 
               <Wallet size={21} />
@@ -461,23 +385,15 @@ export default function BursarDashboard() {
             </div>
 
             <div className="bursar-collection-row">
-              <span>
-                Total collected
-              </span>
+              <span>Total collected</span>
 
-              <strong>
-                {formatCurrency(totalRevenue)}
-              </strong>
+              <strong>{formatCurrency(totalRevenue)}</strong>
             </div>
 
             <div className="bursar-collection-row">
-              <span>
-                Collected today
-              </span>
+              <span>Collected today</span>
 
-              <strong>
-                {formatCurrency(todayRevenue)}
-              </strong>
+              <strong>{formatCurrency(todayRevenue)}</strong>
             </div>
           </div>
 
@@ -486,29 +402,22 @@ export default function BursarDashboard() {
           <div className="bursar-card">
             <div className="bursar-card-header">
               <div>
-                <h3>
-                  Recent Payment Status
-                </h3>
+                <h3>Recent Payment Status</h3>
 
-                <p>
-                  Status of the latest transactions
-                </p>
+                <p>Status of the latest transactions</p>
               </div>
 
               <BarChart3 size={21} />
             </div>
 
             <div className="bursar-summary-list">
-
               <div className="bursar-summary-item">
                 <span>
                   <CheckCircle2 size={17} />
                   Paid
                 </span>
 
-                <strong>
-                  {paidPayments}
-                </strong>
+                <strong>{paidPayments}</strong>
               </div>
 
               <div className="bursar-summary-item">
@@ -517,9 +426,7 @@ export default function BursarDashboard() {
                   Pending
                 </span>
 
-                <strong>
-                  {pendingPayments}
-                </strong>
+                <strong>{pendingPayments}</strong>
               </div>
 
               <div className="bursar-summary-item">
@@ -528,9 +435,7 @@ export default function BursarDashboard() {
                   Failed
                 </span>
 
-                <strong>
-                  {failedPayments}
-                </strong>
+                <strong>{failedPayments}</strong>
               </div>
             </div>
           </div>
@@ -542,104 +447,64 @@ export default function BursarDashboard() {
       ================================================== */}
 
       <div className="bursar-section">
-
         <div className="bursar-section-header">
-
           <div>
-            <h2>
-              Recent Transactions
-            </h2>
+            <h2>Recent Transactions</h2>
 
-            <p>
-              Latest payment transactions
-              recorded in the school.
-            </p>
+            <p>Latest payment transactions recorded in the school.</p>
           </div>
 
           <button
             type="button"
             className="bursar-view-all"
-            onClick={() =>
-              navigate("/finance")
-            }
+            onClick={() => navigate("/finance")}
           >
             View All
-
             <ArrowUpRight size={16} />
           </button>
         </div>
 
         <div className="bursar-card">
-
           {payments.length === 0 ? (
             <div className="bursar-empty-state">
-
               <Receipt size={35} />
 
-              <h3>
-                No payments recorded yet
-              </h3>
+              <h3>No payments recorded yet</h3>
 
-              <p>
-                Recorded payments will
-                appear here.
-              </p>
+              <p>Recorded payments will appear here.</p>
             </div>
           ) : (
             <div className="bursar-transactions">
-
               {payments.map((payment) => {
-                const student =
-                  payment.student || {};
+                const student = payment.student || {};
 
                 const studentName =
                   `${student.firstName || ""} ${
                     student.lastName || ""
-                  }`.trim() ||
-                  "Unknown Student";
+                  }`.trim() || "Unknown Student";
 
-                const paymentStatus =
-                  payment.status || "Pending";
+                const paymentStatus = payment.status || "Pending";
 
                 return (
-                  <div
-                    className="bursar-transaction"
-                    key={payment._id}
-                  >
-
+                  <div className="bursar-transaction" key={payment._id}>
                     <div className="bursar-transaction-icon">
                       <DollarSign size={18} />
                     </div>
 
                     <div className="bursar-transaction-info">
+                      <strong>{studentName}</strong>
 
-                      <strong>
-                        {studentName}
-                      </strong>
+                      <span>{payment.feeType || "Payment"}</span>
 
-                      <span>
-                        {payment.feeType ||
-                          "Payment"}
-                      </span>
-
-                      <small>
-                        {formatDate(
-                          payment.paymentDate
-                        )}
-                      </small>
+                      <small>{formatDate(payment.paymentDate)}</small>
                     </div>
 
                     <div className="bursar-transaction-amount">
-
-                      <strong>
-                        {formatCurrency(
-                          payment.amount
-                        )}
-                      </strong>
+                      <strong>{formatCurrency(payment.amount)}</strong>
 
                       <span
                         className={`bursar-payment-status bursar-status-${String(
-                          paymentStatus
+                          paymentStatus,
                         ).toLowerCase()}`}
                       >
                         {paymentStatus}
@@ -650,9 +515,7 @@ export default function BursarDashboard() {
                       type="button"
                       className="bursar-more-button"
                       onClick={() =>
-                        navigate(
-                          `/finance/invoice/${payment._id}`
-                        )
+                        navigate(`/finance/invoice/${payment._id}`)
                       }
                       title="View payment"
                     >
@@ -671,46 +534,32 @@ export default function BursarDashboard() {
       ================================================== */}
 
       <div className="bursar-section">
-
         <div className="bursar-section-header">
-
           <div>
-            <h2>
-              Outstanding Fees
-            </h2>
+            <h2>Outstanding Fees</h2>
 
-            <p>
-              Track students with unpaid
-              school fees.
-            </p>
+            <p>Track students with unpaid school fees.</p>
           </div>
 
           <button
             type="button"
             className="bursar-view-all"
-            onClick={() =>
-              navigate("/finance")
-            }
+            onClick={() => navigate("/finance")}
           >
             View All
-
             <ArrowUpRight size={16} />
           </button>
         </div>
 
         <div className="bursar-card bursar-outstanding-card">
-
           <Users size={32} />
 
           <div>
-            <h3>
-              Outstanding fee tracking
-            </h3>
+            <h3>Outstanding fee tracking</h3>
 
             <p>
-              Student fee balances will
-              appear here once fee records
-              are connected.
+              Student fee balances will appear here once fee records are
+              connected.
             </p>
           </div>
         </div>
@@ -721,39 +570,27 @@ export default function BursarDashboard() {
       ================================================== */}
 
       <div className="bursar-section bursar-quick-actions">
-
         <div className="bursar-section-header">
-
           <div>
-            <h2>
-              Quick Actions
-            </h2>
+            <h2>Quick Actions</h2>
 
-            <p>
-              Quickly access common
-              bursar operations.
-            </p>
+            <p>Quickly access common bursar operations.</p>
           </div>
         </div>
 
         <div className="bursar-actions-grid">
-
           {/* RECORD PAYMENT */}
 
           <button
             type="button"
             className="bursar-action"
-            onClick={() =>
-              navigate("/record-payment")
-            }
+            onClick={() => navigate("/record-payment")}
           >
             <div className="bursar-action-icon">
               <DollarSign size={21} />
             </div>
 
-            <h3 className="bursar-action-title">
-              Record Payment
-            </h3>
+            <h3 className="bursar-action-title">Record Payment</h3>
 
             <p className="bursar-action-description">
               Record a student payment
@@ -765,17 +602,13 @@ export default function BursarDashboard() {
           <button
             type="button"
             className="bursar-action"
-            onClick={() =>
-              navigate("/finance")
-            }
+            onClick={() => navigate("/finance")}
           >
             <div className="bursar-action-icon">
               <FileText size={21} />
             </div>
 
-            <h3 className="bursar-action-title">
-              Fees & Finance
-            </h3>
+            <h3 className="bursar-action-title">Fees & Finance</h3>
 
             <p className="bursar-action-description">
               View payment and fee records
@@ -787,21 +620,15 @@ export default function BursarDashboard() {
           <button
             type="button"
             className="bursar-action"
-            onClick={() =>
-              navigate("/finance")
-            }
+            onClick={() => navigate("/finance")}
           >
             <div className="bursar-action-icon">
               <Printer size={21} />
             </div>
 
-            <h3 className="bursar-action-title">
-              Payment Records
-            </h3>
+            <h3 className="bursar-action-title">Payment Records</h3>
 
-            <p className="bursar-action-description">
-              View recorded payments
-            </p>
+            <p className="bursar-action-description">View recorded payments</p>
           </button>
 
           {/* REPORTS */}
@@ -809,21 +636,15 @@ export default function BursarDashboard() {
           <button
             type="button"
             className="bursar-action"
-            onClick={() =>
-              navigate("/reports")
-            }
+            onClick={() => navigate("/reports")}
           >
             <div className="bursar-action-icon">
               <BarChart3 size={21} />
             </div>
 
-            <h3 className="bursar-action-title">
-              Financial Report
-            </h3>
+            <h3 className="bursar-action-title">Financial Report</h3>
 
-            <p className="bursar-action-description">
-              View financial reports
-            </p>
+            <p className="bursar-action-description">View financial reports</p>
           </button>
         </div>
       </div>

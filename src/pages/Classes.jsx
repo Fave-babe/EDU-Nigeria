@@ -11,7 +11,7 @@ import {
   X,
 } from "lucide-react";
 
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "../context/authcontext";
 import { classApi } from "../api/class.api";
 import { teacherApi } from "../api/teacher.api";
 import { academicSessionApi } from "../api/academicSession.api";
@@ -36,13 +36,12 @@ function Classes() {
   const [error, setError] = useState("");
   const [createError, setCreateError] = useState("");
 
-  const [showEnrollmentModal, setShowEnrollmentModal] =
-  useState(false);
+  const [showEnrollmentModal, setShowEnrollmentModal] = useState(false);
 
-const [selectedClass, setSelectedClass] = useState(null);
-const [selectedStudent, setSelectedStudent] = useState("");
-const [enrolling, setEnrolling] = useState(false);
-const [enrollmentError, setEnrollmentError] = useState("");
+  const [selectedClass, setSelectedClass] = useState(null);
+  const [selectedStudent, setSelectedStudent] = useState("");
+  const [enrolling, setEnrolling] = useState(false);
+  const [enrollmentError, setEnrollmentError] = useState("");
 
   const [formData, setFormData] = useState({
     name: "",
@@ -52,10 +51,7 @@ const [enrollmentError, setEnrollmentError] = useState("");
     capacity: 40,
   });
 
-  const schoolId =
-    user?.school?._id ||
-    user?.school?.id ||
-    user?.school;
+  const schoolId = user?.school?._id || user?.school?.id || user?.school;
 
   const loadData = async () => {
     try {
@@ -67,17 +63,17 @@ const [enrollmentError, setEnrollmentError] = useState("");
         return;
       }
 
-     const [
-  classesResponse,
-  teachersResponse,
-  sessionsResponse,
-  studentsResponse,
-] = await Promise.all([
-  classApi.getClasses(schoolId),
-  teacherApi.getTeachersBySchool(schoolId),
-  academicSessionApi.getSessionsBySchool(schoolId),
-  getStudents(),
-]);
+      const [
+        classesResponse,
+        teachersResponse,
+        sessionsResponse,
+        studentsResponse,
+      ] = await Promise.all([
+        classApi.getClasses(schoolId),
+        teacherApi.getTeachersBySchool(schoolId),
+        academicSessionApi.getSessionsBySchool(schoolId),
+        getStudents(),
+      ]);
 
       console.log("CLASSES RESPONSE:", classesResponse);
       console.log("TEACHERS RESPONSE:", teachersResponse);
@@ -88,10 +84,9 @@ const [enrollmentError, setEnrollmentError] = useState("");
       setTeachers(teachersResponse?.teachers || []);
       setSessions(sessionsResponse?.sessions || []);
 
-      const currentSession =
-        sessionsResponse?.sessions?.find(
-          (session) => session.isCurrent
-        );
+      const currentSession = sessionsResponse?.sessions?.find(
+        (session) => session.isCurrent,
+      );
 
       if (currentSession) {
         setFormData((current) => ({
@@ -103,9 +98,7 @@ const [enrollmentError, setEnrollmentError] = useState("");
       console.error("Failed to load classes:", err);
 
       setError(
-        err.response?.data?.message ||
-          err.message ||
-          "Failed to load classes."
+        err.response?.data?.message || err.message || "Failed to load classes.",
       );
     } finally {
       setLoading(false);
@@ -168,10 +161,7 @@ const [enrollmentError, setEnrollmentError] = useState("");
       const newClass = response?.class;
 
       if (newClass) {
-        setClasses((currentClasses) => [
-          newClass,
-          ...currentClasses,
-        ]);
+        setClasses((currentClasses) => [newClass, ...currentClasses]);
       } else {
         await loadData();
       }
@@ -189,19 +179,14 @@ const [enrollmentError, setEnrollmentError] = useState("");
       console.error("Failed to create class:", err);
 
       setCreateError(
-        err.response?.data?.message ||
-          err.message ||
-          "Failed to create class."
+        err.response?.data?.message || err.message || "Failed to create class.",
       );
     } finally {
       setCreating(false);
     }
   };
 
-  const handleAssignTeacher = async (
-    classId,
-    teacherId
-  ) => {
+  const handleAssignTeacher = async (classId, teacherId) => {
     try {
       setAssigning(classId);
 
@@ -215,23 +200,16 @@ const [enrollmentError, setEnrollmentError] = useState("");
                   ...item,
                   classTeacher: null,
                 }
-              : item
-          )
+              : item,
+          ),
         );
 
         return;
       }
 
-      const response =
-        await classApi.assignTeacher(
-          classId,
-          teacherId
-        );
+      const response = await classApi.assignTeacher(classId, teacherId);
 
-      console.log(
-        "ASSIGN TEACHER RESPONSE:",
-        response
-      );
+      console.log("ASSIGN TEACHER RESPONSE:", response);
 
       const updatedClass = response?.class;
 
@@ -242,24 +220,15 @@ const [enrollmentError, setEnrollmentError] = useState("");
                 ...item,
                 classTeacher:
                   updatedClass?.classTeacher ||
-                  teachers.find(
-                    (teacher) =>
-                      teacher._id === teacherId
-                  ),
+                  teachers.find((teacher) => teacher._id === teacherId),
               }
-            : item
-        )
+            : item,
+        ),
       );
     } catch (err) {
-      console.error(
-        "Failed to assign teacher:",
-        err
-      );
+      console.error("Failed to assign teacher:", err);
 
-      alert(
-        err.message ||
-          "Failed to assign teacher."
-      );
+      alert(err.message || "Failed to assign teacher.");
     } finally {
       setAssigning(null);
     }
@@ -276,8 +245,7 @@ const [enrollmentError, setEnrollmentError] = useState("");
       setEnrollmentError("");
 
       const academicSession =
-        selectedClass.academicSession?._id ||
-        selectedClass.academicSession;
+        selectedClass.academicSession?._id || selectedClass.academicSession;
 
       await enrollmentApi.createEnrollment({
         school: schoolId,
@@ -299,29 +267,23 @@ const [enrollmentError, setEnrollmentError] = useState("");
       setEnrollmentError(
         err.response?.data?.message ||
           err.message ||
-          "Failed to enroll student."
+          "Failed to enroll student.",
       );
     } finally {
       setEnrolling(false);
     }
   };
 
-  const assignedClasses = classes.filter(
-    (item) => item.classTeacher
-  ).length;
+  const assignedClasses = classes.filter((item) => item.classTeacher).length;
 
-  const unassignedClasses =
-    classes.length - assignedClasses;
+  const unassignedClasses = classes.length - assignedClasses;
 
   return (
     <div className="classes-page">
-
       {/* HEADER */}
       <div className="classes-header">
         <div>
-          <h1 className="classes-title">
-            Classes
-          </h1>
+          <h1 className="classes-title">Classes</h1>
 
           <p className="classes-subtitle">
             Manage school classes and assign class teachers.
@@ -353,7 +315,6 @@ const [enrollmentError, setEnrollmentError] = useState("");
 
       {/* SUMMARY */}
       <div className="classes-summary">
-
         <div className="classes-summary-card">
           <div className="classes-summary-content">
             <p>Total Classes</p>
@@ -386,38 +347,24 @@ const [enrollmentError, setEnrollmentError] = useState("");
             <UserX size={22} />
           </div>
         </div>
-
       </div>
 
       {/* CONTENT */}
       <div className="classes-container">
-
         {loading ? (
           <div className="classes-loading">
-            <Loader2
-              size={32}
-              className="classes-loader"
-            />
+            <Loader2 size={32} className="classes-loader" />
             <p>Loading classes...</p>
           </div>
         ) : error ? (
-          <div className="classes-error">
-            {error}
-          </div>
+          <div className="classes-error">{error}</div>
         ) : classes.length === 0 ? (
           <div className="classes-empty">
-            <GraduationCap
-              size={45}
-              className="classes-empty-icon"
-            />
+            <GraduationCap size={45} className="classes-empty-icon" />
 
-            <h3>
-              No classes found
-            </h3>
+            <h3>No classes found</h3>
 
-            <p>
-              There are no classes registered for this school yet.
-            </p>
+            <p>There are no classes registered for this school yet.</p>
 
             <button
               className="classes-empty-btn"
@@ -432,9 +379,7 @@ const [enrollmentError, setEnrollmentError] = useState("");
           </div>
         ) : (
           <div className="classes-table-wrapper">
-
             <table className="classes-table">
-
               <thead>
                 <tr>
                   <th>Class</th>
@@ -447,9 +392,7 @@ const [enrollmentError, setEnrollmentError] = useState("");
               </thead>
 
               <tbody>
-
                 {classes.map((schoolClass) => {
-
                   const currentTeacher =
                     schoolClass.classTeacher?._id ||
                     schoolClass.classTeacher ||
@@ -457,92 +400,64 @@ const [enrollmentError, setEnrollmentError] = useState("");
 
                   return (
                     <tr key={schoolClass._id}>
-
                       <td>
                         <div className="class-name">
-
                           <div className="class-icon">
                             <GraduationCap size={19} />
                           </div>
 
                           <div>
-                            <strong>
-                              {schoolClass.name}
-                            </strong>
+                            <strong>{schoolClass.name}</strong>
 
                             <span>
                               {schoolClass.academicSession?.name ||
                                 "Current Session"}
                             </span>
                           </div>
-
                         </div>
                       </td>
 
-                      <td>
-                        {schoolClass.level || "N/A"}
-                      </td>
+                      <td>{schoolClass.level || "N/A"}</td>
+
+                      <td>{schoolClass.arm || "A"}</td>
 
                       <td>
-                        {schoolClass.arm || "A"}
-                      </td>
-
-                      <td>
-
                         <select
                           className="teacher-select"
                           value={currentTeacher}
-                          disabled={
-                            assigning === schoolClass._id
-                          }
+                          disabled={assigning === schoolClass._id}
                           onChange={(event) =>
                             handleAssignTeacher(
                               schoolClass._id,
-                              event.target.value
+                              event.target.value,
                             )
                           }
                         >
-
-                          <option value="">
-                            Select Teacher
-                          </option>
+                          <option value="">Select Teacher</option>
 
                           {teachers.map((teacher) => (
-                            <option
-                              key={teacher._id}
-                              value={teacher._id}
-                            >
-                              {teacher.firstName}{" "}
-                              {teacher.lastName}
+                            <option key={teacher._id} value={teacher._id}>
+                              {teacher.firstName} {teacher.lastName}
                             </option>
                           ))}
-
                         </select>
 
                         {assigning === schoolClass._id && (
                           <div className="assigning-text">
-                            <Loader2
-                              size={14}
-                              className="classes-loader"
-                            />
+                            <Loader2 size={14} className="classes-loader" />
                             Saving...
                           </div>
                         )}
-
                       </td>
 
                       <td>
-
                         {schoolClass.isActive !== false ? (
-                          <span className="class-status active">
-                            Active
-                          </span>
+                          <span className="class-status active">Active</span>
                         ) : (
                           <span className="class-status inactive">
                             Inactive
                           </span>
                         )}
-
                       </td>
 
                       <td>
@@ -560,34 +475,24 @@ const [enrollmentError, setEnrollmentError] = useState("");
                           Enroll Student
                         </button>
                       </td>
-
                     </tr>
                   );
                 })}
-
               </tbody>
-
             </table>
-
           </div>
         )}
-
       </div>
 
       {/* CREATE CLASS MODAL */}
       {showCreateModal && (
         <div className="class-modal-overlay">
-
           <div className="class-modal">
-
             <div className="class-modal-header">
-
               <div>
                 <h2>Create Class</h2>
 
-                <p>
-                  Add a new class for this school.
-                </p>
+                <p>Add a new class for this school.</p>
               </div>
 
               <button
@@ -597,25 +502,15 @@ const [enrollmentError, setEnrollmentError] = useState("");
               >
                 <X size={20} />
               </button>
-
             </div>
 
-            <form
-              className="class-form"
-              onSubmit={handleCreateClass}
-            >
-
+            <form className="class-form" onSubmit={handleCreateClass}>
               {createError && (
-                <div className="class-form-error">
-                  {createError}
-                </div>
+                <div className="class-form-error">{createError}</div>
               )}
 
               <div className="class-form-group">
-
-                <label>
-                  Academic Session
-                </label>
+                <label>Academic Session</label>
 
                 <select
                   name="academicSession"
@@ -623,34 +518,20 @@ const [enrollmentError, setEnrollmentError] = useState("");
                   onChange={handleFormChange}
                   required
                 >
-
-                  <option value="">
-                    Select Academic Session
-                  </option>
+                  <option value="">Select Academic Session</option>
 
                   {sessions.map((session) => (
-                    <option
-                      key={session._id}
-                      value={session._id}
-                    >
+                    <option key={session._id} value={session._id}>
                       {session.name}
-                      {session.isCurrent
-                        ? " (Current)"
-                        : ""}
+                      {session.isCurrent ? " (Current)" : ""}
                     </option>
                   ))}
-
                 </select>
-
               </div>
 
               <div className="class-form-row">
-
                 <div className="class-form-group">
-
-                  <label>
-                    Class Name
-                  </label>
+                  <label>Class Name</label>
 
                   <input
                     type="text"
@@ -660,14 +541,10 @@ const [enrollmentError, setEnrollmentError] = useState("");
                     placeholder="e.g. JSS 1"
                     required
                   />
-
                 </div>
 
                 <div className="class-form-group">
-
-                  <label>
-                    Level
-                  </label>
+                  <label>Level</label>
 
                   <input
                     type="text"
@@ -677,18 +554,12 @@ const [enrollmentError, setEnrollmentError] = useState("");
                     placeholder="e.g. JSS 1"
                     required
                   />
-
                 </div>
-
               </div>
 
               <div className="class-form-row">
-
                 <div className="class-form-group">
-
-                  <label>
-                    Arm
-                  </label>
+                  <label>Arm</label>
 
                   <input
                     type="text"
@@ -697,14 +568,10 @@ const [enrollmentError, setEnrollmentError] = useState("");
                     onChange={handleFormChange}
                     placeholder="A"
                   />
-
                 </div>
 
                 <div className="class-form-group">
-
-                  <label>
-                    Capacity
-                  </label>
+                  <label>Capacity</label>
 
                   <input
                     type="number"
@@ -713,19 +580,14 @@ const [enrollmentError, setEnrollmentError] = useState("");
                     onChange={handleFormChange}
                     min="1"
                   />
-
                 </div>
-
               </div>
 
               <div className="class-form-actions">
-
                 <button
                   type="button"
                   className="class-cancel-btn"
-                  onClick={() =>
-                    setShowCreateModal(false)
-                  }
+                  onClick={() => setShowCreateModal(false)}
                   disabled={creating}
                 >
                   Cancel
@@ -736,13 +598,9 @@ const [enrollmentError, setEnrollmentError] = useState("");
                   className="class-submit-btn"
                   disabled={creating}
                 >
-
                   {creating ? (
                     <>
-                      <Loader2
-                        size={17}
-                        className="classes-loader"
-                      />
+                      <Loader2 size={17} className="classes-loader" />
                       Creating...
                     </>
                   ) : (
@@ -751,15 +609,10 @@ const [enrollmentError, setEnrollmentError] = useState("");
                       Create Class
                     </>
                   )}
-
                 </button>
-
               </div>
-
             </form>
-
           </div>
-
         </div>
       )}
 
@@ -767,14 +620,14 @@ const [enrollmentError, setEnrollmentError] = useState("");
       {showEnrollmentModal && selectedClass && (
         <div className="class-modal-overlay">
           <div className="class-modal">
-
             <div className="class-modal-header">
               <div>
                 <h2>Enroll Student</h2>
                 <p>
-                  Add a student to {" "}
+                  Add a student to{" "}
                   <strong>
-                    {selectedClass.name} {selectedClass.level} {selectedClass.arm}
+                    {selectedClass.name} {selectedClass.level}{" "}
+                    {selectedClass.arm}
                   </strong>
                 </p>
               </div>
@@ -795,9 +648,7 @@ const [enrollmentError, setEnrollmentError] = useState("");
 
             <div className="class-form">
               {enrollmentError && (
-                <div className="class-form-error">
-                  {enrollmentError}
-                </div>
+                <div className="class-form-error">{enrollmentError}</div>
               )}
 
               <div className="class-form-group">
@@ -805,9 +656,7 @@ const [enrollmentError, setEnrollmentError] = useState("");
 
                 <select
                   value={selectedStudent}
-                  onChange={(event) =>
-                    setSelectedStudent(event.target.value)
-                  }
+                  onChange={(event) => setSelectedStudent(event.target.value)}
                   disabled={enrolling}
                 >
                   <option value="">Select Student</option>
@@ -858,7 +707,6 @@ const [enrollmentError, setEnrollmentError] = useState("");
           </div>
         </div>
       )}
-
     </div>
   );
 }

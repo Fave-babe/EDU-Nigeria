@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "../context/authcontext";
 
 import {
   GraduationCap,
@@ -158,7 +158,7 @@ function Register() {
 
   const handleChildChange = (index, value) => {
     setChildren((prev) =>
-      prev.map((child, i) => (i === index ? value : child))
+      prev.map((child, i) => (i === index ? value : child)),
     );
   };
 
@@ -245,8 +245,7 @@ function Register() {
           password: "[HIDDEN]",
         });
 
-        const result =
-          await createAdmissionApplication(applicationData);
+        const result = await createAdmissionApplication(applicationData);
 
         console.log("ADMISSION APPLICATION RESULT:", result);
 
@@ -254,12 +253,12 @@ function Register() {
 
         if (!application?._id) {
           throw new Error(
-            "Admission application was created but no application ID was returned."
+            "Admission application was created but no application ID was returned.",
           );
         }
 
         alert(
-          "Application submitted successfully! You will now take the entrance examination."
+          "Application submitted successfully! You will now take the entrance examination.",
         );
 
         navigate("/entrance", {
@@ -273,15 +272,12 @@ function Register() {
       } catch (error) {
         console.error("ADMISSION APPLICATION ERROR:", error);
         console.error("ERROR RESPONSE:", error?.response);
-        console.error(
-          "ERROR RESPONSE DATA:",
-          error?.response?.data
-        );
+        console.error("ERROR RESPONSE DATA:", error?.response?.data);
 
         alert(
           error?.response?.data?.message ||
             error?.message ||
-            "Unable to submit admission application."
+            "Unable to submit admission application.",
         );
 
         return;
@@ -317,14 +313,14 @@ function Register() {
     // PARENT
     // =====================================================
 
-  if (role === "parent") {
-  payload.school = school;
-  payload.phone = phone;
-  payload.address = address;
+    if (role === "parent") {
+      payload.school = school;
+      payload.phone = phone;
+      payload.address = address;
 
-  // Children are linked later using Student IDs.
-  payload.children = [];
-}
+      // Children are linked later using Student IDs.
+      payload.children = [];
+    }
 
     // =====================================================
     // STAFF
@@ -361,15 +357,12 @@ function Register() {
       console.error("REGISTRATION ERROR:", error);
       console.error("ERROR MESSAGE:", error?.message);
       console.error("ERROR RESPONSE:", error?.response);
-      console.error(
-        "ERROR RESPONSE DATA:",
-        error?.response?.data
-      );
+      console.error("ERROR RESPONSE DATA:", error?.response?.data);
 
       alert(
         error?.response?.data?.message ||
           error?.message ||
-          "Registration failed. Please try again."
+          "Registration failed. Please try again.",
       );
     } finally {
       setSubmitting(false);
@@ -645,15 +638,13 @@ function Register() {
       `}</style>
 
       <div className="reg-card">
-        <span className="reg-eyebrow">
-          Enrollment · EDU Nigeria
-        </span>
+        <span className="reg-eyebrow">Enrollment · EDU Nigeria</span>
 
         <h2>Create your entry</h2>
 
         <p className="reg-subtitle">
-          Students must complete an entrance examination before
-          admission can be reviewed.
+          Students must complete an entrance examination before admission can be
+          reviewed.
         </p>
 
         <form onSubmit={handleSubmit} className="reg-form">
@@ -671,14 +662,9 @@ function Register() {
                     key={id}
                     type="button"
                     onClick={() => setRole(id)}
-                    className={`role-chip${
-                      active ? " active" : ""
-                    }`}
+                    className={`role-chip${active ? " active" : ""}`}
                   >
-                    <Icon
-                      size={16}
-                      strokeWidth={active ? 2.25 : 1.75}
-                    />
+                    <Icon size={16} strokeWidth={active ? 2.25 : 1.75} />
 
                     {label}
                   </button>
@@ -691,16 +677,12 @@ function Register() {
 
           <div className="reg-row">
             <div>
-              <label className="reg-label">
-                First name
-              </label>
+              <label className="reg-label">First name</label>
 
               <input
                 type="text"
                 value={firstName}
-                onChange={(e) =>
-                  setFirstName(e.target.value)
-                }
+                onChange={(e) => setFirstName(e.target.value)}
                 className="reg-input"
                 placeholder="Ada"
                 required
@@ -708,16 +690,12 @@ function Register() {
             </div>
 
             <div>
-              <label className="reg-label">
-                Last name
-              </label>
+              <label className="reg-label">Last name</label>
 
               <input
                 type="text"
                 value={lastName}
-                onChange={(e) =>
-                  setLastName(e.target.value)
-                }
+                onChange={(e) => setLastName(e.target.value)}
                 className="reg-input"
                 placeholder="Lovelace"
                 required
@@ -729,16 +707,12 @@ function Register() {
 
           <div className="reg-row">
             <div>
-              <label className="reg-label">
-                Email
-              </label>
+              <label className="reg-label">Email</label>
 
               <input
                 type="email"
                 value={email}
-                onChange={(e) =>
-                  setEmail(e.target.value)
-                }
+                onChange={(e) => setEmail(e.target.value)}
                 className="reg-input"
                 placeholder="ada@school.edu"
                 required
@@ -746,16 +720,12 @@ function Register() {
             </div>
 
             <div>
-              <label className="reg-label">
-                Password
-              </label>
+              <label className="reg-label">Password</label>
 
               <input
                 type="password"
                 value={password}
-                onChange={(e) =>
-                  setPassword(e.target.value)
-                }
+                onChange={(e) => setPassword(e.target.value)}
                 className="reg-input"
                 placeholder="••••••••"
                 minLength={6}
@@ -771,29 +741,20 @@ function Register() {
             role === "parent" ||
             role === "staff") && (
             <div>
-              <label className="reg-label">
-                School
-              </label>
+              <label className="reg-label">School</label>
 
               <select
                 value={school}
-                onChange={(e) =>
-                  setSchool(e.target.value)
-                }
+                onChange={(e) => setSchool(e.target.value)}
                 className="reg-select"
                 required
               >
                 <option value="">
-                  {loadingSchools
-                    ? "Loading schools..."
-                    : "Select your school"}
+                  {loadingSchools ? "Loading schools..." : "Select your school"}
                 </option>
 
                 {schools.map((item) => (
-                  <option
-                    key={item._id}
-                    value={item._id}
-                  >
+                  <option key={item._id} value={item._id}>
                     {item.name}
                   </option>
                 ))}
@@ -807,15 +768,11 @@ function Register() {
             <div className="role-section">
               <div className="reg-row">
                 <div>
-                  <label className="reg-label">
-                    Class applying for
-                  </label>
+                  <label className="reg-label">Class applying for</label>
 
                   <select
                     value={studentClass}
-                    onChange={(e) =>
-                      setStudentClass(e.target.value)
-                    }
+                    onChange={(e) => setStudentClass(e.target.value)}
                     className="reg-select"
                     required
                   >
@@ -832,9 +789,7 @@ function Register() {
                 </div>
 
                 <div>
-                  <label className="reg-label">
-                    Gender
-                  </label>
+                  <label className="reg-label">Gender</label>
 
                   <div className="gender-picker">
                     {["Male", "Female"].map((g) => (
@@ -856,16 +811,12 @@ function Register() {
               {/* Date of birth */}
 
               <div>
-                <label className="reg-label">
-                  Date of birth
-                </label>
+                <label className="reg-label">Date of birth</label>
 
                 <input
                   type="date"
                   value={dob}
-                  onChange={(e) =>
-                    setDob(e.target.value)
-                  }
+                  onChange={(e) => setDob(e.target.value)}
                   className="reg-input"
                   required
                 />
@@ -874,16 +825,12 @@ function Register() {
               {/* Phone */}
 
               <div>
-                <label className="reg-label">
-                  Phone number
-                </label>
+                <label className="reg-label">Phone number</label>
 
                 <input
                   type="tel"
                   value={studentPhone}
-                  onChange={(e) =>
-                    setStudentPhone(e.target.value)
-                  }
+                  onChange={(e) => setStudentPhone(e.target.value)}
                   className="reg-input"
                   placeholder="080X XXX XXXX"
                 />
@@ -892,16 +839,12 @@ function Register() {
               {/* Address */}
 
               <div>
-                <label className="reg-label">
-                  Home address
-                </label>
+                <label className="reg-label">Home address</label>
 
                 <input
                   type="text"
                   value={studentAddress}
-                  onChange={(e) =>
-                    setStudentAddress(e.target.value)
-                  }
+                  onChange={(e) => setStudentAddress(e.target.value)}
                   className="reg-input"
                   placeholder="12 Allen Avenue, Ikeja, Lagos"
                 />
@@ -910,16 +853,12 @@ function Register() {
               {/* Previous school */}
 
               <div>
-                <label className="reg-label">
-                  Previous school attended
-                </label>
+                <label className="reg-label">Previous school attended</label>
 
                 <input
                   type="text"
                   value={previousSchool}
-                  onChange={(e) =>
-                    setPreviousSchool(e.target.value)
-                  }
+                  onChange={(e) => setPreviousSchool(e.target.value)}
                   className="reg-input"
                   placeholder="e.g. Bright Stars Nursery & Primary"
                   required
@@ -927,9 +866,9 @@ function Register() {
               </div>
 
               <p className="reg-signin">
-                After submitting your details, you will take
-                the entrance examination. Your admission will
-                then be reviewed by the school administrator.
+                After submitting your details, you will take the entrance
+                examination. Your admission will then be reviewed by the school
+                administrator.
               </p>
             </div>
           )}
@@ -940,16 +879,12 @@ function Register() {
             <div className="role-section">
               <div className="reg-row">
                 <div>
-                  <label className="reg-label">
-                    Phone number
-                  </label>
+                  <label className="reg-label">Phone number</label>
 
                   <input
                     type="tel"
                     value={teacherPhone}
-                    onChange={(e) =>
-                      setTeacherPhone(e.target.value)
-                    }
+                    onChange={(e) => setTeacherPhone(e.target.value)}
                     className="reg-input"
                     placeholder="080X XXX XXXX"
                     required
@@ -957,43 +892,31 @@ function Register() {
                 </div>
 
                 <div>
-                  <label className="reg-label">
-                    Employment type
-                  </label>
+                  <label className="reg-label">Employment type</label>
 
                   <div className="employment-picker">
-                    {["Full-time", "Part-time"].map(
-                      (type) => (
-                        <button
-                          key={type}
-                          type="button"
-                          onClick={() =>
-                            setEmploymentType(type)
-                          }
-                          className={`employment-chip${
-                            employmentType === type
-                              ? " active"
-                              : ""
-                          }`}
-                        >
-                          {type}
-                        </button>
-                      )
-                    )}
+                    {["Full-time", "Part-time"].map((type) => (
+                      <button
+                        key={type}
+                        type="button"
+                        onClick={() => setEmploymentType(type)}
+                        className={`employment-chip${
+                          employmentType === type ? " active" : ""
+                        }`}
+                      >
+                        {type}
+                      </button>
+                    ))}
                   </div>
                 </div>
               </div>
 
               <div>
-                <label className="reg-label">
-                  Subject taught
-                </label>
+                <label className="reg-label">Subject taught</label>
 
                 <select
                   value={subject}
-                  onChange={(e) =>
-                    setSubject(e.target.value)
-                  }
+                  onChange={(e) => setSubject(e.target.value)}
                   className="reg-select"
                   required
                 >
@@ -1016,16 +939,12 @@ function Register() {
           {role === "parent" && (
             <div className="role-section">
               <div>
-                <label className="reg-label">
-                  Phone number
-                </label>
+                <label className="reg-label">Phone number</label>
 
                 <input
                   type="tel"
                   value={phone}
-                  onChange={(e) =>
-                    setPhone(e.target.value)
-                  }
+                  onChange={(e) => setPhone(e.target.value)}
                   className="reg-input"
                   placeholder="080X XXX XXXX"
                   required
@@ -1033,16 +952,12 @@ function Register() {
               </div>
 
               <div>
-                <label className="reg-label">
-                  Home address
-                </label>
+                <label className="reg-label">Home address</label>
 
                 <input
                   type="text"
                   value={address}
-                  onChange={(e) =>
-                    setAddress(e.target.value)
-                  }
+                  onChange={(e) => setAddress(e.target.value)}
                   className="reg-input"
                   placeholder="12 Allen Avenue, Ikeja, Lagos"
                   required
@@ -1050,28 +965,16 @@ function Register() {
               </div>
 
               <div>
-                <label className="reg-label">
-                  Child / children
-                </label>
+                <label className="reg-label">Child / children</label>
 
                 {children.map((child, index) => (
-                  <div
-                    className="child-row"
-                    key={index}
-                  >
+                  <div className="child-row" key={index}>
                     <input
                       type="text"
                       value={child}
-                      onChange={(e) =>
-                        handleChildChange(
-                          index,
-                          e.target.value
-                        )
-                      }
+                      onChange={(e) => handleChildChange(index, e.target.value)}
                       className="reg-input"
-                      placeholder={`Child ${
-                        index + 1
-                      } full name`}
+                      placeholder={`Child ${index + 1} full name`}
                       required
                     />
 
@@ -1079,9 +982,7 @@ function Register() {
                       <button
                         type="button"
                         className="child-remove-btn"
-                        onClick={() =>
-                          removeChildField(index)
-                        }
+                        onClick={() => removeChildField(index)}
                         aria-label="Remove child"
                       >
                         <X size={15} />
@@ -1107,16 +1008,12 @@ function Register() {
           {role === "staff" && (
             <div className="role-section">
               <div>
-                <label className="reg-label">
-                  Phone number
-                </label>
+                <label className="reg-label">Phone number</label>
 
                 <input
                   type="tel"
                   value={staffPhone}
-                  onChange={(e) =>
-                    setStaffPhone(e.target.value)
-                  }
+                  onChange={(e) => setStaffPhone(e.target.value)}
                   className="reg-input"
                   placeholder="080X XXX XXXX"
                   required
@@ -1124,15 +1021,11 @@ function Register() {
               </div>
 
               <div>
-                <label className="reg-label">
-                  Staff role
-                </label>
+                <label className="reg-label">Staff role</label>
 
                 <select
                   value={staffRole}
-                  onChange={(e) =>
-                    setStaffRole(e.target.value)
-                  }
+                  onChange={(e) => setStaffRole(e.target.value)}
                   className="reg-select"
                   required
                 >
@@ -1152,11 +1045,7 @@ function Register() {
 
           {/* Submit */}
 
-          <button
-            type="submit"
-            className="reg-submit"
-            disabled={submitting}
-          >
+          <button type="submit" className="reg-submit" disabled={submitting}>
             {submitting
               ? role === "student"
                 ? "Submitting Application..."
@@ -1170,9 +1059,7 @@ function Register() {
 
           <p className="reg-signin">
             Already enrolled?{" "}
-            <span onClick={() => navigate("/login")}>
-              Sign in
-            </span>
+            <span onClick={() => navigate("/login")}>Sign in</span>
           </p>
         </form>
       </div>

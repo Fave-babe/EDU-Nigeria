@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "../context/authcontext";
 
 import {
   GraduationCap,
@@ -31,48 +31,48 @@ function ParentDashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [availableStudents, setAvailableStudents] = useState([]);
-const [selectedStudentId, setSelectedStudentId] = useState("");
-const [linkingChild, setLinkingChild] = useState(false);
+  const [selectedStudentId, setSelectedStudentId] = useState("");
+  const [linkingChild, setLinkingChild] = useState(false);
 
   useEffect(() => {
-  const loadParentDashboard = async () => {
-    try {
-      setLoading(true);
-      setError("");
+    const loadParentDashboard = async () => {
+      try {
+        setLoading(true);
+        setError("");
 
-      const response = await getMyParentDashboard();
+        const response = await getMyParentDashboard();
 
-      console.log("PARENT DASHBOARD RESPONSE:", response);
+        console.log("PARENT DASHBOARD RESPONSE:", response);
 
-      const parentDashboard = response?.dashboard || null;
+        const parentDashboard = response?.dashboard || null;
 
-      setDashboard(parentDashboard);
+        setDashboard(parentDashboard);
 
-      // Load students from the parent's school
-      const schoolId = parentDashboard?.parent?.school?._id;
+        // Load students from the parent's school
+        const schoolId = parentDashboard?.parent?.school?._id;
 
-      if (schoolId) {
-        const studentsResponse = await getStudentsBySchool(schoolId);
+        if (schoolId) {
+          const studentsResponse = await getStudentsBySchool(schoolId);
 
-        console.log("PARENT SCHOOL STUDENTS:", studentsResponse);
+          console.log("PARENT SCHOOL STUDENTS:", studentsResponse);
 
-        setAvailableStudents(studentsResponse?.students || []);
+          setAvailableStudents(studentsResponse?.students || []);
+        }
+      } catch (err) {
+        console.error("PARENT DASHBOARD ERROR:", err);
+
+        setError(
+          err?.response?.data?.message ||
+            err?.message ||
+            "Failed to load parent dashboard",
+        );
+      } finally {
+        setLoading(false);
       }
-    } catch (err) {
-      console.error("PARENT DASHBOARD ERROR:", err);
+    };
 
-      setError(
-        err?.response?.data?.message ||
-          err?.message ||
-          "Failed to load parent dashboard"
-      );
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  loadParentDashboard();
-}, []);
+    loadParentDashboard();
+  }, []);
 
   const parentName =
     dashboard?.parent?.firstName ||
@@ -156,44 +156,41 @@ const [linkingChild, setLinkingChild] = useState(false);
     );
   }
   const handleLinkStudent = async () => {
-  if (!selectedStudentId) {
-    alert("Please select your child.");
-    return;
-  }
+    if (!selectedStudentId) {
+      alert("Please select your child.");
+      return;
+    }
 
-  if (!dashboard?.parent?._id) {
-    alert("Parent account information is missing.");
-    return;
-  }
+    if (!dashboard?.parent?._id) {
+      alert("Parent account information is missing.");
+      return;
+    }
 
-  try {
-    setLinkingChild(true);
+    try {
+      setLinkingChild(true);
 
-    await linkChildToParent(
-      dashboard.parent._id,
-      selectedStudentId
-    );
+      await linkChildToParent(dashboard.parent._id, selectedStudentId);
 
-    alert("Student linked successfully.");
+      alert("Student linked successfully.");
 
-    // Reload dashboard so the child appears immediately
-    const response = await getMyParentDashboard();
+      // Reload dashboard so the child appears immediately
+      const response = await getMyParentDashboard();
 
-    setDashboard(response?.dashboard || null);
+      setDashboard(response?.dashboard || null);
 
-    setSelectedStudentId("");
-  } catch (err) {
-    console.error("LINK STUDENT ERROR:", err);
+      setSelectedStudentId("");
+    } catch (err) {
+      console.error("LINK STUDENT ERROR:", err);
 
-    alert(
-      err?.response?.data?.message ||
-        err?.message ||
-        "Failed to link student"
-    );
-  } finally {
-    setLinkingChild(false);
-  }
-};
+      alert(
+        err?.response?.data?.message ||
+          err?.message ||
+          "Failed to link student",
+      );
+    } finally {
+      setLinkingChild(false);
+    }
+  };
 
   return (
     <div className="parent-dashboard">
@@ -205,13 +202,11 @@ const [linkingChild, setLinkingChild] = useState(false);
         <div>
           <span className="parent-eyebrow">Parent Portal</span>
 
-          <h1>
-            Welcome back, {parentName.split(" ")[0]} 👋
-          </h1>
+          <h1>Welcome back, {parentName.split(" ")[0]} 👋</h1>
 
           <p>
-            Keep track of your children's academic progress,
-            attendance and school activities.
+            Keep track of your children's academic progress, attendance and
+            school activities.
           </p>
         </div>
 
@@ -314,9 +309,7 @@ const [linkingChild, setLinkingChild] = useState(false);
       <section className="parent-section">
         <div className="parent-section-heading">
           <div>
-            <span className="parent-section-label">
-              My Children
-            </span>
+            <span className="parent-section-label">My Children</span>
 
             <h2>Children overview</h2>
           </div>
@@ -333,100 +326,81 @@ const [linkingChild, setLinkingChild] = useState(false);
 
         <div className="children-grid">
           {children.length === 0 ? (
-  <div className="parent-link-child-card">
-    <div className="parent-link-child-icon">
-      <GraduationCap size={28} />
-    </div>
+            <div className="parent-link-child-card">
+              <div className="parent-link-child-icon">
+                <GraduationCap size={28} />
+              </div>
 
-    <div className="parent-link-child-content">
-      <span className="parent-link-child-label">
-        CHILD ACCOUNT
-      </span>
+              <div className="parent-link-child-content">
+                <span className="parent-link-child-label">CHILD ACCOUNT</span>
 
-      <h3>Link your child</h3>
+                <h3>Link your child</h3>
 
-      <p>
-        Select your child from the students registered at your
-        school to connect their academic information to your
-        parent account.
-      </p>
+                <p>
+                  Select your child from the students registered at your school
+                  to connect their academic information to your parent account.
+                </p>
 
-      {availableStudents.length > 0 ? (
-        <div className="parent-link-child-form">
-          <div className="parent-select-wrapper">
-            <label htmlFor="student-select">
-              Select student
-            </label>
+                {availableStudents.length > 0 ? (
+                  <div className="parent-link-child-form">
+                    <div className="parent-select-wrapper">
+                      <label htmlFor="student-select">Select student</label>
 
-            <select
-              id="student-select"
-              value={selectedStudentId}
-              onChange={(e) =>
-                setSelectedStudentId(e.target.value)
-              }
-              disabled={linkingChild}
-            >
-              <option value="">
-                Choose your child
-              </option>
+                      <select
+                        id="student-select"
+                        value={selectedStudentId}
+                        onChange={(e) => setSelectedStudentId(e.target.value)}
+                        disabled={linkingChild}
+                      >
+                        <option value="">Choose your child</option>
 
-              {availableStudents.map((student) => (
-                <option
-                  key={student._id}
-                  value={student._id}
-                >
-                  {getChildName(student)}
-                  {student.registrationNumber
-                    ? ` — ${student.registrationNumber}`
-                    : ""}
-                </option>
-              ))}
-            </select>
-          </div>
+                        {availableStudents.map((student) => (
+                          <option key={student._id} value={student._id}>
+                            {getChildName(student)}
+                            {student.registrationNumber
+                              ? ` — ${student.registrationNumber}`
+                              : ""}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
 
-          <button
-            type="button"
-            className="parent-link-child-btn"
-            onClick={handleLinkStudent}
-            disabled={
-              linkingChild || !selectedStudentId
-            }
-          >
-            {linkingChild ? (
-              <>
-                <span className="parent-button-spinner" />
-                Linking...
-              </>
-            ) : (
-              <>
-                Link Student
-                <ChevronRight size={16} />
-              </>
-            )}
-          </button>
-        </div>
-      ) : (
-        <div className="parent-no-students">
-          <AlertCircle size={17} />
+                    <button
+                      type="button"
+                      className="parent-link-child-btn"
+                      onClick={handleLinkStudent}
+                      disabled={linkingChild || !selectedStudentId}
+                    >
+                      {linkingChild ? (
+                        <>
+                          <span className="parent-button-spinner" />
+                          Linking...
+                        </>
+                      ) : (
+                        <>
+                          Link Student
+                          <ChevronRight size={16} />
+                        </>
+                      )}
+                    </button>
+                  </div>
+                ) : (
+                  <div className="parent-no-students">
+                    <AlertCircle size={17} />
 
-          <span>
-            No students were found in your school.
-          </span>
-        </div>
-      )}
-    </div>
-  </div>
-) : (
+                    <span>No students were found in your school.</span>
+                  </div>
+                )}
+              </div>
+            </div>
+          ) : (
             children.map((child) => {
               const childName = getChildName(child);
               const className = getChildClass(child);
               const arm = getChildArm(child);
 
               return (
-                <div
-                  className="child-card"
-                  key={child._id || child.id}
-                >
+                <div className="child-card" key={child._id || child.id}>
                   <div className="child-card-top">
                     <div className="child-avatar">
                       {getChildInitials(child)}
@@ -489,9 +463,7 @@ const [linkingChild, setLinkingChild] = useState(false);
         <section className="parent-panel">
           <div className="panel-heading">
             <div>
-              <span className="panel-label">
-                Academic Performance
-              </span>
+              <span className="panel-label">Academic Performance</span>
 
               <h2>Latest results</h2>
             </div>
@@ -512,8 +484,7 @@ const [linkingChild, setLinkingChild] = useState(false);
             <h3>Results will appear here</h3>
 
             <p>
-              Student results will be connected to the parent
-              dashboard next.
+              Student results will be connected to the parent dashboard next.
             </p>
           </div>
         </section>
@@ -585,10 +556,7 @@ const [linkingChild, setLinkingChild] = useState(false);
 
             <h3>Fee information</h3>
 
-            <p>
-              Your children's fee information will be connected
-              here.
-            </p>
+            <p>Your children's fee information will be connected here.</p>
 
             <button
               type="button"
@@ -606,9 +574,7 @@ const [linkingChild, setLinkingChild] = useState(false);
         <section className="parent-panel">
           <div className="panel-heading">
             <div>
-              <span className="panel-label">
-                School Updates
-              </span>
+              <span className="panel-label">School Updates</span>
 
               <h2>Announcements</h2>
             </div>
@@ -621,10 +587,7 @@ const [linkingChild, setLinkingChild] = useState(false);
 
             <h3>No announcements yet</h3>
 
-            <p>
-              School announcements will appear here when
-              available.
-            </p>
+            <p>School announcements will appear here when available.</p>
           </div>
         </section>
       </div>
@@ -636,9 +599,7 @@ const [linkingChild, setLinkingChild] = useState(false);
       <section className="parent-panel messages-panel">
         <div className="panel-heading">
           <div>
-            <span className="panel-label">
-              Communication
-            </span>
+            <span className="panel-label">Communication</span>
 
             <h2>Recent messages</h2>
           </div>
@@ -658,10 +619,7 @@ const [linkingChild, setLinkingChild] = useState(false);
 
           <h3>No recent messages</h3>
 
-          <p>
-            Messages from teachers and the school will appear
-            here.
-          </p>
+          <p>Messages from teachers and the school will appear here.</p>
         </div>
       </section>
     </div>

@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import {
   BookOpen,
@@ -12,7 +11,7 @@ import {
   ArrowRight,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "../context/authcontext";
 import { teacherApi } from "../api/teacher.api";
 import "./TeacherDashboard.css";
 
@@ -39,7 +38,7 @@ export default function TeacherDashboard() {
 
         console.log(
           "TEACHER DASHBOARD RESPONSE:",
-          JSON.stringify(response, null, 2)
+          JSON.stringify(response, null, 2),
         );
 
         setTeacher(response?.teacher || user || null);
@@ -48,8 +47,7 @@ export default function TeacherDashboard() {
         console.error("Teacher dashboard error:", err);
 
         setError(
-          err?.response?.data?.message ||
-            "Failed to load teacher dashboard"
+          err?.response?.data?.message || "Failed to load teacher dashboard",
         );
       } finally {
         setLoading(false);
@@ -73,9 +71,7 @@ export default function TeacherDashboard() {
   // =========================================================
 
   const schoolName =
-    teacher?.school?.name ||
-    user?.school?.name ||
-    "EduNigeria School";
+    teacher?.school?.name || user?.school?.name || "EduNigeria School";
 
   // =========================================================
   // CURRENT DATE
@@ -167,40 +163,34 @@ export default function TeacherDashboard() {
 
   return (
     <div className="teacher-dashboard">
-
       {/* =====================================================
           TOP HEADER
       ===================================================== */}
 
       <section className="teacher-hero">
         <div className="teacher-hero-content">
-
           <div className="teacher-hero-text">
-
             <div className="teacher-welcome-badge">
               <GraduationCap size={16} />
               Teacher Portal
             </div>
 
             <h1>
-              Welcome back,{" "}
-              <span>{teacherName}</span>
+              Welcome back, <span>{teacherName}</span>
             </h1>
 
             <p>
-              Manage your classes, students, attendance and
-              academic activities from one place.
+              Manage your classes, students, attendance and academic activities
+              from one place.
             </p>
 
             <div className="teacher-date">
               <Calendar size={17} />
               <span>{formattedDate}</span>
             </div>
-
           </div>
 
           <div className="teacher-profile-summary">
-
             <div className="teacher-avatar">
               {teacherName.charAt(0).toUpperCase()}
             </div>
@@ -208,15 +198,11 @@ export default function TeacherDashboard() {
             <div>
               <h3>{teacherName}</h3>
 
-              <p>
-                {teacher?.email || "No email available"}
-              </p>
+              <p>{teacher?.email || "No email available"}</p>
 
               <span>{schoolName}</span>
             </div>
-
           </div>
-
         </div>
       </section>
 
@@ -229,9 +215,7 @@ export default function TeacherDashboard() {
           <AlertCircle size={20} />
 
           <div>
-            <strong>
-              Unable to load teacher information
-            </strong>
+            <strong>Unable to load teacher information</strong>
 
             <p>{error}</p>
           </div>
@@ -249,24 +233,17 @@ export default function TeacherDashboard() {
         </div>
       ) : (
         <div className="teacher-dashboard-content">
-
           {/* =================================================
               STATISTICS
           ================================================= */}
 
           <section className="teacher-stats">
-
             {stats.map((stat) => {
               const Icon = stat.icon;
 
               return (
-                <div
-                  key={stat.title}
-                  className="teacher-stat-card"
-                >
-                  <div
-                    className={`teacher-stat-icon ${stat.className}`}
-                  >
+                <div key={stat.title} className="teacher-stat-card">
+                  <div className={`teacher-stat-icon ${stat.className}`}>
                     <Icon size={22} />
                   </div>
 
@@ -277,7 +254,6 @@ export default function TeacherDashboard() {
                 </div>
               );
             })}
-
           </section>
 
           {/* =================================================
@@ -285,15 +261,12 @@ export default function TeacherDashboard() {
           ================================================= */}
 
           <section className="teacher-main-grid">
-
             {/* =================================================
                 MY CLASSES
             ================================================= */}
 
             <div className="teacher-panel">
-
               <div className="teacher-panel-header">
-
                 <div>
                   <h2>My Classes</h2>
                   <p>Classes assigned to you</p>
@@ -306,12 +279,10 @@ export default function TeacherDashboard() {
                   View All
                   <ArrowRight size={16} />
                 </button>
-
               </div>
 
               {classes.length === 0 ? (
                 <div className="teacher-empty-state">
-
                   <div className="teacher-empty-icon">
                     <Users size={25} />
                   </div>
@@ -319,20 +290,14 @@ export default function TeacherDashboard() {
                   <h3>No classes assigned yet</h3>
 
                   <p>
-                    Your assigned classes will appear here
-                    once they are available.
+                    Your assigned classes will appear here once they are
+                    available.
                   </p>
-
                 </div>
               ) : (
                 <div className="teacher-classes-list">
-
                   {classes.map((item) => (
-                    <div
-                      key={item.id}
-                      className="teacher-class-item"
-                    >
-
+                    <div key={item.id} className="teacher-class-item">
                       <div className="teacher-class-icon">
                         <BookOpen size={20} />
                       </div>
@@ -345,16 +310,11 @@ export default function TeacherDashboard() {
                         </p>
                       </div>
 
-                      <span>
-                        {item.students} Students
-                      </span>
-
+                      <span>{item.students} Students</span>
                     </div>
                   ))}
-
                 </div>
               )}
-
             </div>
 
             {/* =================================================
@@ -362,16 +322,13 @@ export default function TeacherDashboard() {
             ================================================= */}
 
             <div className="teacher-panel">
-
               <div className="teacher-panel-header">
-
                 <div>
                   <h2>Today's Timetable</h2>
                   <p>Your classes for today</p>
                 </div>
 
                 <Calendar size={20} />
-
               </div>
 
               {timetable.length === 0 ? (
@@ -381,24 +338,15 @@ export default function TeacherDashboard() {
                 </div>
               ) : (
                 <div className="timetable-list">
-
                   {timetable.map((item) => (
-                    <div
-                      className="timetable-item"
-                      key={item._id}
-                    >
-
+                    <div className="timetable-item" key={item._id}>
                       <div>
-                        <strong>
-                          {item.subject?.name || "Subject"}
-                        </strong>
+                        <strong>{item.subject?.name || "Subject"}</strong>
 
                         <p>
                           {item.class?.name || "Class"}
 
-                          {item.class?.arm
-                            ? ` • Arm ${item.class.arm}`
-                            : ""}
+                          {item.class?.arm ? ` • Arm ${item.class.arm}` : ""}
                         </p>
                       </div>
 
@@ -407,19 +355,13 @@ export default function TeacherDashboard() {
                           {item.startTime} - {item.endTime}
                         </strong>
 
-                        {item.room && (
-                          <p>{item.room}</p>
-                        )}
+                        {item.room && <p>{item.room}</p>}
                       </div>
-
                     </div>
                   ))}
-
                 </div>
               )}
-
             </div>
-
           </section>
 
           {/* =================================================
@@ -427,58 +369,42 @@ export default function TeacherDashboard() {
           ================================================= */}
 
           <section className="teacher-bottom-grid">
-
             {/* =================================================
                 RECENT ACTIVITIES
             ================================================= */}
 
             <div className="teacher-panel">
-
               <div className="teacher-panel-header">
-
                 <div>
                   <h2>Recent Activities</h2>
                   <p>Your latest academic activities</p>
                 </div>
-
               </div>
 
               {activities.length === 0 ? (
                 <div className="teacher-empty-state compact">
-
                   <div className="teacher-empty-icon">
                     <CheckCircle size={23} />
                   </div>
 
                   <h3>No recent activities</h3>
 
-                  <p>
-                    Your recent activities will appear here.
-                  </p>
-
+                  <p>Your recent activities will appear here.</p>
                 </div>
               ) : (
                 <div className="teacher-activities-list">
-
                   {activities.map((activity) => (
-                    <div
-                      key={activity.id}
-                      className="teacher-activity-item"
-                    >
-
+                    <div key={activity.id} className="teacher-activity-item">
                       <div className="teacher-activity-dot"></div>
 
                       <div>
                         <p>{activity.title}</p>
                         <span>{activity.time}</span>
                       </div>
-
                     </div>
                   ))}
-
                 </div>
               )}
-
             </div>
 
             {/* =================================================
@@ -486,18 +412,14 @@ export default function TeacherDashboard() {
             ================================================= */}
 
             <div className="teacher-panel">
-
               <div className="teacher-panel-header">
-
                 <div>
                   <h2>Quick Actions</h2>
                   <p>Common teacher activities</p>
                 </div>
-
               </div>
 
               <div className="teacher-actions-grid">
-
                 {actions.map((action) => {
                   const Icon = action.icon;
 
@@ -507,7 +429,6 @@ export default function TeacherDashboard() {
                       className="teacher-action-btn"
                       onClick={() => navigate(action.path)}
                     >
-
                       <div className="teacher-action-icon">
                         <Icon size={20} />
                       </div>
@@ -517,25 +438,15 @@ export default function TeacherDashboard() {
                         <span>{action.description}</span>
                       </div>
 
-                      <ArrowRight
-                        size={17}
-                        className="teacher-action-arrow"
-                      />
-
+                      <ArrowRight size={17} className="teacher-action-arrow" />
                     </button>
                   );
                 })}
-
               </div>
-
             </div>
-
           </section>
-
         </div>
       )}
-
     </div>
   );
 }
-

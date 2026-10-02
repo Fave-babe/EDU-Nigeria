@@ -10,7 +10,7 @@ import {
   Loader2,
 } from "lucide-react";
 import http from "../api/http";
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "../context/authcontext";
 
 export default function Announcements() {
   const navigate = useNavigate();
@@ -30,35 +30,33 @@ export default function Announcements() {
     return user.school._id || user.school.id || null;
   };
 
-const loadAnnouncements = async () => {
-  try {
-    setLoading(true);
-    setError("");
+  const loadAnnouncements = async () => {
+    try {
+      setLoading(true);
+      setError("");
 
-    const schoolId = getSchoolId();
+      const schoolId = getSchoolId();
 
-    if (!schoolId) {
-      setError("School information is not available.");
-      return;
+      if (!schoolId) {
+        setError("School information is not available.");
+        return;
+      }
+
+      const response = await http.get(
+        `/announcements/school/${schoolId}/audience/students`,
+      );
+
+      console.log("STUDENT ANNOUNCEMENTS RESPONSE:", response);
+
+      setAnnouncements(response.announcements || []);
+    } catch (err) {
+      console.error("ANNOUNCEMENTS ERROR:", err);
+
+      setError(err.message || "Unable to load announcements.");
+    } finally {
+      setLoading(false);
     }
-
-    const response = await http.get(
-      `/announcements/school/${schoolId}/audience/students`
-    );
-
-    console.log("STUDENT ANNOUNCEMENTS RESPONSE:", response);
-
-    setAnnouncements(response.announcements || []);
-  } catch (err) {
-    console.error("ANNOUNCEMENTS ERROR:", err);
-
-    setError(
-      err.message || "Unable to load announcements."
-    );
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
   useEffect(() => {
     loadAnnouncements();
@@ -66,10 +64,7 @@ const loadAnnouncements = async () => {
 
   return (
     <div className="page-container">
-      <button
-        className="back-button"
-        onClick={() => navigate(-1)}
-      >
+      <button className="back-button" onClick={() => navigate(-1)}>
         <ArrowLeft size={18} />
         Back
       </button>
@@ -96,9 +91,7 @@ const loadAnnouncements = async () => {
         >
           <div>
             <h2>School Announcements</h2>
-            <p>
-              Latest announcements published by your school.
-            </p>
+            <p>Latest announcements published by your school.</p>
           </div>
 
           <button
@@ -128,8 +121,7 @@ const loadAnnouncements = async () => {
             <Megaphone size={48} />
             <h2>No Announcements</h2>
             <p>
-              School announcements will appear here when they
-              are published.
+              School announcements will appear here when they are published.
             </p>
           </div>
         ) : (
@@ -161,15 +153,12 @@ const loadAnnouncements = async () => {
 
                     {announcement.type && (
                       <p>
-                        <strong>Type:</strong>{" "}
-                        {announcement.type}
+                        <strong>Type:</strong> {announcement.type}
                       </p>
                     )}
                   </div>
 
-                  {announcement.published && (
-  <span>Published</span>
-)}
+                  {announcement.published && <span>Published</span>}
                 </div>
 
                 <p
@@ -204,9 +193,7 @@ const loadAnnouncements = async () => {
                   {announcement.createdAt && (
                     <span>
                       <CalendarDays size={15} />{" "}
-                      {new Date(
-                        announcement.createdAt
-                      ).toLocaleDateString()}
+                      {new Date(announcement.createdAt).toLocaleDateString()}
                     </span>
                   )}
                 </div>

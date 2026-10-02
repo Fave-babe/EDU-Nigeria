@@ -1,15 +1,6 @@
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 
-import {
-  BrowserRouter,
-  Routes,
-  Route,
-  Navigate,
-} from "react-router-dom";
-
-import {
-  AuthProvider,
-  useAuth,
-} from "./context/AuthContext.jsx";
+import { AuthProvider, useAuth } from "./context/authcontext.jsx";
 
 import { PERMISSIONS, ROLES } from "./config/permissions";
 
@@ -46,9 +37,7 @@ import ParentDashboard from "./pages/ParentDashboard";
 // SCHOOL MODULES
 // =========================================================
 
-import Students, {
-  StudentProfile,
-} from "./pages/Students";
+import Students, { StudentProfile } from "./pages/Students";
 import Invoice from "./pages/Invoice";
 import GradeSummary from "./pages/GradeSummary";
 import ClassSubjects from "./pages/ClassSubjects";
@@ -90,26 +79,14 @@ import SuperAdminDashboard from "./pages/SuperAdminDashboard";
 // =========================================================
 
 function ProtectedRoute({ children }) {
-  const {
-    user,
-    loading,
-  } = useAuth();
+  const { user, loading } = useAuth();
 
   if (loading) {
-    return (
-      <div className="route-loading">
-        Loading...
-      </div>
-    );
+    return <div className="route-loading">Loading...</div>;
   }
 
   if (!user) {
-    return (
-      <Navigate
-        to="/login"
-        replace
-      />
-    );
+    return <Navigate to="/login" replace />;
   }
 
   return children;
@@ -119,41 +96,19 @@ function ProtectedRoute({ children }) {
 // ROLE ROUTE
 // =========================================================
 
-function RoleRoute({
-  allowed,
-  children,
-}) {
-  const {
-    user,
-    loading,
-    canAccess,
-    getRedirectPath,
-  } = useAuth();
+function RoleRoute({ allowed, children }) {
+  const { user, loading, canAccess, getRedirectPath } = useAuth();
 
   if (loading) {
-    return (
-      <div className="route-loading">
-        Loading...
-      </div>
-    );
+    return <div className="route-loading">Loading...</div>;
   }
 
   if (!user) {
-    return (
-      <Navigate
-        to="/login"
-        replace
-      />
-    );
+    return <Navigate to="/login" replace />;
   }
 
   if (!canAccess(allowed)) {
-    return (
-      <Navigate
-        to={getRedirectPath(user)}
-        replace
-      />
-    );
+    return <Navigate to={getRedirectPath(user)} replace />;
   }
 
   return children;
@@ -163,30 +118,15 @@ function RoleRoute({
 // GUEST ROUTE
 // =========================================================
 
-function GuestRoute({
-  children,
-}) {
-  const {
-    user,
-    loading,
-    getRedirectPath,
-  } = useAuth();
+function GuestRoute({ children }) {
+  const { user, loading, getRedirectPath } = useAuth();
 
   if (loading) {
-    return (
-      <div className="route-loading">
-        Loading...
-      </div>
-    );
+    return <div className="route-loading">Loading...</div>;
   }
 
   if (user) {
-    return (
-      <Navigate
-        to={getRedirectPath(user)}
-        replace
-      />
-    );
+    return <Navigate to={getRedirectPath(user)} replace />;
   }
 
   return children;
@@ -199,35 +139,19 @@ function GuestRoute({
 function AppRoutes() {
   return (
     <Routes>
-
       {/* ===================================================
           PUBLIC ROUTES
       =================================================== */}
 
-      <Route
-        path="/"
-        element={<Home />}
-      />
+      <Route path="/" element={<Home />} />
 
-      <Route
-        path="/about"
-        element={<About />}
-      />
+      <Route path="/about" element={<About />} />
 
-      <Route
-        path="/entrance"
-        element={<EntranceExam />}
-      />
+      <Route path="/entrance" element={<EntranceExam />} />
 
-      <Route
-        path="/careers/apply"
-        element={<CareerApplication />}
-      />
+      <Route path="/careers/apply" element={<CareerApplication />} />
 
-      <Route
-        path="/careers/teaching"
-        element={<TeachingOpportunities />}
-      />
+      <Route path="/careers/teaching" element={<TeachingOpportunities />} />
 
       {/* ===================================================
           AUTH
@@ -283,22 +207,22 @@ function AppRoutes() {
       =================================================== */}
 
       <Route
-  path="/superadmin"
-  element={
-    <RoleRoute allowed={["super_admin"]}>
-      <SuperAdminDashboard />
-    </RoleRoute>
-  }
-/>
+        path="/superadmin"
+        element={
+          <RoleRoute allowed={["super_admin"]}>
+            <SuperAdminDashboard />
+          </RoleRoute>
+        }
+      />
 
       <Route
-  path="/superadmin/users"
-  element={
-    <RoleRoute allowed={["super_admin"]}>
-      <SuperAdminUsers />
-    </RoleRoute>
-  }
-/>
+        path="/superadmin/users"
+        element={
+          <RoleRoute allowed={["super_admin"]}>
+            <SuperAdminUsers />
+          </RoleRoute>
+        }
+      />
 
       {/* ===================================================
           RESULTS
@@ -356,14 +280,14 @@ function AppRoutes() {
           SETTINGS
       =================================================== */}
 
-     <Route
-  path="/settings"
-  element={
-    <RoleRoute allowed={["student"]}>
-      <Settings />
-    </RoleRoute>
-  }
-/>
+      <Route
+        path="/settings"
+        element={
+          <RoleRoute allowed={["student"]}>
+            <Settings />
+          </RoleRoute>
+        }
+      />
       {/* ===================================================
           PROFILE
       =================================================== */}
@@ -388,7 +312,6 @@ function AppRoutes() {
           </ProtectedRoute>
         }
       >
-
         {/* =================================================
             ADMIN DASHBOARD
         ================================================= */}
@@ -401,18 +324,15 @@ function AppRoutes() {
             </RoleRoute>
           }
         />
+        <Route path="/class-subjects" element={<ClassSubjects />} />
         <Route
-  path="/class-subjects"
-  element={<ClassSubjects />}
-/>
-<Route
-  path="/announcement-management"
-  element={
-    <RoleRoute allowed={["admin"]}>
-      <AnnouncementManagement />
-    </RoleRoute>
-  }
-/>
+          path="/announcement-management"
+          element={
+            <RoleRoute allowed={["admin"]}>
+              <AnnouncementManagement />
+            </RoleRoute>
+          }
+        />
         <Route path="/admissions" element={<AdminAdmissions />} />
 
         {/* =================================================
@@ -433,39 +353,39 @@ function AppRoutes() {
         ================================================= */}
 
         <Route
-  path="/Cdashboard"
-  element={
-    <RoleRoute allowed={["counsellor"]}>
-      <Cdashboard />
-    </RoleRoute>
-  }
-/>
+          path="/Cdashboard"
+          element={
+            <RoleRoute allowed={["counsellor"]}>
+              <Cdashboard />
+            </RoleRoute>
+          }
+        />
 
-<Route
-  path="/counsellor/students"
-  element={
-    <RoleRoute allowed={["counsellor"]}>
-      <CounsellorStudents />
-    </RoleRoute>
-  }
-/>
+        <Route
+          path="/counsellor/students"
+          element={
+            <RoleRoute allowed={["counsellor"]}>
+              <CounsellorStudents />
+            </RoleRoute>
+          }
+        />
 
-<Route
-  path="/counsellor/counselling"
-  element={
-    <RoleRoute allowed={["counsellor"]}>
-      <CounsellingRecords />
-    </RoleRoute>
-  }
-/>
-<Route
-  path="/counsellor/followups"
-  element={
-    <RoleRoute allowed={["counsellor"]}>
-      <CounsellorFollowups />
-    </RoleRoute>
-  }
-/>
+        <Route
+          path="/counsellor/counselling"
+          element={
+            <RoleRoute allowed={["counsellor"]}>
+              <CounsellingRecords />
+            </RoleRoute>
+          }
+        />
+        <Route
+          path="/counsellor/followups"
+          element={
+            <RoleRoute allowed={["counsellor"]}>
+              <CounsellorFollowups />
+            </RoleRoute>
+          }
+        />
         {/* =================================================
             TEACHER DASHBOARD
         ================================================= */}
@@ -479,26 +399,17 @@ function AppRoutes() {
           }
         />
         <Route path="/subjects" element={<Subjects />} />
+        <Route path="/Tstudents" element={<TeacherStudents />} />
+        <Route path="/Tattendance" element={<TeacherAttendance />} />
+        <Route path="/lesson-notes" element={<LessonNotes />} />
         <Route
-  path="/Tstudents"
-  element={<TeacherStudents />}
-/>
-<Route
-  path="/Tattendance"
-  element={<TeacherAttendance />}
-/>
-<Route
-  path="/lesson-notes"
-  element={<LessonNotes />}
-/>
-<Route
-  path="/student/lesson-notes"
-  element={
-    <RoleRoute allowed={["student"]}>
-      <StudentLessonNotes />
-    </RoleRoute>
-  }
-/>
+          path="/student/lesson-notes"
+          element={
+            <RoleRoute allowed={["student"]}>
+              <StudentLessonNotes />
+            </RoleRoute>
+          }
+        />
 
         {/* =================================================
             BURSAR DASHBOARD
@@ -512,10 +423,7 @@ function AppRoutes() {
             </RoleRoute>
           }
         />
-        <Route
-  path="/finance/invoice/:paymentId"
-  element={<Invoice />}
-/>
+        <Route path="/finance/invoice/:paymentId" element={<Invoice />} />
         <Route path="/record-payment" element={<RecordPayment />} />
 
         {/* =================================================
@@ -530,10 +438,7 @@ function AppRoutes() {
             </RoleRoute>
           }
         />
-        <Route
-  path="/grades"
-  element={<GradeSummary />}
-/>
+        <Route path="/grades" element={<GradeSummary />} />
 
         {/* =================================================
             PARENT DASHBOARD
@@ -600,14 +505,14 @@ function AppRoutes() {
     CLASSES
 ================================================= */}
 
-<Route
-  path="/classes"
-  element={
-    <RoleRoute allowed={["admin", "super_admin"]}>
-      <Classes />
-    </RoleRoute>
-  }
-/>
+        <Route
+          path="/classes"
+          element={
+            <RoleRoute allowed={["admin", "super_admin"]}>
+              <Classes />
+            </RoleRoute>
+          }
+        />
 
         {/* =================================================
             ACADEMICS
@@ -669,7 +574,7 @@ function AppRoutes() {
           path="/counselling"
           element={
             <RoleRoute allowed={PERMISSIONS.counselling}>
-             <Cdashboard />
+              <Cdashboard />
             </RoleRoute>
           }
         />
@@ -712,23 +617,13 @@ function AppRoutes() {
             </RoleRoute>
           }
         />
-
       </Route>
 
       {/* ===================================================
           CATCH ALL
       =================================================== */}
 
-      <Route
-        path="*"
-        element={
-          <Navigate
-            to="/"
-            replace
-          />
-        }
-      />
-
+      <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
 }
@@ -746,4 +641,3 @@ export default function App() {
     </AuthProvider>
   );
 }
-

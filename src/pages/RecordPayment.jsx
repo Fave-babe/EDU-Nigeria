@@ -8,7 +8,7 @@ import {
   CheckCircle2,
   Loader2,
 } from "lucide-react";
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "../context/authcontext";
 import { createPayment } from "../api/payment.api";
 import { getStudentsBySchool } from "../api/student.api";
 import "./RecordPayment.css";
@@ -18,9 +18,7 @@ export default function RecordPayment() {
   const { user } = useAuth();
 
   const schoolId =
-    typeof user?.school === "object"
-      ? user?.school?._id
-      : user?.school;
+    typeof user?.school === "object" ? user?.school?._id : user?.school;
 
   const bursarId = user?._id;
 
@@ -68,10 +66,7 @@ export default function RecordPayment() {
       } catch (err) {
         console.error("LOAD STUDENTS ERROR:", err);
 
-        setError(
-          err?.response?.data?.message ||
-            "Failed to load students."
-        );
+        setError(err?.response?.data?.message || "Failed to load students.");
       } finally {
         setStudentsLoading(false);
       }
@@ -92,20 +87,11 @@ export default function RecordPayment() {
   const getStudentName = (student) => {
     if (!student) return "Unknown Student";
 
-    const fullName = [
-      student.firstName,
-      student.middleName,
-      student.lastName,
-    ]
+    const fullName = [student.firstName, student.middleName, student.lastName]
       .filter(Boolean)
       .join(" ");
 
-    return (
-      fullName ||
-      student.name ||
-      student.fullName ||
-      "Unknown Student"
-    );
+    return fullName || student.name || student.fullName || "Unknown Student";
   };
 
   const getStudentId = (student) => {
@@ -161,27 +147,23 @@ export default function RecordPayment() {
       }
 
       if (formData.paymentDate) {
-        paymentData.paymentDate = new Date(
-          formData.paymentDate
-        ).toISOString();
+        paymentData.paymentDate = new Date(formData.paymentDate).toISOString();
       }
 
       console.log("PAYMENT DATA:", paymentData);
 
-     const response = await createPayment(paymentData);
+      const response = await createPayment(paymentData);
 
-console.log("CREATED PAYMENT:", response);
+      console.log("CREATED PAYMENT:", response);
 
-const createdPayment =
-  response?.payment ||
-  response?.data?.payment ||
-  response;
+      const createdPayment =
+        response?.payment || response?.data?.payment || response;
 
-setSuccess("Payment recorded successfully.");
+      setSuccess("Payment recorded successfully.");
 
-if (createdPayment?._id) {
-  navigate(`/finance/invoice/${createdPayment._id}`);
-}
+      if (createdPayment?._id) {
+        navigate(`/finance/invoice/${createdPayment._id}`);
+      }
       setFormData({
         student: "",
         amount: "",
@@ -197,7 +179,7 @@ if (createdPayment?._id) {
 
       setError(
         err?.response?.data?.message ||
-          "Failed to record payment. Please try again."
+          "Failed to record payment. Please try again.",
       );
     } finally {
       setLoading(false);
@@ -252,16 +234,11 @@ if (createdPayment?._id) {
           </div>
         )}
 
-        <form
-          className="record-payment-card"
-          onSubmit={handleSubmit}
-        >
+        <form className="record-payment-card" onSubmit={handleSubmit}>
           <div className="record-payment-section">
             <div className="record-payment-section-header">
               <h2>Payment Information</h2>
-              <p>
-                Enter the details of the payment received.
-              </p>
+              <p>Enter the details of the payment received.</p>
             </div>
 
             <div className="record-payment-grid">
@@ -280,19 +257,14 @@ if (createdPayment?._id) {
                   disabled={studentsLoading}
                 >
                   <option value="">
-                    {studentsLoading
-                      ? "Loading students..."
-                      : "Select student"}
+                    {studentsLoading ? "Loading students..." : "Select student"}
                   </option>
 
                   {students.map((student) => {
                     const studentId = getStudentId(student);
 
                     return (
-                      <option
-                        key={studentId}
-                        value={studentId}
-                      >
+                      <option key={studentId} value={studentId}>
                         {getStudentName(student)}
                         {student.registrationNumber
                           ? ` — ${student.registrationNumber}`
@@ -302,9 +274,7 @@ if (createdPayment?._id) {
                   })}
                 </select>
 
-                <small>
-                  Select the student who made the payment.
-                </small>
+                <small>Select the student who made the payment.</small>
               </div>
 
               {/* AMOUNT */}
@@ -332,9 +302,7 @@ if (createdPayment?._id) {
 
               {/* FEE TYPE */}
               <div className="record-payment-field">
-                <label htmlFor="feeType">
-                  Fee Type
-                </label>
+                <label htmlFor="feeType">Fee Type</label>
 
                 <select
                   id="feeType"
@@ -342,33 +310,21 @@ if (createdPayment?._id) {
                   value={formData.feeType}
                   onChange={handleChange}
                 >
-                  <option value="School Fees">
-                    School Fees
-                  </option>
+                  <option value="School Fees">School Fees</option>
 
-                  <option value="Transport Fee">
-                    Transport Fee
-                  </option>
+                  <option value="Transport Fee">Transport Fee</option>
 
-                  <option value="Uniform Fee">
-                    Uniform Fee
-                  </option>
+                  <option value="Uniform Fee">Uniform Fee</option>
 
-                  <option value="Examination Fee">
-                    Examination Fee
-                  </option>
+                  <option value="Examination Fee">Examination Fee</option>
 
-                  <option value="Other">
-                    Other
-                  </option>
+                  <option value="Other">Other</option>
                 </select>
               </div>
 
               {/* PAYMENT METHOD */}
               <div className="record-payment-field">
-                <label htmlFor="paymentMethod">
-                  Payment Method
-                </label>
+                <label htmlFor="paymentMethod">Payment Method</label>
 
                 <select
                   id="paymentMethod"
@@ -376,29 +332,19 @@ if (createdPayment?._id) {
                   value={formData.paymentMethod}
                   onChange={handleChange}
                 >
-                  <option value="Cash">
-                    Cash
-                  </option>
+                  <option value="Cash">Cash</option>
 
-                  <option value="Bank Transfer">
-                    Bank Transfer
-                  </option>
+                  <option value="Bank Transfer">Bank Transfer</option>
 
-                  <option value="POS">
-                    POS
-                  </option>
+                  <option value="POS">POS</option>
 
-                  <option value="Online">
-                    Online
-                  </option>
+                  <option value="Online">Online</option>
                 </select>
               </div>
 
               {/* STATUS */}
               <div className="record-payment-field">
-                <label htmlFor="status">
-                  Payment Status
-                </label>
+                <label htmlFor="status">Payment Status</label>
 
                 <select
                   id="status"
@@ -406,29 +352,19 @@ if (createdPayment?._id) {
                   value={formData.status}
                   onChange={handleChange}
                 >
-                  <option value="Paid">
-                    Paid
-                  </option>
+                  <option value="Paid">Paid</option>
 
-                  <option value="Pending">
-                    Pending
-                  </option>
+                  <option value="Pending">Pending</option>
 
-                  <option value="Failed">
-                    Failed
-                  </option>
+                  <option value="Failed">Failed</option>
 
-                  <option value="Refunded">
-                    Refunded
-                  </option>
+                  <option value="Refunded">Refunded</option>
                 </select>
               </div>
 
               {/* REFERENCE */}
               <div className="record-payment-field">
-                <label htmlFor="reference">
-                  Payment Reference
-                </label>
+                <label htmlFor="reference">Payment Reference</label>
 
                 <input
                   id="reference"
@@ -442,9 +378,7 @@ if (createdPayment?._id) {
 
               {/* PAYMENT DATE */}
               <div className="record-payment-field">
-                <label htmlFor="paymentDate">
-                  Payment Date
-                </label>
+                <label htmlFor="paymentDate">Payment Date</label>
 
                 <input
                   id="paymentDate"
@@ -457,9 +391,7 @@ if (createdPayment?._id) {
 
               {/* DESCRIPTION */}
               <div className="record-payment-field record-payment-full">
-                <label htmlFor="description">
-                  Description
-                </label>
+                <label htmlFor="description">Description</label>
 
                 <textarea
                   id="description"
@@ -490,10 +422,7 @@ if (createdPayment?._id) {
             >
               {loading ? (
                 <>
-                  <Loader2
-                    size={18}
-                    className="record-payment-spinner"
-                  />
+                  <Loader2 size={18} className="record-payment-spinner" />
                   Recording...
                 </>
               ) : (

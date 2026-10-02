@@ -21,7 +21,7 @@ import {
   Clock,
 } from "lucide-react";
 
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "../context/authcontext";
 
 import {
   createAssignment,
@@ -112,8 +112,7 @@ export default function Assignments() {
           return;
         }
 
-        const assignmentResponse =
-          await getSchoolAssignments(schoolId);
+        const assignmentResponse = await getSchoolAssignments(schoolId);
 
         const schoolAssignments =
           assignmentResponse?.data?.assignments ||
@@ -122,20 +121,15 @@ export default function Assignments() {
 
         // Only published assignments belonging to
         // the student's class
-        const studentAssignments = schoolAssignments.filter(
-          (assignment) => {
-            const assignmentClassId =
-              assignment?.class?._id ||
-              assignment?.class;
+        const studentAssignments = schoolAssignments.filter((assignment) => {
+          const assignmentClassId = assignment?.class?._id || assignment?.class;
 
-            return (
-              assignment?.status === "published" &&
-              assignmentClassId &&
-              String(assignmentClassId) ===
-                String(studentClassId)
-            );
-          }
-        );
+          return (
+            assignment?.status === "published" &&
+            assignmentClassId &&
+            String(assignmentClassId) === String(studentClassId)
+          );
+        });
 
         setAssignments(studentAssignments);
 
@@ -147,8 +141,7 @@ export default function Assignments() {
       // =================================================
 
       if (isTeacher) {
-        const dashboardResponse =
-          await teacherApi.getDashboard();
+        const dashboardResponse = await teacherApi.getDashboard();
 
         const teacher = dashboardResponse?.teacher;
 
@@ -157,18 +150,15 @@ export default function Assignments() {
         const schoolId = teacher?.school?._id;
 
         if (!schoolId) {
-          throw new Error(
-            "Teacher school information was not found."
-          );
+          throw new Error("Teacher school information was not found.");
         }
 
-        const assignmentResponse =
-          await getSchoolAssignments(schoolId);
+        const assignmentResponse = await getSchoolAssignments(schoolId);
 
         setAssignments(
           assignmentResponse?.assignments ||
             assignmentResponse?.data?.assignments ||
-            []
+            [],
         );
 
         return;
@@ -185,7 +175,7 @@ export default function Assignments() {
       setError(
         err?.response?.data?.message ||
           err?.message ||
-          "Failed to load assignments."
+          "Failed to load assignments.",
       );
     } finally {
       setLoading(false);
@@ -208,12 +198,7 @@ export default function Assignments() {
 
   const studentClassName =
     studentClass?.name ||
-    [
-      studentClass?.level,
-      studentClass?.arm,
-    ]
-      .filter(Boolean)
-      .join(" ") ||
+    [studentClass?.level, studentClass?.arm].filter(Boolean).join(" ") ||
     "Class not assigned";
 
   // =====================================================
@@ -224,14 +209,9 @@ export default function Assignments() {
     if (!teacher?._id) return [];
 
     return assignments.filter((assignment) => {
-      const assignmentTeacher =
-        assignment?.teacher?._id ||
-        assignment?.teacher;
+      const assignmentTeacher = assignment?.teacher?._id || assignment?.teacher;
 
-      return (
-        String(assignmentTeacher) ===
-        String(teacher._id)
-      );
+      return String(assignmentTeacher) === String(teacher._id);
     });
   }, [assignments, teacher]);
 
@@ -243,15 +223,12 @@ export default function Assignments() {
     if (!studentClass?._id) return [];
 
     return assignments.filter((assignment) => {
-      const assignmentClassId =
-        assignment?.class?._id ||
-        assignment?.class;
+      const assignmentClassId = assignment?.class?._id || assignment?.class;
 
       return (
         assignment?.status === "published" &&
         assignmentClassId &&
-        String(assignmentClassId) ===
-          String(studentClass._id)
+        String(assignmentClassId) === String(studentClass._id)
       );
     });
   }, [assignments, studentClass]);
@@ -261,9 +238,7 @@ export default function Assignments() {
   // =====================================================
 
   const visibleAssignments = useMemo(() => {
-    const source = isStudent
-      ? studentAssignments
-      : teacherAssignments;
+    const source = isStudent ? studentAssignments : teacherAssignments;
 
     const value = search.toLowerCase().trim();
 
@@ -271,26 +246,13 @@ export default function Assignments() {
 
     return source.filter((assignment) => {
       return (
-        assignment?.title
-          ?.toLowerCase()
-          .includes(value) ||
-        assignment?.subject?.name
-          ?.toLowerCase()
-          .includes(value) ||
-        assignment?.class?.name
-          ?.toLowerCase()
-          .includes(value) ||
-        assignment?.description
-          ?.toLowerCase()
-          .includes(value)
+        assignment?.title?.toLowerCase().includes(value) ||
+        assignment?.subject?.name?.toLowerCase().includes(value) ||
+        assignment?.class?.name?.toLowerCase().includes(value) ||
+        assignment?.description?.toLowerCase().includes(value)
       );
     });
-  }, [
-    isStudent,
-    studentAssignments,
-    teacherAssignments,
-    search,
-  ]);
+  }, [isStudent, studentAssignments, teacherAssignments, search]);
 
   // =====================================================
   // FORM HANDLERS
@@ -331,35 +293,23 @@ export default function Assignments() {
     setEditingAssignment(assignment);
 
     setForm({
-      class:
-        assignment?.class?._id ||
-        assignment?.class ||
-        "",
+      class: assignment?.class?._id || assignment?.class || "",
 
-      subject:
-        assignment?.subject?._id ||
-        assignment?.subject ||
-        "",
+      subject: assignment?.subject?._id || assignment?.subject || "",
 
       title: assignment?.title || "",
 
-      description:
-        assignment?.description || "",
+      description: assignment?.description || "",
 
-      instructions:
-        assignment?.instructions || "",
+      instructions: assignment?.instructions || "",
 
       dueDate: assignment?.dueDate
-        ? new Date(assignment.dueDate)
-            .toISOString()
-            .slice(0, 16)
+        ? new Date(assignment.dueDate).toISOString().slice(0, 16)
         : "",
 
-      totalMarks:
-        assignment?.totalMarks || "",
+      totalMarks: assignment?.totalMarks || "",
 
-      status:
-        assignment?.status || "draft",
+      status: assignment?.status || "draft",
     });
 
     setError("");
@@ -397,42 +347,30 @@ export default function Assignments() {
         return;
       }
 
-      if (
-        !form.totalMarks ||
-        Number(form.totalMarks) < 1
-      ) {
+      if (!form.totalMarks || Number(form.totalMarks) < 1) {
         setError("Please enter valid total marks.");
         return;
       }
 
       const selectedClass = classes.find(
-        (item) =>
-          String(item.id) ===
-          String(form.class)
+        (item) => String(item.id) === String(form.class),
       );
 
       const academicSession =
-        selectedClass?.academicSession?._id ||
-        selectedClass?.academicSession;
+        selectedClass?.academicSession?._id || selectedClass?.academicSession;
 
       if (!academicSession) {
-        setError(
-          "Academic session was not found for this class."
-        );
+        setError("Academic session was not found for this class.");
         return;
       }
 
       if (!teacher?._id) {
-        setError(
-          "Teacher information was not found."
-        );
+        setError("Teacher information was not found.");
         return;
       }
 
       if (!teacher?.school?._id) {
-        setError(
-          "School information was not found."
-        );
+        setError("School information was not found.");
         return;
       }
 
@@ -449,38 +387,28 @@ export default function Assignments() {
 
         title: form.title.trim(),
 
-        description:
-          form.description.trim(),
+        description: form.description.trim(),
 
-        instructions:
-          form.instructions.trim(),
+        instructions: form.instructions.trim(),
 
         dueDate: form.dueDate,
 
-        totalMarks:
-          Number(form.totalMarks),
+        totalMarks: Number(form.totalMarks),
 
-        status: publish
-          ? "published"
-          : form.status,
+        status: publish ? "published" : form.status,
       };
 
       if (editingAssignment) {
-        await updateAssignment(
-          editingAssignment._id,
-          payload
-        );
+        await updateAssignment(editingAssignment._id, payload);
 
-        setSuccess(
-          "Assignment updated successfully."
-        );
+        setSuccess("Assignment updated successfully.");
       } else {
         await createAssignment(payload);
 
         setSuccess(
           publish
             ? "Assignment published successfully."
-            : "Assignment saved as draft."
+            : "Assignment saved as draft.",
         );
       }
 
@@ -489,15 +417,12 @@ export default function Assignments() {
 
       await loadData();
     } catch (err) {
-      console.error(
-        "ASSIGNMENT SAVE ERROR:",
-        err
-      );
+      console.error("ASSIGNMENT SAVE ERROR:", err);
 
       setError(
         err?.response?.data?.message ||
           err?.message ||
-          "Failed to save assignment."
+          "Failed to save assignment.",
       );
     } finally {
       setSaving(false);
@@ -510,7 +435,7 @@ export default function Assignments() {
 
   const handleDelete = async (id) => {
     const confirmed = window.confirm(
-      "Are you sure you want to delete this assignment?"
+      "Are you sure you want to delete this assignment?",
     );
 
     if (!confirmed) return;
@@ -521,21 +446,16 @@ export default function Assignments() {
 
       await deleteAssignment(id);
 
-      setSuccess(
-        "Assignment deleted successfully."
-      );
+      setSuccess("Assignment deleted successfully.");
 
       await loadData();
     } catch (err) {
-      console.error(
-        "ASSIGNMENT DELETE ERROR:",
-        err
-      );
+      console.error("ASSIGNMENT DELETE ERROR:", err);
 
       setError(
         err?.response?.data?.message ||
           err?.message ||
-          "Failed to delete assignment."
+          "Failed to delete assignment.",
       );
     }
   };
@@ -564,29 +484,18 @@ export default function Assignments() {
   if (loading) {
     return (
       <div className="page-container">
-        <button
-          className="back-button"
-          onClick={() => navigate(-1)}
-        >
+        <button className="back-button" onClick={() => navigate(-1)}>
           <ArrowLeft size={18} />
           Back
         </button>
 
         <div className="content-card">
           <div className="empty-state">
-            <Loader2
-              size={40}
-              className="spin"
-            />
+            <Loader2 size={40} className="spin" />
 
-            <h2>
-              Loading Assignments...
-            </h2>
+            <h2>Loading Assignments...</h2>
 
-            <p>
-              Please wait while your
-              assignments are being loaded.
-            </p>
+            <p>Please wait while your assignments are being loaded.</p>
           </div>
         </div>
       </div>
@@ -600,10 +509,7 @@ export default function Assignments() {
   if (isStudent) {
     return (
       <div className="page-container">
-        <button
-          className="back-button"
-          onClick={() => navigate(-1)}
-        >
+        <button className="back-button" onClick={() => navigate(-1)}>
           <ArrowLeft size={18} />
           Back
         </button>
@@ -612,9 +518,7 @@ export default function Assignments() {
           <div>
             <h1>Assignments</h1>
 
-            <p>
-              View assignments given to your class.
-            </p>
+            <p>View assignments given to your class.</p>
           </div>
 
           <div className="page-header-icon">
@@ -640,9 +544,7 @@ export default function Assignments() {
           }}
         >
           <div>
-            <strong>
-              {studentClassName}
-            </strong>
+            <strong>{studentClassName}</strong>
 
             <div
               style={{
@@ -652,9 +554,7 @@ export default function Assignments() {
               }}
             >
               {studentAssignments.length}{" "}
-              {studentAssignments.length === 1
-                ? "assignment"
-                : "assignments"}
+              {studentAssignments.length === 1 ? "assignment" : "assignments"}
             </div>
           </div>
 
@@ -676,9 +576,7 @@ export default function Assignments() {
               type="text"
               placeholder="Search assignments..."
               value={search}
-              onChange={(e) =>
-                setSearch(e.target.value)
-              }
+              onChange={(e) => setSearch(e.target.value)}
               style={{
                 border: "none",
                 outline: "none",
@@ -694,13 +592,10 @@ export default function Assignments() {
             <div className="empty-state">
               <ClipboardList size={48} />
 
-              <h2>
-                No Assignments
-              </h2>
+              <h2>No Assignments</h2>
 
               <p>
-                There are no published assignments
-                for your class at the moment.
+                There are no published assignments for your class at the moment.
               </p>
             </div>
           ) : (
@@ -710,214 +605,152 @@ export default function Assignments() {
                 gap: "15px",
               }}
             >
-              {visibleAssignments.map(
-                (assignment) => (
+              {visibleAssignments.map((assignment) => (
+                <div
+                  key={assignment._id}
+                  style={{
+                    border: "1px solid #e5e7eb",
+                    borderRadius: "10px",
+                    padding: "20px",
+                    background: "#fff",
+                  }}
+                >
                   <div
-                    key={assignment._id}
                     style={{
-                      border:
-                        "1px solid #e5e7eb",
-                      borderRadius: "10px",
-                      padding: "20px",
-                      background: "#fff",
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "flex-start",
+                      gap: "15px",
                     }}
                   >
-                    <div
-                      style={{
-                        display: "flex",
-                        justifyContent:
-                          "space-between",
-                        alignItems:
-                          "flex-start",
-                        gap: "15px",
-                      }}
-                    >
-                      <div>
-                        <h3
-                          style={{
-                            margin:
-                              "0 0 8px",
-                          }}
-                        >
-                          {assignment.title}
-                        </h3>
-
-                        <div
-                          style={{
-                            display: "flex",
-                            gap: "15px",
-                            flexWrap:
-                              "wrap",
-                            fontSize:
-                              "14px",
-                            color: "#666",
-                          }}
-                        >
-                          <span
-                            style={{
-                              display:
-                                "flex",
-                              alignItems:
-                                "center",
-                              gap: "5px",
-                            }}
-                          >
-                            <BookOpen
-                              size={15}
-                            />
-
-                            {assignment
-                              .subject
-                              ?.name ||
-                              "Subject"}
-                          </span>
-
-                          <span
-                            style={{
-                              display:
-                                "flex",
-                              alignItems:
-                                "center",
-                              gap: "5px",
-                            }}
-                          >
-                            <Users
-                              size={15}
-                            />
-
-                            {assignment
-                              .class
-                              ?.level}{" "}
-                            {assignment
-                              .class
-                              ?.name}
-
-                            {assignment
-                              .class
-                              ?.arm
-                              ? ` (${assignment.class.arm})`
-                              : ""}
-                          </span>
-
-                          <span
-                            style={{
-                              display:
-                                "flex",
-                              alignItems:
-                                "center",
-                              gap: "5px",
-                            }}
-                          >
-                            <CalendarDays
-                              size={15}
-                            />
-
-                            Due:{" "}
-                            {assignment.dueDate
-                              ? new Date(
-                                  assignment.dueDate
-                                ).toLocaleDateString()
-                              : "No date"}
-                          </span>
-
-                          <span>
-                            {assignment.totalMarks}{" "}
-                            marks
-                          </span>
-                        </div>
-                      </div>
-
-                      <span
-                        className={getStatusClass(
-                          assignment.status
-                        )}
+                    <div>
+                      <h3
                         style={{
-                          textTransform:
-                            "capitalize",
-                          padding:
-                            "5px 10px",
-                          borderRadius:
-                            "20px",
-                          fontSize:
-                            "12px",
+                          margin: "0 0 8px",
                         }}
                       >
-                        {assignment.status}
-                      </span>
+                        {assignment.title}
+                      </h3>
+
+                      <div
+                        style={{
+                          display: "flex",
+                          gap: "15px",
+                          flexWrap: "wrap",
+                          fontSize: "14px",
+                          color: "#666",
+                        }}
+                      >
+                        <span
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "5px",
+                          }}
+                        >
+                          <BookOpen size={15} />
+
+                          {assignment.subject?.name || "Subject"}
+                        </span>
+
+                        <span
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "5px",
+                          }}
+                        >
+                          <Users size={15} />
+                          {assignment.class?.level} {assignment.class?.name}
+                          {assignment.class?.arm
+                            ? ` (${assignment.class.arm})`
+                            : ""}
+                        </span>
+
+                        <span
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "5px",
+                          }}
+                        >
+                          <CalendarDays size={15} />
+                          Due:{" "}
+                          {assignment.dueDate
+                            ? new Date(assignment.dueDate).toLocaleDateString()
+                            : "No date"}
+                        </span>
+
+                        <span>{assignment.totalMarks} marks</span>
+                      </div>
                     </div>
 
-                    {assignment.description && (
+                    <span
+                      className={getStatusClass(assignment.status)}
+                      style={{
+                        textTransform: "capitalize",
+                        padding: "5px 10px",
+                        borderRadius: "20px",
+                        fontSize: "12px",
+                      }}
+                    >
+                      {assignment.status}
+                    </span>
+                  </div>
+
+                  {assignment.description && (
+                    <p
+                      style={{
+                        margin: "15px 0 0",
+                        color: "#555",
+                        lineHeight: 1.6,
+                      }}
+                    >
+                      {assignment.description}
+                    </p>
+                  )}
+
+                  {assignment.instructions && (
+                    <div
+                      style={{
+                        marginTop: "15px",
+                        padding: "12px",
+                        background: "#f8fafc",
+                        borderRadius: "8px",
+                      }}
+                    >
+                      <strong>Instructions</strong>
+
                       <p
                         style={{
-                          margin:
-                            "15px 0 0",
+                          margin: "6px 0 0",
                           color: "#555",
                           lineHeight: 1.6,
                         }}
                       >
-                        {assignment.description}
+                        {assignment.instructions}
                       </p>
-                    )}
-
-                    {assignment.instructions && (
-                      <div
-                        style={{
-                          marginTop:
-                            "15px",
-                          padding:
-                            "12px",
-                          background:
-                            "#f8fafc",
-                          borderRadius:
-                            "8px",
-                        }}
-                      >
-                        <strong>
-                          Instructions
-                        </strong>
-
-                        <p
-                          style={{
-                            margin:
-                              "6px 0 0",
-                            color:
-                              "#555",
-                            lineHeight:
-                              1.6,
-                          }}
-                        >
-                          {
-                            assignment.instructions
-                          }
-                        </p>
-                      </div>
-                    )}
-
-                    <div
-                      style={{
-                        display: "flex",
-                        alignItems:
-                          "center",
-                        gap: "6px",
-                        marginTop:
-                          "15px",
-                        color: "#666",
-                        fontSize:
-                          "13px",
-                      }}
-                    >
-                      <Clock size={15} />
-
-                      Due:{" "}
-                      {assignment.dueDate
-                        ? new Date(
-                            assignment.dueDate
-                          ).toLocaleString()
-                        : "No due date"}
                     </div>
+                  )}
+
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "6px",
+                      marginTop: "15px",
+                      color: "#666",
+                      fontSize: "13px",
+                    }}
+                  >
+                    <Clock size={15} />
+                    Due:{" "}
+                    {assignment.dueDate
+                      ? new Date(assignment.dueDate).toLocaleString()
+                      : "No due date"}
                   </div>
-                )
-              )}
+                </div>
+              ))}
             </div>
           )}
         </div>
@@ -931,10 +764,7 @@ export default function Assignments() {
 
   return (
     <div className="page-container">
-      <button
-        className="back-button"
-        onClick={() => navigate(-1)}
-      >
+      <button className="back-button" onClick={() => navigate(-1)}>
         <ArrowLeft size={18} />
         Back
       </button>
@@ -943,10 +773,7 @@ export default function Assignments() {
         <div>
           <h1>Assignments</h1>
 
-          <p>
-            Create and manage assignments
-            for your students.
-          </p>
+          <p>Create and manage assignments for your students.</p>
         </div>
 
         <div className="page-header-icon">
@@ -961,19 +788,14 @@ export default function Assignments() {
         </div>
       )}
 
-      {success && (
-        <div className="success-message">
-          {success}
-        </div>
-      )}
+      {success && <div className="success-message">{success}</div>}
 
       {/* TOP ACTIONS */}
 
       <div
         style={{
           display: "flex",
-          justifyContent:
-            "space-between",
+          justifyContent: "space-between",
           alignItems: "center",
           gap: "15px",
           marginBottom: "20px",
@@ -998,23 +820,17 @@ export default function Assignments() {
             type="text"
             placeholder="Search assignments..."
             value={search}
-            onChange={(e) =>
-              setSearch(e.target.value)
-            }
+            onChange={(e) => setSearch(e.target.value)}
             style={{
               border: "none",
               outline: "none",
               width: "100%",
-              background:
-                "transparent",
+              background: "transparent",
             }}
           />
         </div>
 
-        <button
-          className="primary-button"
-          onClick={openCreateForm}
-        >
+        <button className="primary-button" onClick={openCreateForm}>
           <Plus size={18} />
           Create Assignment
         </button>
@@ -1027,14 +843,9 @@ export default function Assignments() {
           <div className="empty-state">
             <ClipboardList size={48} />
 
-            <h2>
-              No Assignments
-            </h2>
+            <h2>No Assignments</h2>
 
-            <p>
-              Create your first assignment
-              for your students.
-            </p>
+            <p>Create your first assignment for your students.</p>
 
             <button
               className="primary-button"
@@ -1054,164 +865,115 @@ export default function Assignments() {
               gap: "15px",
             }}
           >
-            {visibleAssignments.map(
-              (assignment) => (
+            {visibleAssignments.map((assignment) => (
+              <div
+                key={assignment._id}
+                style={{
+                  border: "1px solid #e5e7eb",
+                  borderRadius: "10px",
+                  padding: "18px",
+                  background: "#fff",
+                }}
+              >
                 <div
-                  key={assignment._id}
                   style={{
-                    border:
-                      "1px solid #e5e7eb",
-                    borderRadius: "10px",
-                    padding: "18px",
-                    background: "#fff",
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "flex-start",
+                    gap: "15px",
                   }}
                 >
-                  <div
-                    style={{
-                      display: "flex",
-                      justifyContent:
-                        "space-between",
-                      alignItems:
-                        "flex-start",
-                      gap: "15px",
-                    }}
-                  >
-                    <div>
-                      <h3
-                        style={{
-                          margin:
-                            "0 0 8px",
-                        }}
-                      >
-                        {assignment.title}
-                      </h3>
+                  <div>
+                    <h3
+                      style={{
+                        margin: "0 0 8px",
+                      }}
+                    >
+                      {assignment.title}
+                    </h3>
 
-                      <div
-                        style={{
-                          display: "flex",
-                          gap: "15px",
-                          flexWrap:
-                            "wrap",
-                          fontSize:
-                            "14px",
-                          color: "#666",
-                        }}
-                      >
-                        <span>
-                          <BookOpen
-                            size={15}
-                          />{" "}
-                          {assignment
-                            .subject
-                            ?.name ||
-                            "Subject"}
-                        </span>
+                    <div
+                      style={{
+                        display: "flex",
+                        gap: "15px",
+                        flexWrap: "wrap",
+                        fontSize: "14px",
+                        color: "#666",
+                      }}
+                    >
+                      <span>
+                        <BookOpen size={15} />{" "}
+                        {assignment.subject?.name || "Subject"}
+                      </span>
 
-                        <span>
-                          <Users
-                            size={15}
-                          />{" "}
-                          {assignment
-                            .class
-                            ?.level}{" "}
-                          {assignment
-                            .class
-                            ?.name}{" "}
-                          {assignment
-                            .class
-                            ?.arm
-                            ? `(${assignment.class.arm})`
-                            : ""}
-                        </span>
+                      <span>
+                        <Users size={15} /> {assignment.class?.level}{" "}
+                        {assignment.class?.name}{" "}
+                        {assignment.class?.arm
+                          ? `(${assignment.class.arm})`
+                          : ""}
+                      </span>
 
-                        <span>
-                          <CalendarDays
-                            size={15}
-                          />{" "}
-                          Due:{" "}
-                          {assignment.dueDate
-                            ? new Date(
-                                assignment.dueDate
-                              ).toLocaleDateString()
-                            : "No date"}
-                        </span>
+                      <span>
+                        <CalendarDays size={15} /> Due:{" "}
+                        {assignment.dueDate
+                          ? new Date(assignment.dueDate).toLocaleDateString()
+                          : "No date"}
+                      </span>
 
-                        <span>
-                          {
-                            assignment.totalMarks
-                          }{" "}
-                          marks
-                        </span>
-                      </div>
+                      <span>{assignment.totalMarks} marks</span>
                     </div>
-
-                    <span
-                      className={getStatusClass(
-                        assignment.status
-                      )}
-                      style={{
-                        textTransform:
-                          "capitalize",
-                        padding:
-                          "5px 10px",
-                        borderRadius:
-                          "20px",
-                        fontSize:
-                          "12px",
-                      }}
-                    >
-                      {assignment.status}
-                    </span>
                   </div>
 
-                  {assignment.description && (
-                    <p
-                      style={{
-                        margin:
-                          "15px 0 0",
-                        color: "#555",
-                      }}
-                    >
-                      {
-                        assignment.description
-                      }
-                    </p>
-                  )}
-
-                  <div
+                  <span
+                    className={getStatusClass(assignment.status)}
                     style={{
-                      display: "flex",
-                      gap: "10px",
-                      marginTop: "15px",
+                      textTransform: "capitalize",
+                      padding: "5px 10px",
+                      borderRadius: "20px",
+                      fontSize: "12px",
                     }}
                   >
-                    <button
-                      className="secondary-button"
-                      onClick={() =>
-                        openEditForm(
-                          assignment
-                        )
-                      }
-                    >
-                      <Edit size={16} />
-                      Edit
-                    </button>
-
-                    <button
-                      className="danger-button"
-                      onClick={() =>
-                        handleDelete(
-                          assignment._id
-                        )
-                      }
-                    >
-                      <Trash2 size={16} />
-                      Delete
-                    </button>
-                  </div>
+                    {assignment.status}
+                  </span>
                 </div>
-              )
-            )}
+
+                {assignment.description && (
+                  <p
+                    style={{
+                      margin: "15px 0 0",
+                      color: "#555",
+                    }}
+                  >
+                    {assignment.description}
+                  </p>
+                )}
+
+                <div
+                  style={{
+                    display: "flex",
+                    gap: "10px",
+                    marginTop: "15px",
+                  }}
+                >
+                  <button
+                    className="secondary-button"
+                    onClick={() => openEditForm(assignment)}
+                  >
+                    <Edit size={16} />
+                    Edit
+                  </button>
+
+                  <button
+                    className="danger-button"
+                    onClick={() => handleDelete(assignment._id)}
+                  >
+                    <Trash2 size={16} />
+                    Delete
+                  </button>
+                </div>
+              </div>
+            ))}
           </div>
         )}
       </div>
@@ -1223,13 +985,10 @@ export default function Assignments() {
           style={{
             position: "fixed",
             inset: 0,
-            background:
-              "rgba(0,0,0,0.5)",
+            background: "rgba(0,0,0,0.5)",
             display: "flex",
-            justifyContent:
-              "center",
-            alignItems:
-              "center",
+            justifyContent: "center",
+            alignItems: "center",
             zIndex: 1000,
             padding: "20px",
           }}
@@ -1248,12 +1007,9 @@ export default function Assignments() {
             <div
               style={{
                 display: "flex",
-                justifyContent:
-                  "space-between",
-                alignItems:
-                  "center",
-                marginBottom:
-                  "20px",
+                justifyContent: "space-between",
+                alignItems: "center",
+                marginBottom: "20px",
               }}
             >
               <div>
@@ -1262,20 +1018,16 @@ export default function Assignments() {
                     margin: 0,
                   }}
                 >
-                  {editingAssignment
-                    ? "Edit Assignment"
-                    : "Create Assignment"}
+                  {editingAssignment ? "Edit Assignment" : "Create Assignment"}
                 </h2>
 
                 <p
                   style={{
-                    margin:
-                      "5px 0 0",
+                    margin: "5px 0 0",
                     color: "#666",
                   }}
                 >
-                  Send an assignment to
-                  your class.
+                  Send an assignment to your class.
                 </p>
               </div>
 
@@ -1286,10 +1038,8 @@ export default function Assignments() {
                 }}
                 style={{
                   border: "none",
-                  background:
-                    "transparent",
-                  cursor:
-                    "pointer",
+                  background: "transparent",
+                  cursor: "pointer",
                 }}
               >
                 <X size={22} />
@@ -1299,78 +1049,46 @@ export default function Assignments() {
             {/* CLASS */}
 
             <div className="form-group">
-              <label>
-                Class *
-              </label>
+              <label>Class *</label>
 
-              <select
-                name="class"
-                value={form.class}
-                onChange={handleChange}
-              >
-                <option value="">
-                  Select class
-                </option>
+              <select name="class" value={form.class} onChange={handleChange}>
+                <option value="">Select class</option>
 
-                {classes.map(
-                  (item) => (
-                    <option
-                      key={item.id}
-                      value={item.id}
-                    >
-                      {item.level} -{" "}
-                      {item.name}
-
-                      {item.arm
-                        ? ` (${item.arm})`
-                        : ""}
-                    </option>
-                  )
-                )}
+                {classes.map((item) => (
+                  <option key={item.id} value={item.id}>
+                    {item.level} - {item.name}
+                    {item.arm ? ` (${item.arm})` : ""}
+                  </option>
+                ))}
               </select>
             </div>
 
             {/* SUBJECT */}
 
             <div className="form-group">
-              <label>
-                Subject *
-              </label>
+              <label>Subject *</label>
 
               <select
                 name="subject"
                 value={form.subject}
                 onChange={handleChange}
               >
-                <option value="">
-                  Select subject
-                </option>
+                <option value="">Select subject</option>
 
-                {subjects.map(
-                  (subject) => (
-                    <option
-                      key={subject._id}
-                      value={
-                        subject._id
-                      }
-                    >
-                      {subject.name}
+                {subjects.map((subject) => (
+                  <option key={subject._id} value={subject._id}>
+                    {subject.name}
 
-                      {subject.code
-                        ? ` (${subject.code})`
-                        : ""}
-                    </option>
-                  )
-                )}
+                    {subject.code ? ` (${subject.code})` : ""}
+                  </option>
+                ))}
               </select>
             </div>
 
             {/* TITLE */}
 
             <div className="form-group">
-              <label>
-                Assignment Title *
-              </label>
+              <label>Assignment Title *</label>
 
               <input
                 type="text"
@@ -1384,18 +1102,12 @@ export default function Assignments() {
             {/* DESCRIPTION */}
 
             <div className="form-group">
-              <label>
-                Description
-              </label>
+              <label>Description</label>
 
               <textarea
                 name="description"
-                value={
-                  form.description
-                }
-                onChange={
-                  handleChange
-                }
+                value={form.description}
+                onChange={handleChange}
                 placeholder="Describe the assignment..."
                 rows={4}
               />
@@ -1404,18 +1116,12 @@ export default function Assignments() {
             {/* INSTRUCTIONS */}
 
             <div className="form-group">
-              <label>
-                Instructions
-              </label>
+              <label>Instructions</label>
 
               <textarea
                 name="instructions"
-                value={
-                  form.instructions
-                }
-                onChange={
-                  handleChange
-                }
+                value={form.instructions}
+                onChange={handleChange}
                 placeholder="Tell students what they need to do..."
                 rows={4}
               />
@@ -1424,36 +1130,26 @@ export default function Assignments() {
             {/* DUE DATE */}
 
             <div className="form-group">
-              <label>
-                Due Date *
-              </label>
+              <label>Due Date *</label>
 
               <input
                 type="datetime-local"
                 name="dueDate"
                 value={form.dueDate}
-                onChange={
-                  handleChange
-                }
+                onChange={handleChange}
               />
             </div>
 
             {/* TOTAL MARKS */}
 
             <div className="form-group">
-              <label>
-                Total Marks *
-              </label>
+              <label>Total Marks *</label>
 
               <input
                 type="number"
                 name="totalMarks"
-                value={
-                  form.totalMarks
-                }
-                onChange={
-                  handleChange
-                }
+                value={form.totalMarks}
+                onChange={handleChange}
                 min="1"
                 placeholder="e.g. 20"
               />
@@ -1464,13 +1160,10 @@ export default function Assignments() {
             <div
               style={{
                 display: "flex",
-                justifyContent:
-                  "flex-end",
+                justifyContent: "flex-end",
                 gap: "10px",
-                marginTop:
-                  "25px",
-                flexWrap:
-                  "wrap",
+                marginTop: "25px",
+                flexWrap: "wrap",
               }}
             >
               <button
@@ -1486,39 +1179,27 @@ export default function Assignments() {
 
               <button
                 className="secondary-button"
-                onClick={() =>
-                  handleSubmit(false)
-                }
+                onClick={() => handleSubmit(false)}
                 disabled={saving}
               >
                 {saving ? (
-                  <Loader2
-                    size={16}
-                    className="spin"
-                  />
+                  <Loader2 size={16} className="spin" />
                 ) : (
                   <Save size={16} />
                 )}
-
                 Save Draft
               </button>
 
               <button
                 className="primary-button"
-                onClick={() =>
-                  handleSubmit(true)
-                }
+                onClick={() => handleSubmit(true)}
                 disabled={saving}
               >
                 {saving ? (
-                  <Loader2
-                    size={16}
-                    className="spin"
-                  />
+                  <Loader2 size={16} className="spin" />
                 ) : (
                   <Send size={16} />
                 )}
-
                 Publish Assignment
               </button>
             </div>
