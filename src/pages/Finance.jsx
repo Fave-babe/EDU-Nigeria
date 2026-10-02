@@ -1,338 +1,576 @@
-import { useState, useEffect } from 'react';
-import Header from '../components/Header';
-import { loadData, saveData, addItem, updateItem } from '../data/store';
+import React, { useEffect, useMemo, useState } from "react";
+
+import {
+  Search,
+  RefreshCw,
+  Receipt,
+  Users,
+  WalletCards,
+  Clock,
+  CheckCircle2,
+  XCircle,
+  Eye,
+  AlertCircle,
+} from "lucide-react";
+
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
+
+import {
+  getPayments,
+  getTotalRevenue,
+  getMyChildrenPayments,
+} from "../api/payment.api";
+
+import "./Finance.css";
 
 export default function Finance() {
-  const [students, setStudents] = useState([]);
-  const [classes, setClasses] = useState([]);
-  const [fees, setFees] = useState([]);
-  const [invoices, setInvoices] = useState([]);
-  const [payments, setPayments] = useState([]);
-  const [activeTab, setActiveTab] = useState('invoices');
-  const [showFeeForm, setShowFeeForm] = useState(false);
-  const [showPaymentForm, setShowPaymentForm] = useState(false);
-  const [selectedInvoice, setSelectedInvoice] = useState(null);
+  const { user } = useAuth();
+  const navigate = useNavigate();
 
-  const [feeForm, setFeeForm] = useState({ classId: '', category: 'Tuition', amount: '', term: 'First Term', session: '2024/2025' });
-  const [paymentForm, setPaymentForm] = useState({ invoiceId: '', amount: '', method: 'bank_transfer', date: '', reference: '' });
+  const [payments, setPayments] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [error, setError] = useState("");
+  const [totalRevenue, setTotalRevenue] = useState(0);
+
+  const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [feeTypeFilter, setFeeTypeFilter] = useState("all");
+
+  const isParent = user?.role === "parent";
+
+  const schoolId =
+    typeof user?.school === "object"
+      ? user?.school?._id
+      : user?.school;
+
+  const loadPayments = async (isRefresh = false) => {
+    try {
+      if (isRefresh) {
+        setRefreshing(true);
+      } else {
+        setLoading(true);
+      }
+
+      setError("");
+
+      // =====================================================
+      // PARENT
+      // Only load payments belonging to linked children
+      // =====================================================
+
+      if (isParent) {
+        const response = await getMyChildrenPayments();
+
+        console.log("PARENT PAYMENTS RESPONSE:", response);
+
+        const paymentList =
+          response?.payments ??
+          response?.data?.payments ??
+          [];
+
+        const safePayments = Array.isArray(paymentList)
+          ? paymentList
+          : [];
+
+        setPayments(safePayments);
+
+        // Calculate total paid by the parent's children
+        const parentRevenue = safePayments
+          .filter(
+            (payment) =>
+              String(payment.status || "").toLowerCase() ===
+              "paid"
+          )
+          .reduce(
+            (total, payment) =>
+              total + Number(payment.amount || 0),
+            0
+          );
+
+        setTotalRevenue(parentRevenue);
+
+        return;
+      }
+
+      // =====================================================
+      // ADMIN / BURSAR / SUPER ADMIN
+      // School-wide finance
+      // =====================================================
+
+      if (!schoolId) {
+        setPayments([]);
+        setTotalRevenue(0);
+        setError(
+          "No school is associated with this account."
+        );
+        return;
+      }
+
+      const [paymentsResponse, revenueResponse] =
+        await Promise.all([
+          getPayments({
+            school: schoolId,
+            page: 1,
+            limit: 100,
+          }),
+
+          getTotalRevenue(schoolId),
+        ]);
+
+      console.log(
+        "FINANCE PAYMENTS RESPONSE:",
+        paymentsResponse
+      );
+
+      console.log(
+        "FINANCE REVENUE RESPONSE:",
+        revenueResponse
+      );
+
+      const paymentList =
+        paymentsResponse?.payments ??
+        paymentsResponse?.data?.payments ??
+        [];
+
+      setPayments(
+        Array.isArray(paymentList) ? paymentList : []
+      );
+
+      const revenue =
+        revenueResponse?.total ??
+        revenueResponse?.data?.total ??
+        0;
+
+      setTotalRevenue(Number(revenue) || 0);
+    } catch (err) {
+      console.error("FINANCE LOAD ERROR:", err);
+
+      setError(
+        err?.response?.data?.message ||
+          err?.message ||
+          "Failed to load payment records."
+      );
+
+      setPayments([]);
+      setTotalRevenue(0);
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  };
 
   useEffect(() => {
-    setStudents(loadData('students'));
-    setClasses(loadData('classes'));
-    setFees(loadData('fees'));
-    setInvoices(loadData('invoices'));
-    setPayments(loadData('payments'));
-  }, []);
+    loadPayments();
+  }, [schoolId, isParent]);
 
-  function refresh() {
-    setStudents(loadData('students'));
-    setClasses(loadData('classes'));
-    setFees(loadData('fees'));
-    setInvoices(loadData('invoices'));
-    setPayments(loadData('payments'));
-  }
+  const filteredPayments = useMemo(() => {
+    const searchValue = search.trim().toLowerCase();
 
-  function handleFeeSubmit(e) {
-    e.preventDefault();
-    addItem('fees', { ...feeForm, classId: parseInt(feeForm.classId), amount: parseFloat(feeForm.amount), branch: 'Main Campus' });
-    setShowFeeForm(false);
-    setFeeForm({ classId: '', category: 'Tuition', amount: '', term: 'First Term', session: '2024/2025' });
-    refresh();
-  }
+    return payments.filter((payment) => {
+      const student = payment.student || {};
 
-  function handlePaymentSubmit(e) {
-    e.preventDefault();
-    const payment = {
-      invoiceId: parseInt(paymentForm.invoiceId),
-      studentId: selectedInvoice ? selectedInvoice.studentId : 0,
-      amount: parseFloat(paymentForm.amount),
-      method: paymentForm.method,
-      date: paymentForm.date || new Date().toISOString().split('T')[0],
-      reference: paymentForm.reference,
-      receivedBy: 'Mr. Bursar',
-      branch: 'Main Campus'
-    };
-    addItem('payments', payment);
-    if (selectedInvoice) {
-      const remaining = selectedInvoice.amount - payment.amount;
-      updateItem('invoices', selectedInvoice.id, { status: remaining <= 0 ? 'paid' : 'partial' });
-    }
-    setShowPaymentForm(false);
-    setSelectedInvoice(null);
-    setPaymentForm({ invoiceId: '', amount: '', method: 'bank_transfer', date: '', reference: '' });
-    refresh();
-  }
+      const studentName =
+        `${student.firstName || ""} ${
+          student.lastName || ""
+        }`.trim();
 
-  function generateReceipt(payment) {
-    const invoice = invoices.find(i => i.id === payment.invoiceId);
-    const student = students.find(s => s.id === payment.studentId);
-    const methodLabel = { bank_transfer: 'Bank Transfer', ussd: 'USSD', mobile_money: 'Mobile Money', cash: 'Cash' }[payment.method] || payment.method;
-    
-    const html = `<!DOCTYPE html><html><head><title>Receipt</title><style>
-      body{font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px;}
-      h1{text-align:center;color:#1a73e8;}
-      .receipt-box{border:1px solid #ddd;padding:20px;margin-top:20px;}
-      .row{display:flex;justify-content:space-between;margin:10px 0;padding-bottom:10px;border-bottom:1px solid #eee;}
-    </style></head><body>`;
-    html += `<h1>Payment Receipt</h1>`;
-    html += `<div class="receipt-box">`;
-    html += `<div class="row"><span>Receipt No:</span><span>RCP-${payment.id}</span></div>`;
-    html += `<div class="row"><span>Date:</span><span>${payment.date}</span></div>`;
-    html += `<div class="row"><span>Student:</span><span>${student ? `${student.firstName} ${student.lastName}` : '-'}</span></div>`;
-    html += `<div class="row"><span>Amount:</span><span>NGN ${payment.amount.toLocaleString()}</span></div>`;
-    html += `<div class="row"><span>Method:</span><span>${methodLabel}</span></div>`;
-    html += `<div class="row"><span>Reference:</span><span>${payment.reference || '-'}</span></div>`;
-    html += `</div></body></html>`;
+      const registrationNumber =
+        student.registrationNumber || "";
 
-    const blob = new Blob([html], { type: 'text/html' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `receipt-${payment.id}.html`;
-    a.click();
-    URL.revokeObjectURL(url);
-  }
+      const reference = payment.reference || "";
 
-  const totalInvoices = invoices.length;
-  const paidInvoices = invoices.filter(i => i.status === 'paid').length;
-  const pendingAmount = invoices.filter(i => i.status === 'pending').reduce((sum, i) => sum + i.amount, 0);
-  const totalCollected = payments.reduce((sum, p) => sum + p.amount, 0);
+      const matchesSearch =
+        !searchValue ||
+        studentName
+          .toLowerCase()
+          .includes(searchValue) ||
+        registrationNumber
+          .toLowerCase()
+          .includes(searchValue) ||
+        reference.toLowerCase().includes(searchValue);
+
+      const matchesStatus =
+        statusFilter === "all" ||
+        String(payment.status || "").toLowerCase() ===
+          statusFilter.toLowerCase();
+
+      const matchesFeeType =
+        feeTypeFilter === "all" ||
+        String(payment.feeType || "").toLowerCase() ===
+          feeTypeFilter.toLowerCase();
+
+      return (
+        matchesSearch &&
+        matchesStatus &&
+        matchesFeeType
+      );
+    });
+  }, [
+    payments,
+    search,
+    statusFilter,
+    feeTypeFilter,
+  ]);
+
+  const paidCount = payments.filter(
+    (payment) =>
+      String(payment.status || "").toLowerCase() === "paid"
+  ).length;
+
+  const pendingCount = payments.filter(
+    (payment) =>
+      String(payment.status || "").toLowerCase() ===
+      "pending"
+  ).length;
+
+  const failedCount = payments.filter(
+    (payment) =>
+      String(payment.status || "").toLowerCase() === "failed"
+  ).length;
+
+  const formatMoney = (amount) => {
+    return new Intl.NumberFormat("en-NG", {
+      style: "currency",
+      currency: "NGN",
+      maximumFractionDigits: 0,
+    }).format(Number(amount || 0));
+  };
+
+  const formatDate = (date) => {
+    if (!date) return "—";
+
+    return new Date(date).toLocaleDateString("en-NG", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    });
+  };
+
+  const getStudentName = (payment) => {
+    const student = payment.student || {};
+
+    const name =
+      `${student.firstName || ""} ${
+        student.lastName || ""
+      }`.trim();
+
+    return name || "Unknown Student";
+  };
+
+  const getStatusClass = (status) => {
+    const normalized = String(status || "").toLowerCase();
+
+    if (normalized === "paid") return "status-paid";
+    if (normalized === "pending") return "status-pending";
+    if (normalized === "failed") return "status-failed";
+
+    return "status-default";
+  };
 
   return (
-    <div className="page">
-      <Header title="Finance & Fees" subtitle="Manage invoicing, payments, and receipts" />
-
-      <div className="stats-grid">
-        <div className="stat-card">
-          <div className="stat-icon green">C</div>
-          <div className="stat-info">
-            <div className="stat-value">{(totalCollected / 1000).toFixed(0)}K</div>
-            <div className="stat-label">Total Collected</div>
-          </div>
-        </div>
-        <div className="stat-card">
-          <div className="stat-icon orange">P</div>
-          <div className="stat-info">
-            <div className="stat-value">{(pendingAmount / 1000).toFixed(0)}K</div>
-            <div className="stat-label">Pending</div>
-          </div>
-        </div>
-        <div className="stat-card">
-          <div className="stat-icon blue">I</div>
-          <div className="stat-info">
-            <div className="stat-value">{totalInvoices}</div>
-            <div className="stat-label">Total Invoices</div>
-          </div>
-        </div>
-        <div className="stat-card">
-          <div className="stat-icon purple">R</div>
-          <div className="stat-info">
-            <div className="stat-value">{paidInvoices}</div>
-            <div className="stat-label">Paid</div>
-          </div>
-        </div>
-      </div>
-
-      <div className="tabs">
-        <button className={`tab ${activeTab === 'invoices' ? 'active' : ''}`} onClick={() => setActiveTab('invoices')}>Invoices</button>
-        <button className={`tab ${activeTab === 'payments' ? 'active' : ''}`} onClick={() => setActiveTab('payments')}>Payments</button>
-        <button className={`tab ${activeTab === 'fees' ? 'active' : ''}`} onClick={() => setActiveTab('fees')}>Fee Structures</button>
-      </div>
-
-      {activeTab === 'invoices' && (
+    <div className="finance-page">
+      <div className="finance-header">
         <div>
-          <div className="page-actions">
-            <button className="btn-primary" onClick={() => alert('Invoices are generated automatically based on fee structures.')}>+ Generate Invoices</button>
-          </div>
-          <div className="table-wrapper">
-            <table className="data-table">
-              <thead>
-                <tr>
-                  <th>Invoice ID</th>
-                  <th>Student</th>
-                  <th>Amount</th>
-                  <th>Due Date</th>
-                  <th>Status</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {invoices.map(inv => {
-                  const student = students.find(s => s.id === inv.studentId);
-                  return (
-                    <tr key={inv.id}>
-                      <td>INV-{inv.id}</td>
-                      <td>{student ? `${student.firstName} ${student.lastName}` : '-'}</td>
-                      <td>NGN {inv.amount.toLocaleString()}</td>
-                      <td>{inv.dueDate}</td>
-                      <td><span className={`badge ${inv.status === 'paid' ? 'badge-success' : inv.status === 'partial' ? 'badge-warning' : 'badge-danger'}`}>{inv.status}</span></td>
-                      <td>
-                        {inv.status !== 'paid' && (
-                          <button className="btn-sm" onClick={() => { setSelectedInvoice(inv); setShowPaymentForm(true); setPaymentForm({ ...paymentForm, invoiceId: inv.id }); }}>Record Payment</button>
-                        )}
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
+          <h1>Fees & Finance</h1>
+
+          <p>
+            {isParent
+              ? "View payment records for your children."
+              : "Manage student payments, fees and financial records."}
+          </p>
+        </div>
+
+        <button
+          type="button"
+          className="finance-refresh-button"
+          onClick={() => loadPayments(true)}
+          disabled={refreshing}
+        >
+          <RefreshCw
+            size={17}
+            className={
+              refreshing ? "finance-spin" : ""
+            }
+          />
+
+          {refreshing ? "Refreshing..." : "Refresh"}
+        </button>
+      </div>
+
+      {error && (
+        <div className="finance-error">
+          <AlertCircle size={18} />
+          <span>{error}</span>
         </div>
       )}
 
-      {activeTab === 'payments' && (
-        <div className="table-wrapper">
-          <table className="data-table">
-            <thead>
-              <tr>
-                <th>Receipt No</th>
-                <th>Student</th>
-                <th>Amount</th>
-                <th>Method</th>
-                <th>Date</th>
-                <th>Reference</th>
-                <th>Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              {payments.map(p => {
-                const student = students.find(s => s.id === p.studentId);
-                return (
-                  <tr key={p.id}>
-                    <td>RCP-{p.id}</td>
-                    <td>{student ? `${student.firstName} ${student.lastName}` : '-'}</td>
-                    <td>NGN {p.amount.toLocaleString()}</td>
-                    <td>{p.method.replace('_', ' ')}</td>
-                    <td>{p.date}</td>
-                    <td>{p.reference || '-'}</td>
-                    <td><button className="btn-sm" onClick={() => generateReceipt(p)}>Receipt</button></td>
+      <div className="finance-stats">
+        <div className="finance-stat-card">
+          <div className="finance-stat-icon">
+            <WalletCards size={21} />
+          </div>
+
+          <div>
+            <span>
+              {isParent
+                ? "Children's Payments"
+                : "Total Revenue"}
+            </span>
+
+            <strong>
+              {formatMoney(totalRevenue)}
+            </strong>
+          </div>
+        </div>
+
+        <div className="finance-stat-card">
+          <div className="finance-stat-icon">
+            <Receipt size={21} />
+          </div>
+
+          <div>
+            <span>Total Payments</span>
+            <strong>{payments.length}</strong>
+          </div>
+        </div>
+
+        <div className="finance-stat-card">
+          <div className="finance-stat-icon">
+            <CheckCircle2 size={21} />
+          </div>
+
+          <div>
+            <span>Paid</span>
+            <strong>{paidCount}</strong>
+          </div>
+        </div>
+
+        <div className="finance-stat-card">
+          <div className="finance-stat-icon">
+            <Clock size={21} />
+          </div>
+
+          <div>
+            <span>Pending</span>
+            <strong>{pendingCount}</strong>
+          </div>
+        </div>
+
+        <div className="finance-stat-card">
+          <div className="finance-stat-icon">
+            <XCircle size={21} />
+          </div>
+
+          <div>
+            <span>Failed</span>
+            <strong>{failedCount}</strong>
+          </div>
+        </div>
+      </div>
+
+      <div className="finance-content">
+        <div className="finance-toolbar">
+          <div className="finance-search">
+            <Search size={18} />
+
+            <input
+              type="text"
+              placeholder="Search student, registration number or reference..."
+              value={search}
+              onChange={(e) =>
+                setSearch(e.target.value)
+              }
+            />
+          </div>
+
+          <select
+            value={statusFilter}
+            onChange={(e) =>
+              setStatusFilter(e.target.value)
+            }
+          >
+            <option value="all">All Statuses</option>
+            <option value="paid">Paid</option>
+            <option value="pending">Pending</option>
+            <option value="failed">Failed</option>
+          </select>
+
+          <select
+            value={feeTypeFilter}
+            onChange={(e) =>
+              setFeeTypeFilter(e.target.value)
+            }
+          >
+            <option value="all">All Fee Types</option>
+            <option value="school_fees">
+              School Fees
+            </option>
+            <option value="transport">Transport</option>
+            <option value="uniform">Uniform</option>
+            <option value="exam">Exam</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
+
+        <div className="finance-table-card">
+          <div className="finance-table-header">
+            <div>
+              <h2>Payment Records</h2>
+
+              <p>
+                {filteredPayments.length} payment
+                {filteredPayments.length === 1
+                  ? ""
+                  : "s"} found
+              </p>
+            </div>
+
+            {!isParent && (
+              <button
+                type="button"
+                className="finance-record-button"
+                onClick={() =>
+                  navigate("/record-payment")
+                }
+              >
+                <WalletCards size={17} />
+                Record Payment
+              </button>
+            )}
+          </div>
+
+          {loading ? (
+            <div className="finance-empty">
+              <RefreshCw
+                size={25}
+                className="finance-spin"
+              />
+
+              <p>
+                Loading payment records...
+              </p>
+            </div>
+          ) : filteredPayments.length === 0 ? (
+            <div className="finance-empty">
+              <Receipt size={34} />
+
+              <h3>
+                No payment records found
+              </h3>
+
+              <p>
+                {isParent
+                  ? "Payments for your linked children will appear here."
+                  : "Payments recorded for this school will appear here."}
+              </p>
+            </div>
+          ) : (
+            <div className="finance-table-wrapper">
+              <table className="finance-table">
+                <thead>
+                  <tr>
+                    <th>Student</th>
+                    <th>Registration No.</th>
+                    <th>Fee Type</th>
+                    <th>Amount</th>
+                    <th>Method</th>
+                    <th>Status</th>
+                    <th>Date</th>
+                    <th></th>
                   </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
-      )}
+                </thead>
 
-      {activeTab === 'fees' && (
-        <div>
-          <div className="page-actions">
-            <button className="btn-primary" onClick={() => setShowFeeForm(true)}>+ Add Fee Structure</button>
-          </div>
-          <div className="table-wrapper">
-            <table className="data-table">
-              <thead>
-                <tr>
-                  <th>Class</th>
-                  <th>Category</th>
-                  <th>Amount</th>
-                  <th>Term</th>
-                  <th>Session</th>
-                </tr>
-              </thead>
-              <tbody>
-                {fees.map(f => {
-                  const cls = classes.find(c => c.id === f.classId);
-                  return (
-                    <tr key={f.id}>
-                      <td>{cls ? `${cls.name} ${cls.arm}` : '-'}</td>
-                      <td>{f.category}</td>
-                      <td>NGN {f.amount.toLocaleString()}</td>
-                      <td>{f.term}</td>
-                      <td>{f.session}</td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      )}
+                <tbody>
+                  {filteredPayments.map(
+                    (payment) => (
+                      <tr key={payment._id}>
+                        <td>
+                          <div className="finance-student">
+                            <div className="finance-student-avatar">
+                              <Users size={17} />
+                            </div>
 
-      {showFeeForm && (
-        <div className="modal-overlay" onClick={() => setShowFeeForm(false)}>
-          <div className="modal" onClick={e => e.stopPropagation()}>
-            <h2>Add Fee Structure</h2>
-            <form onSubmit={handleFeeSubmit} className="form-grid">
-              <div className="form-group">
-                <label>Class</label>
-                <select required value={feeForm.classId} onChange={e => setFeeForm({ ...feeForm, classId: e.target.value })}>
-                  <option value="">Select Class</option>
-                  {classes.map(c => <option key={c.id} value={c.id}>{c.name} {c.arm}</option>)}
-                </select>
-              </div>
-              <div className="form-group">
-                <label>Category</label>
-                <select value={feeForm.category} onChange={e => setFeeForm({ ...feeForm, category: e.target.value })}>
-                  <option>Tuition</option>
-                  <option>Examination</option>
-                  <option>Development</option>
-                  <option>Other</option>
-                </select>
-              </div>
-              <div className="form-group">
-                <label>Amount</label>
-                <input type="number" required value={feeForm.amount} onChange={e => setFeeForm({ ...feeForm, amount: e.target.value })} />
-              </div>
-              <div className="form-group">
-                <label>Term</label>
-                <select value={feeForm.term} onChange={e => setFeeForm({ ...feeForm, term: e.target.value })}>
-                  <option>First Term</option>
-                  <option>Second Term</option>
-                  <option>Third Term</option>
-                </select>
-              </div>
-              <div className="form-group">
-                <label>Session</label>
-                <input required value={feeForm.session} onChange={e => setFeeForm({ ...feeForm, session: e.target.value })} />
-              </div>
-              <div className="form-actions full-width">
-                <button type="button" className="btn-secondary" onClick={() => setShowFeeForm(false)}>Cancel</button>
-                <button type="submit" className="btn-primary">Save</button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+                            <div>
+                              <strong>
+                                {getStudentName(
+                                  payment
+                                )}
+                              </strong>
+                            </div>
+                          </div>
+                        </td>
 
-      {showPaymentForm && (
-        <div className="modal-overlay" onClick={() => setShowPaymentForm(false)}>
-          <div className="modal" onClick={e => e.stopPropagation()}>
-            <h2>Record Payment</h2>
-            <form onSubmit={handlePaymentSubmit} className="form-grid">
-              <div className="form-group">
-                <label>Invoice</label>
-                <input disabled value={selectedInvoice ? `INV-${selectedInvoice.id}` : ''} />
-              </div>
-              <div className="form-group">
-                <label>Amount</label>
-                <input type="number" required value={paymentForm.amount} onChange={e => setPaymentForm({ ...paymentForm, amount: e.target.value })} />
-              </div>
-              <div className="form-group">
-                <label>Method</label>
-                <select value={paymentForm.method} onChange={e => setPaymentForm({ ...paymentForm, method: e.target.value })}>
-                  <option value="bank_transfer">Bank Transfer</option>
-                  <option value="ussd">USSD</option>
-                  <option value="mobile_money">Mobile Money</option>
-                  <option value="cash">Cash</option>
-                </select>
-              </div>
-              <div className="form-group">
-                <label>Date</label>
-                <input type="date" required value={paymentForm.date} onChange={e => setPaymentForm({ ...paymentForm, date: e.target.value })} />
-              </div>
-              <div className="form-group">
-                <label>Reference</label>
-                <input value={paymentForm.reference} onChange={e => setPaymentForm({ ...paymentForm, reference: e.target.value })} />
-              </div>
-              <div className="form-actions full-width">
-                <button type="button" className="btn-secondary" onClick={() => setShowPaymentForm(false)}>Cancel</button>
-                <button type="submit" className="btn-primary">Save Payment</button>
-              </div>
-            </form>
-          </div>
+                        <td>
+                          {payment.student
+                            ?.registrationNumber ||
+                            "—"}
+                        </td>
+
+                        <td>
+                          <span className="fee-type">
+                            {String(
+                              payment.feeType ||
+                                "Other"
+                            ).replaceAll("_", " ")}
+                          </span>
+                        </td>
+
+                        <td>
+                          <strong>
+                            {formatMoney(
+                              payment.amount
+                            )}
+                          </strong>
+                        </td>
+
+                        <td>
+                          {payment.paymentMethod ||
+                            "—"}
+                        </td>
+
+                        <td>
+                          <span
+                            className={`finance-status ${getStatusClass(
+                              payment.status
+                            )}`}
+                          >
+                            {payment.status ||
+                              "Unknown"}
+                          </span>
+                        </td>
+
+                        <td>
+                          {formatDate(
+                            payment.paymentDate ||
+                              payment.createdAt
+                          )}
+                        </td>
+
+                        <td>
+                          <button
+                            type="button"
+                            className="finance-view-button"
+                            title="View payment"
+                            onClick={() =>
+                              navigate(
+                                `/finance/invoice/${payment._id}`
+                              )
+                            }
+                          >
+                            <Eye size={17} />
+                          </button>
+                        </td>
+                      </tr>
+                    )
+                  )}
+                </tbody>
+              </table>
+            </div>
+          )}
         </div>
-      )}
+      </div>
     </div>
   );
 }

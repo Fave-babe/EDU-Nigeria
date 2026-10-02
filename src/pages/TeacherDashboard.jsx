@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from "react";
 
+import React, { useEffect, useState } from "react";
 import {
   BookOpen,
   ClipboardCheck,
@@ -9,58 +9,54 @@ import {
   CheckCircle,
   AlertCircle,
   GraduationCap,
-  Clock,
   ArrowRight,
 } from "lucide-react";
-
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { teacherApi } from "../api/teacher.api";
-
 import "./TeacherDashboard.css";
 
 export default function TeacherDashboard() {
+  const navigate = useNavigate();
   const { user } = useAuth();
 
   const [teacher, setTeacher] = useState(user || null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [dashboard, setDashboard] = useState(null);
 
   // =========================================================
-  // LOAD TEACHER
+  // LOAD TEACHER DASHBOARD
   // =========================================================
 
   useEffect(() => {
-    const loadTeacher = async () => {
+    const loadDashboard = async () => {
       try {
         setLoading(true);
         setError("");
 
-        if (!user?._id) {
-          setLoading(false);
-          return;
-        }
+        const response = await teacherApi.getDashboard();
 
-        const response = await teacherApi.getTeacher(user._id);
+        console.log(
+          "TEACHER DASHBOARD RESPONSE:",
+          JSON.stringify(response, null, 2)
+        );
 
-        console.log("TEACHER RESPONSE:", response);
-
-        if (response?.teacher) {
-          setTeacher(response.teacher);
-        }
+        setTeacher(response?.teacher || user || null);
+        setDashboard(response || null);
       } catch (err) {
-        console.error("TEACHER DASHBOARD ERROR:", err);
+        console.error("Teacher dashboard error:", err);
 
         setError(
           err?.response?.data?.message ||
-            err?.message ||
-            "Unable to load teacher information."
+            "Failed to load teacher dashboard"
         );
       } finally {
         setLoading(false);
       }
     };
 
-    loadTeacher();
+    loadDashboard();
   }, [user]);
 
   // =========================================================
@@ -95,40 +91,42 @@ export default function TeacherDashboard() {
   });
 
   // =========================================================
-  // PLACEHOLDER DATA
+  // DASHBOARD DATA
   // =========================================================
-  // These will later be replaced with backend data.
 
   const stats = [
     {
       title: "My Students",
-      value: "—",
+      value: dashboard?.stats?.students ?? 0,
       icon: Users,
       className: "blue",
     },
     {
       title: "Subjects",
-      value: "—",
+      value: dashboard?.stats?.subjects ?? 0,
       icon: BookOpen,
       className: "green",
     },
     {
       title: "Today's Classes",
-      value: "—",
+      value: dashboard?.stats?.todayClasses ?? 0,
       icon: Calendar,
       className: "orange",
     },
     {
       title: "Attendance",
-      value: "—",
-      icon: CheckCircle,
+      value: dashboard?.attendance?.total ?? 0,
+      icon: ClipboardCheck,
       className: "purple",
     },
   ];
 
-  const classes = [];
+  const classes = dashboard?.classes || [];
+  const timetable = dashboard?.todayTimetable || [];
 
-  const timetable = [];
+  // =========================================================
+  // RECENT ACTIVITIES
+  // =========================================================
 
   const activities = [];
 
@@ -141,21 +139,25 @@ export default function TeacherDashboard() {
       title: "Mark Attendance",
       description: "Record today's attendance",
       icon: ClipboardCheck,
+      path: "/Tattendance",
     },
     {
       title: "Enter Scores",
       description: "Add student results",
       icon: FileText,
+      path: "/results",
     },
     {
       title: "Assignments",
       description: "Create or manage assignments",
       icon: BookOpen,
+      path: "/assignments",
     },
     {
       title: "Lesson Notes",
       description: "Manage your lesson notes",
       icon: Calendar,
+      path: "/lesson-notes",
     },
   ];
 
@@ -174,6 +176,7 @@ export default function TeacherDashboard() {
         <div className="teacher-hero-content">
 
           <div className="teacher-hero-text">
+
             <div className="teacher-welcome-badge">
               <GraduationCap size={16} />
               Teacher Portal
@@ -193,9 +196,11 @@ export default function TeacherDashboard() {
               <Calendar size={17} />
               <span>{formattedDate}</span>
             </div>
+
           </div>
 
           <div className="teacher-profile-summary">
+
             <div className="teacher-avatar">
               {teacherName.charAt(0).toUpperCase()}
             </div>
@@ -203,10 +208,13 @@ export default function TeacherDashboard() {
             <div>
               <h3>{teacherName}</h3>
 
-              <p>{teacher?.email || "No email available"}</p>
+              <p>
+                {teacher?.email || "No email available"}
+              </p>
 
               <span>{schoolName}</span>
             </div>
+
           </div>
 
         </div>
@@ -221,7 +229,10 @@ export default function TeacherDashboard() {
           <AlertCircle size={20} />
 
           <div>
-            <strong>Unable to load teacher information</strong>
+            <strong>
+              Unable to load teacher information
+            </strong>
+
             <p>{error}</p>
           </div>
         </div>
@@ -275,26 +286,32 @@ export default function TeacherDashboard() {
 
           <section className="teacher-main-grid">
 
-            {/* ===============================================
+            {/* =================================================
                 MY CLASSES
-            =============================================== */}
+            ================================================= */}
 
             <div className="teacher-panel">
 
               <div className="teacher-panel-header">
+
                 <div>
                   <h2>My Classes</h2>
                   <p>Classes assigned to you</p>
                 </div>
 
-                <button className="teacher-panel-link">
+                <button
+                  className="teacher-panel-link"
+                  onClick={() => navigate("/Tstudents")}
+                >
                   View All
                   <ArrowRight size={16} />
                 </button>
+
               </div>
 
               {classes.length === 0 ? (
                 <div className="teacher-empty-state">
+
                   <div className="teacher-empty-icon">
                     <Users size={25} />
                   </div>
@@ -305,80 +322,99 @@ export default function TeacherDashboard() {
                     Your assigned classes will appear here
                     once they are available.
                   </p>
+
                 </div>
               ) : (
                 <div className="teacher-classes-list">
+
                   {classes.map((item) => (
                     <div
                       key={item.id}
                       className="teacher-class-item"
                     >
+
                       <div className="teacher-class-icon">
                         <BookOpen size={20} />
                       </div>
 
                       <div>
                         <h3>{item.name}</h3>
-                        <p>{item.subject}</p>
+
+                        <p>
+                          {item.level} • Arm {item.arm}
+                        </p>
                       </div>
 
                       <span>
                         {item.students} Students
                       </span>
+
                     </div>
                   ))}
+
                 </div>
               )}
 
             </div>
 
-            {/* ===============================================
+            {/* =================================================
                 TODAY'S TIMETABLE
-            =============================================== */}
+            ================================================= */}
 
             <div className="teacher-panel">
 
               <div className="teacher-panel-header">
+
                 <div>
                   <h2>Today's Timetable</h2>
                   <p>Your classes for today</p>
                 </div>
 
                 <Calendar size={20} />
+
               </div>
 
               {timetable.length === 0 ? (
-                <div className="teacher-empty-state">
-                  <div className="teacher-empty-icon">
-                    <Clock size={25} />
-                  </div>
-
-                  <h3>No timetable available</h3>
-
-                  <p>
-                    Your timetable will appear here when
-                    it has been configured.
-                  </p>
+                <div className="empty-state">
+                  <Calendar size={24} />
+                  <p>No classes scheduled for today.</p>
                 </div>
               ) : (
-                <div className="teacher-timetable-list">
+                <div className="timetable-list">
+
                   {timetable.map((item) => (
                     <div
-                      key={item.id}
-                      className="teacher-timetable-item"
+                      className="timetable-item"
+                      key={item._id}
                     >
-                      <div className="teacher-time">
-                        {item.time}
+
+                      <div>
+                        <strong>
+                          {item.subject?.name || "Subject"}
+                        </strong>
+
+                        <p>
+                          {item.class?.name || "Class"}
+
+                          {item.class?.arm
+                            ? ` • Arm ${item.class.arm}`
+                            : ""}
+                        </p>
                       </div>
 
                       <div>
-                        <h3>{item.subject}</h3>
-                        <p>{item.className}</p>
+                        <strong>
+                          {item.startTime} - {item.endTime}
+                        </strong>
+
+                        {item.room && (
+                          <p>{item.room}</p>
+                        )}
                       </div>
 
-                      <span>{item.room}</span>
                     </div>
                   ))}
+
                 </div>
               )}
 
@@ -392,21 +428,24 @@ export default function TeacherDashboard() {
 
           <section className="teacher-bottom-grid">
 
-            {/* ===============================================
+            {/* =================================================
                 RECENT ACTIVITIES
-            =============================================== */}
+            ================================================= */}
 
             <div className="teacher-panel">
 
               <div className="teacher-panel-header">
+
                 <div>
                   <h2>Recent Activities</h2>
                   <p>Your latest academic activities</p>
                 </div>
+
               </div>
 
               {activities.length === 0 ? (
                 <div className="teacher-empty-state compact">
+
                   <div className="teacher-empty-icon">
                     <CheckCircle size={23} />
                   </div>
@@ -416,38 +455,45 @@ export default function TeacherDashboard() {
                   <p>
                     Your recent activities will appear here.
                   </p>
+
                 </div>
               ) : (
                 <div className="teacher-activities-list">
+
                   {activities.map((activity) => (
                     <div
                       key={activity.id}
                       className="teacher-activity-item"
                     >
+
                       <div className="teacher-activity-dot"></div>
 
                       <div>
                         <p>{activity.title}</p>
                         <span>{activity.time}</span>
                       </div>
+
                     </div>
                   ))}
+
                 </div>
               )}
 
             </div>
 
-            {/* ===============================================
+            {/* =================================================
                 QUICK ACTIONS
-            =============================================== */}
+            ================================================= */}
 
             <div className="teacher-panel">
 
               <div className="teacher-panel-header">
+
                 <div>
                   <h2>Quick Actions</h2>
                   <p>Common teacher activities</p>
                 </div>
+
               </div>
 
               <div className="teacher-actions-grid">
@@ -459,7 +505,9 @@ export default function TeacherDashboard() {
                     <button
                       key={action.title}
                       className="teacher-action-btn"
+                      onClick={() => navigate(action.path)}
                     >
+
                       <div className="teacher-action-icon">
                         <Icon size={20} />
                       </div>
@@ -473,6 +521,7 @@ export default function TeacherDashboard() {
                         size={17}
                         className="teacher-action-arrow"
                       />
+
                     </button>
                   );
                 })}
@@ -489,3 +538,4 @@ export default function TeacherDashboard() {
     </div>
   );
 }
+

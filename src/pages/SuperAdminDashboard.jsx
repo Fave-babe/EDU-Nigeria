@@ -1,4 +1,3 @@
-
 import React, { useEffect, useMemo, useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 
@@ -29,11 +28,11 @@ import {
 import "./SuperAdminDashboard.css";
 
 import { useAuth } from "../context/AuthContext";
+
 import {
   getSchools,
   createSchool,
 } from "../api/school.api";
-
 
 /* =========================================================================
    STATUS BADGE
@@ -76,7 +75,6 @@ function StatusBadge({ isActive, status }) {
   );
 }
 
-
 /* =========================================================================
    STAT CARD
    ========================================================================= */
@@ -116,21 +114,17 @@ function StatCard({
   );
 }
 
-
 /* =========================================================================
    SUPER ADMIN DASHBOARD
    ========================================================================= */
 
 function SuperAdminDashboard() {
-  console.log("SUPER ADMIN DASHBOARD RENDERED");
-
   const {
     user,
     logout,
   } = useAuth();
 
   const navigate = useNavigate();
-
 
   /* =========================================================================
      STATE
@@ -174,7 +168,6 @@ function SuperAdminDashboard() {
       country: "Nigeria",
     });
 
-
   /* =========================================================================
      LOAD SCHOOLS
      ========================================================================= */
@@ -202,18 +195,16 @@ function SuperAdminDashboard() {
 
       setError(
         err?.message ||
-        "Failed to load schools."
+          "Failed to load schools."
       );
     } finally {
       setLoading(false);
     }
   };
 
-
   useEffect(() => {
     loadSchools();
   }, []);
-
 
   /* =========================================================================
      STATISTICS
@@ -258,7 +249,6 @@ function SuperAdminDashboard() {
         "Primary & Secondary"
     ).length;
 
-
   /* =========================================================================
      RECENT SCHOOLS
      ========================================================================= */
@@ -276,7 +266,6 @@ function SuperAdminDashboard() {
       )
       .slice(0, 5);
   }, [schools]);
-
 
   /* =========================================================================
      FILTERED SCHOOLS
@@ -319,7 +308,6 @@ function SuperAdminDashboard() {
     showAllSchools,
   ]);
 
-
   /* =========================================================================
      ADMIN DETAILS
      ========================================================================= */
@@ -334,15 +322,17 @@ function SuperAdminDashboard() {
       .charAt(0)
       .toUpperCase();
 
-
   /* =========================================================================
-     SCHOOL NAVIGATION
+     NAVIGATION
      ========================================================================= */
 
-  const openSchool = () => {
+  const openSchools = () => {
     navigate("/schools");
   };
 
+  const openUsers = () => {
+    navigate("/superadmin/users");
+  };
 
   /* =========================================================================
      FORM
@@ -360,7 +350,6 @@ function SuperAdminDashboard() {
         [name]: value,
       }));
     };
-
 
   /* =========================================================================
      CREATE SCHOOL
@@ -398,13 +387,12 @@ function SuperAdminDashboard() {
 
         setCreateSchoolError(
           err?.message ||
-          "Failed to create school."
+            "Failed to create school."
         );
       } finally {
         setCreatingSchool(false);
       }
     };
-
 
   /* =========================================================================
      LOGOUT
@@ -413,7 +401,6 @@ function SuperAdminDashboard() {
   const handleLogout = () => {
     logout();
   };
-
 
   /* =========================================================================
      DATE
@@ -434,7 +421,6 @@ function SuperAdminDashboard() {
     );
   };
 
-
   /* =========================================================================
      MOBILE SIDEBAR
      ========================================================================= */
@@ -442,7 +428,6 @@ function SuperAdminDashboard() {
   const closeMobileSidebar = () => {
     setMobileSidebarOpen(false);
   };
-
 
   /* =========================================================================
      RENDER
@@ -459,7 +444,6 @@ function SuperAdminDashboard() {
           onClick={closeMobileSidebar}
         />
       )}
-
 
       {/* SIDEBAR */}
 
@@ -497,9 +481,7 @@ function SuperAdminDashboard() {
 
         </div>
 
-
         <div className="sa-sidebar-divider" />
-
 
         {/* MAIN MENU */}
 
@@ -527,7 +509,6 @@ function SuperAdminDashboard() {
               <span>Dashboard</span>
             </NavLink>
 
-
             <NavLink
               to="/schools"
               className={({ isActive }) =>
@@ -543,18 +524,19 @@ function SuperAdminDashboard() {
               <span>Schools</span>
             </NavLink>
 
+            {/* USERS */}
 
             <button
               className="sa-nav-item"
               type="button"
-              onClick={() =>
-                navigate("/superadmin/admins")
-              }
+              onClick={() => {
+                closeMobileSidebar();
+                openUsers();
+              }}
             >
               <Users size={19} />
               <span>Users</span>
             </button>
-
 
             <button
               className="sa-nav-item"
@@ -566,7 +548,6 @@ function SuperAdminDashboard() {
               <FileBarChart size={19} />
               <span>Reports</span>
             </button>
-
 
             <button
               className="sa-nav-item"
@@ -580,7 +561,6 @@ function SuperAdminDashboard() {
           </nav>
 
         </div>
-
 
         {/* SYSTEM */}
 
@@ -607,7 +587,6 @@ function SuperAdminDashboard() {
 
         </div>
 
-
         {/* SIDEBAR USER */}
 
         <div className="sa-sidebar-bottom">
@@ -632,7 +611,6 @@ function SuperAdminDashboard() {
 
           </div>
 
-
           <button
             className="sa-sidebar-logout"
             onClick={handleLogout}
@@ -646,11 +624,9 @@ function SuperAdminDashboard() {
 
       </aside>
 
-
       {/* MAIN WRAPPER */}
 
       <div className="sa-main-wrapper">
-
 
         {/* TOPBAR */}
 
@@ -669,6 +645,7 @@ function SuperAdminDashboard() {
             </button>
 
             <div>
+
               <span className="sa-topbar-label">
                 PLATFORM ADMINISTRATION
               </span>
@@ -676,10 +653,10 @@ function SuperAdminDashboard() {
               <h1>
                 Super Admin Dashboard
               </h1>
+
             </div>
 
           </div>
-
 
           <div className="sa-topbar-right">
 
@@ -700,7 +677,6 @@ function SuperAdminDashboard() {
 
             </div>
 
-
             <button
               className="sa-icon-button"
               type="button"
@@ -708,7 +684,6 @@ function SuperAdminDashboard() {
               <Bell size={19} />
               <span className="sa-notification-dot" />
             </button>
-
 
             <div className="sa-topbar-profile">
 
@@ -734,11 +709,9 @@ function SuperAdminDashboard() {
 
         </header>
 
-
         {/* MAIN CONTENT */}
 
         <main className="sa-main-content">
-
 
           {/* PAGE INTRO */}
 
@@ -764,7 +737,6 @@ function SuperAdminDashboard() {
 
             </div>
 
-
             <div className="sa-page-actions">
 
               <button
@@ -785,7 +757,6 @@ function SuperAdminDashboard() {
                 Refresh
               </button>
 
-
               <button
                 className="sa-primary-button"
                 onClick={() => {
@@ -801,7 +772,6 @@ function SuperAdminDashboard() {
             </div>
 
           </section>
-
 
           {/* ERROR */}
 
@@ -824,7 +794,6 @@ function SuperAdminDashboard() {
 
             </div>
           )}
-
 
           {/* STAT CARDS */}
 
@@ -863,15 +832,39 @@ function SuperAdminDashboard() {
               description="Awaiting activation"
             />
 
-            <StatCard
-              title="Platform Users"
-              value="—"
-              icon={Users}
-              description="User management"
-            />
+            {/* USERS CARD */}
+
+            <button
+              type="button"
+              className="sa-stat-card sa-stat-card-button"
+              onClick={openUsers}
+            >
+              <div className="sa-stat-top">
+
+                <div className="sa-stat-icon">
+                  <Users size={21} />
+                </div>
+
+                <span className="sa-stat-arrow">
+                  <ChevronRight size={18} />
+                </span>
+
+              </div>
+
+              <div className="sa-stat-value">
+                —
+              </div>
+
+              <div className="sa-stat-title">
+                Platform Users
+              </div>
+
+              <div className="sa-stat-description">
+                User management
+              </div>
+            </button>
 
           </section>
-
 
           {/* SCHOOL BREAKDOWN */}
 
@@ -893,7 +886,6 @@ function SuperAdminDashboard() {
 
             </div>
 
-
             <div className="sa-breakdown-grid">
 
               <div className="sa-breakdown-card">
@@ -914,7 +906,6 @@ function SuperAdminDashboard() {
 
               </div>
 
-
               <div className="sa-breakdown-card">
 
                 <div className="sa-breakdown-icon">
@@ -932,7 +923,6 @@ function SuperAdminDashboard() {
                 </div>
 
               </div>
-
 
               <div className="sa-breakdown-card">
 
@@ -956,7 +946,6 @@ function SuperAdminDashboard() {
 
           </section>
 
-
           {/* SCHOOLS */}
 
           <section className="sa-section">
@@ -978,7 +967,6 @@ function SuperAdminDashboard() {
 
               </div>
 
-
               <button
                 className="sa-text-button"
                 onClick={() =>
@@ -996,7 +984,6 @@ function SuperAdminDashboard() {
               </button>
 
             </div>
-
 
             <div className="sa-school-panel">
 
@@ -1036,8 +1023,6 @@ function SuperAdminDashboard() {
 
                 <>
 
-                  {/* DESKTOP TABLE */}
-
                   <div className="sa-table-wrapper">
 
                     <table className="sa-school-table">
@@ -1065,7 +1050,7 @@ function SuperAdminDashboard() {
                               <tr
                                 key={schoolId}
                                 className="sa-school-row"
-                                onClick={openSchool}
+                                onClick={openSchools}
                               >
 
                                 <td>
@@ -1094,7 +1079,6 @@ function SuperAdminDashboard() {
 
                                 </td>
 
-
                                 <td>
 
                                   <span className="sa-location">
@@ -1111,7 +1095,6 @@ function SuperAdminDashboard() {
 
                                 </td>
 
-
                                 <td>
 
                                   <span className="sa-type-pill">
@@ -1121,13 +1104,11 @@ function SuperAdminDashboard() {
 
                                 </td>
 
-
                                 <td>
                                   {formatDate(
                                     school?.createdAt
                                   )}
                                 </td>
-
 
                                 <td>
 
@@ -1153,9 +1134,6 @@ function SuperAdminDashboard() {
 
                   </div>
 
-
-                  {/* MOBILE SCHOOL LIST */}
-
                   <div className="sa-mobile-school-list">
 
                     {filteredSchools.map(
@@ -1169,7 +1147,7 @@ function SuperAdminDashboard() {
                           <div
                             className="sa-mobile-school-card"
                             key={schoolId}
-                            onClick={openSchool}
+                            onClick={openSchools}
                           >
 
                             <div className="sa-mobile-school-top">
@@ -1194,11 +1172,9 @@ function SuperAdminDashboard() {
 
                             </div>
 
-
                             <div className="sa-mobile-school-details">
 
                               <div>
-
                                 <span>
                                   Location
                                 </span>
@@ -1212,12 +1188,9 @@ function SuperAdminDashboard() {
                                     .join(", ") ||
                                     "—"}
                                 </strong>
-
                               </div>
 
-
                               <div>
-
                                 <span>
                                   Type
                                 </span>
@@ -1226,12 +1199,9 @@ function SuperAdminDashboard() {
                                   {school?.schoolType ||
                                     "—"}
                                 </strong>
-
                               </div>
 
-
                               <div>
-
                                 <span>
                                   Registered
                                 </span>
@@ -1241,11 +1211,9 @@ function SuperAdminDashboard() {
                                     school?.createdAt
                                   )}
                                 </strong>
-
                               </div>
 
                             </div>
-
 
                             <StatusBadge
                               isActive={
@@ -1271,11 +1239,9 @@ function SuperAdminDashboard() {
 
           </section>
 
-
           {/* BOTTOM GRID */}
 
           <section className="sa-bottom-grid">
-
 
             {/* PLATFORM HEALTH */}
 
@@ -1307,7 +1273,6 @@ function SuperAdminDashboard() {
 
               </div>
 
-
               <div className="sa-health-list">
 
                 <div className="sa-health-row">
@@ -1328,7 +1293,6 @@ function SuperAdminDashboard() {
 
                 </div>
 
-
                 <div className="sa-health-row">
 
                   <div>
@@ -1346,7 +1310,6 @@ function SuperAdminDashboard() {
                   </strong>
 
                 </div>
-
 
                 <div className="sa-health-row">
 
@@ -1368,7 +1331,6 @@ function SuperAdminDashboard() {
 
             </div>
 
-
             {/* QUICK ACTIONS */}
 
             <div className="sa-actions-panel">
@@ -1389,15 +1351,12 @@ function SuperAdminDashboard() {
 
               </div>
 
-
               <div className="sa-management-grid">
 
                 <button
                   className="sa-management-card"
                   type="button"
-                  onClick={() =>
-                    navigate("/schools")
-                  }
+                  onClick={openSchools}
                 >
 
                   <div className="sa-management-icon">
@@ -1420,15 +1379,12 @@ function SuperAdminDashboard() {
 
                 </button>
 
+                {/* SCHOOL ADMINISTRATORS */}
 
                 <button
                   className="sa-management-card"
                   type="button"
-                  onClick={() =>
-                    navigate(
-                      "/superadmin/admins"
-                    )
-                  }
+                  onClick={openUsers}
                 >
 
                   <div className="sa-management-icon">
@@ -1451,15 +1407,12 @@ function SuperAdminDashboard() {
 
                 </button>
 
+                {/* PLATFORM USERS */}
 
                 <button
                   className="sa-management-card"
                   type="button"
-                  onClick={() =>
-                    navigate(
-                      "/superadmin/admins"
-                    )
-                  }
+                  onClick={openUsers}
                 >
 
                   <div className="sa-management-icon">
@@ -1481,7 +1434,6 @@ function SuperAdminDashboard() {
                   <ChevronRight size={17} />
 
                 </button>
-
 
                 <button
                   className="sa-management-card"
@@ -1517,7 +1469,6 @@ function SuperAdminDashboard() {
         </main>
 
       </div>
-
 
       {/* ADD SCHOOL MODAL */}
 
@@ -1558,7 +1509,6 @@ function SuperAdminDashboard() {
 
               </div>
 
-
               <button
                 className="sa-modal-close"
                 onClick={() =>
@@ -1570,7 +1520,6 @@ function SuperAdminDashboard() {
               </button>
 
             </div>
-
 
             {createSchoolError && (
 
@@ -1584,14 +1533,12 @@ function SuperAdminDashboard() {
 
             )}
 
-
             <form
               className="sa-school-form"
               onSubmit={handleCreateSchool}
             >
 
               <div className="sa-form-grid">
-
 
                 <div className="sa-form-field sa-form-full">
 
@@ -1614,7 +1561,6 @@ function SuperAdminDashboard() {
 
                 </div>
 
-
                 <div className="sa-form-field">
 
                   <label>
@@ -1631,7 +1577,6 @@ function SuperAdminDashboard() {
                     }
                     required
                   >
-
                     <option value="Primary">
                       Primary
                     </option>
@@ -1643,11 +1588,9 @@ function SuperAdminDashboard() {
                     <option value="Primary & Secondary">
                       Primary & Secondary
                     </option>
-
                   </select>
 
                 </div>
-
 
                 <div className="sa-form-field">
 
@@ -1670,7 +1613,6 @@ function SuperAdminDashboard() {
 
                 </div>
 
-
                 <div className="sa-form-field">
 
                   <label>
@@ -1690,7 +1632,6 @@ function SuperAdminDashboard() {
                   />
 
                 </div>
-
 
                 <div className="sa-form-field">
 
@@ -1712,7 +1653,6 @@ function SuperAdminDashboard() {
 
                 </div>
 
-
                 <div className="sa-form-field">
 
                   <label>
@@ -1733,7 +1673,6 @@ function SuperAdminDashboard() {
 
                 </div>
 
-
                 <div className="sa-form-field sa-form-full">
 
                   <label>
@@ -1753,7 +1692,6 @@ function SuperAdminDashboard() {
                   />
 
                 </div>
-
 
                 <div className="sa-form-field">
 
@@ -1777,7 +1715,6 @@ function SuperAdminDashboard() {
 
               </div>
 
-
               <div className="sa-modal-actions">
 
                 <button
@@ -1789,7 +1726,6 @@ function SuperAdminDashboard() {
                 >
                   Cancel
                 </button>
-
 
                 <button
                   type="submit"
@@ -1831,4 +1767,3 @@ function SuperAdminDashboard() {
 }
 
 export default SuperAdminDashboard;
-

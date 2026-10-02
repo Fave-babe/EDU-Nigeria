@@ -33,7 +33,6 @@ import "./Sidebar.css";
 
 export default function Sidebar() {
   const { user, logout } = useAuth();
-
   const navigate = useNavigate();
 
   const [isOpen, setIsOpen] = useState(false);
@@ -100,6 +99,20 @@ export default function Sidebar() {
         path: "/dashboard",
         icon: LayoutDashboard,
       },
+      { label: "Admissions", 
+        path: "/admissions", 
+        icon: FileText, 
+      },
+      {
+  label: "Subjects",
+  path: "/subjects",
+  icon: BookOpen,
+},
+{
+  label: "Class Subjects",
+  path: "/class-subjects",
+  icon: BookOpen,
+},
       {
         label: "Students",
         path: "/students",
@@ -113,6 +126,11 @@ export default function Sidebar() {
       {
         label: "Teachers",
         path: "/teachers",
+        icon: School,
+      },
+      {
+        label: "Classes",
+        path: "/classes",
         icon: School,
       },
       {
@@ -156,10 +174,10 @@ export default function Sidebar() {
         icon: Megaphone,
       },
       {
-        label: "Announcements",
-        path: "/announcements",
-        icon: Megaphone,
-      },
+  label: "Announcements",
+  path: "/announcement-management",
+  icon: Megaphone,
+},
       {
         label: "Notifications",
         path: "/notifications",
@@ -176,45 +194,46 @@ export default function Sidebar() {
         icon: Settings,
       },
     ],
-// =======================================================
-// SUPER ADMIN
-// =======================================================
 
-super_admin: [
-  {
-    label: "Dashboard",
-    path: "/superadmin",
-    icon: LayoutDashboard,
-  },
-  {
-    label: "Schools",
-    path: "/schools",
-    icon: School,
-  },
-  {
-    label: "Super Admins",
-    path: "/superadmin/admins",
-    icon: UserCog,
-  },
-],
+    // =======================================================
+    // SUPER ADMIN
+    // =======================================================
 
-superadmin: [
-  {
-    label: "Dashboard",
-    path: "/superadmin",
-    icon: LayoutDashboard,
-  },
-  {
-    label: "Schools",
-    path: "/schools",
-    icon: School,
-  },
-  {
-    label: "Super Admins",
-    path: "/superadmin/admins",
-    icon: UserCog,
-  },
-],
+    super_admin: [
+      {
+        label: "Dashboard",
+        path: "/superadmin",
+        icon: LayoutDashboard,
+      },
+      {
+        label: "Schools",
+        path: "/schools",
+        icon: School,
+      },
+      {
+        label: "Super Admins",
+        path: "/superadmin/admins",
+        icon: UserCog,
+      },
+    ],
+
+    superadmin: [
+      {
+        label: "Dashboard",
+        path: "/superadmin",
+        icon: LayoutDashboard,
+      },
+      {
+        label: "Schools",
+        path: "/schools",
+        icon: School,
+      },
+      {
+        label: "Super Admins",
+        path: "/superadmin/admins",
+        icon: UserCog,
+      },
+    ],
 
     // =======================================================
     // TEACHER
@@ -228,12 +247,12 @@ superadmin: [
       },
       {
         label: "My Students",
-        path: "/students",
+        path: "/Tstudents",
         icon: Users,
       },
       {
         label: "Attendance",
-        path: "/attendance",
+        path: "/Tattendance",
         icon: ClipboardCheck,
       },
       {
@@ -291,6 +310,11 @@ superadmin: [
       {
         label: "Subjects",
         path: "/subjects",
+        icon: BookOpen,
+      },
+      {
+        label: "Lesson Notes",
+        path: "/student/lesson-notes",
         icon: BookOpen,
       },
       {
@@ -451,41 +475,46 @@ superadmin: [
     // =======================================================
 
     bursar: [
-      {
-        label: "Dashboard",
-        path: "/Bdashboard",
-        icon: LayoutDashboard,
-      },
-      {
-        label: "Students",
-        path: "/students",
-        icon: GraduationCap,
-      },
-      {
-        label: "Fees & Finance",
-        path: "/finance",
-        icon: WalletCards,
-      },
-      {
-        label: "Reports",
-        path: "/reports",
-        icon: BarChart3,
-      },
-      {
-        label: "Notifications",
-        path: "/notifications",
-        icon: Bell,
-      },
-      {
-        label: "Settings",
-        path: "/settings",
-        icon: Settings,
-      },
-    ],
-  };
+  {
+    label: "Dashboard",
+    path: "/Bdashboard",
+    icon: LayoutDashboard,
+  },
+  {
+    label: "Students",
+    path: "/students",
+    icon: GraduationCap,
+  },
+  {
+    label: "Fees & Finance",
+    path: "/finance",
+    icon: WalletCards,
+  },
+  {
+    label: "Record Payment",
+    path: "/record-payment",
+    icon: WalletCards,
+  },
+  {
+    label: "Reports",
+    path: "/reports",
+    icon: BarChart3,
+  },
+  {
+    label: "Notifications",
+    path: "/notifications",
+    icon: Bell,
+  },
+  {
+    label: "Settings",
+    path: "/settings",
+    icon: Settings,
+  },
+],
+  }
 
   // =========================================================
-  // GET CURRENT ROLE NAVIGATION
+  // CURRENT ROLE NAVIGATION
   // =========================================================
 
   const visibleItems = roleNavigation[role] || [];
@@ -499,7 +528,6 @@ superadmin: [
     setIsOpen(false);
 
     logout();
-
     navigate("/login");
   };
 
@@ -571,9 +599,7 @@ superadmin: [
 
   return (
     <>
-      {/* =====================================================
-          MOBILE MENU BUTTON
-      ===================================================== */}
+      {/* MOBILE MENU BUTTON */}
 
       <button
         className="mobile-menu-btn"
@@ -583,9 +609,7 @@ superadmin: [
         <Menu size={24} />
       </button>
 
-      {/* =====================================================
-          MOBILE OVERLAY
-      ===================================================== */}
+      {/* MOBILE OVERLAY */}
 
       {isOpen && (
         <div
@@ -594,18 +618,14 @@ superadmin: [
         />
       )}
 
-      {/* =====================================================
-          SIDEBAR
-      ===================================================== */}
+      {/* SIDEBAR */}
 
       <aside
         className={`sidebar ${
           isOpen ? "sidebar-open" : ""
         }`}
       >
-        {/* ===================================================
-            HEADER
-        =================================================== */}
+        {/* HEADER */}
 
         <div className="sidebar-header">
           <div className="brand">
@@ -615,7 +635,6 @@ superadmin: [
 
             <div>
               <h2>EduNigeria</h2>
-
               <span>School Management</span>
             </div>
           </div>
@@ -629,9 +648,7 @@ superadmin: [
           </button>
         </div>
 
-        {/* ===================================================
-            SCHOOL INFORMATION
-        =================================================== */}
+        {/* SCHOOL INFORMATION */}
 
         <div className="school-section">
           <div className="school-avatar">
@@ -657,9 +674,7 @@ superadmin: [
           </div>
         </div>
 
-        {/* ===================================================
-            NAVIGATION
-        =================================================== */}
+        {/* NAVIGATION */}
 
         <nav className="sidebar-nav">
           <p className="nav-title">MAIN MENU</p>
@@ -680,16 +695,13 @@ superadmin: [
                 }
               >
                 <Icon size={20} />
-
                 <span>{item.label}</span>
               </NavLink>
             );
           })}
         </nav>
 
-        {/* ===================================================
-            BOTTOM PROFILE
-        =================================================== */}
+        {/* BOTTOM PROFILE */}
 
         <div className="sidebar-bottom">
           <div className="profile-wrapper">
@@ -705,7 +717,6 @@ superadmin: [
 
               <div className="profile-info">
                 <strong>{getUserName()}</strong>
-
                 <span>{getUserRole()}</span>
               </div>
 
@@ -717,9 +728,7 @@ superadmin: [
               />
             </button>
 
-            {/* =================================================
-                PROFILE MENU
-            ================================================= */}
+            {/* PROFILE MENU */}
 
             {profileOpen && (
               <div className="profile-menu">
@@ -730,7 +739,6 @@ superadmin: [
                   }}
                 >
                   <UserRound size={17} />
-
                   My Profile
                 </button>
 
@@ -741,7 +749,6 @@ superadmin: [
                   }}
                 >
                   <Settings size={17} />
-
                   Settings
                 </button>
 
@@ -750,7 +757,6 @@ superadmin: [
                   onClick={handleLogout}
                 >
                   <LogOut size={17} />
-
                   Logout
                 </button>
               </div>

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+
 import {
   GraduationCap,
   BookOpen,
@@ -10,6 +11,8 @@ import {
   Plus,
   X,
 } from "lucide-react";
+
+import { createAdmissionApplication } from "../api/admissionApplication.api";
 
 const ROLES = [
   { id: "student", label: "Student", icon: GraduationCap },
@@ -82,36 +85,43 @@ function Register() {
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-
   const [role, setRole] = useState("student");
 
   const [schools, setSchools] = useState([]);
   const [school, setSchool] = useState("");
   const [loadingSchools, setLoadingSchools] = useState(false);
 
-  // Student-only fields
+  // Student fields
   const [studentClass, setStudentClass] = useState("");
   const [gender, setGender] = useState("");
+  const [dob, setDob] = useState("");
   const [previousSchool, setPreviousSchool] = useState("");
+  const [studentPhone, setStudentPhone] = useState("");
+  const [studentAddress, setStudentAddress] = useState("");
 
-  // Parent-only fields
+  // Parent fields
   const [phone, setPhone] = useState("");
   const [address, setAddress] = useState("");
   const [children, setChildren] = useState([""]);
 
-  // Staff-only fields
+  // Staff fields
   const [staffPhone, setStaffPhone] = useState("");
   const [staffRole, setStaffRole] = useState("");
 
-  // Teacher-only fields
+  // Teacher fields
   const [teacherPhone, setTeacherPhone] = useState("");
   const [subject, setSubject] = useState("");
   const [employmentType, setEmploymentType] = useState("");
 
+  const [submitting, setSubmitting] = useState(false);
+
   const navigate = useNavigate();
   const { register } = useAuth();
 
-  // Load schools
+  // =====================================================
+  // LOAD SCHOOLS
+  // =====================================================
+
   useEffect(() => {
     const fetchSchools = async () => {
       try {
@@ -127,11 +137,9 @@ function Register() {
 
         console.log("Schools response:", data);
 
-        const schoolList =
-          data.data?.schools ||
-          data.data ||
-          data.schools ||
-          [];
+        const schoolList = data.schools || [];
+
+        console.log("SCHOOLS BEING STORED:", schoolList);
 
         setSchools(schoolList);
       } catch (error) {
@@ -144,7 +152,10 @@ function Register() {
     fetchSchools();
   }, []);
 
-  // Parent children
+  // =====================================================
+  // PARENT CHILDREN
+  // =====================================================
+
   const handleChildChange = (index, value) => {
     setChildren((prev) =>
       prev.map((child, i) => (i === index ? value : child))
@@ -159,71 +170,184 @@ function Register() {
     setChildren((prev) => prev.filter((_, i) => i !== index));
   };
 
-  // Submit registration
+  // =====================================================
+  // SUBMIT REGISTRATION
+  // =====================================================
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Student and teacher must select a school
+    // =====================================================
+    // SCHOOL VALIDATION
+    // Student, Teacher, Parent and Staff require a school
+    // =====================================================
+
     if (
-      (role === "student" || role === "teacher") &&
+      (role === "student" ||
+        role === "teacher" ||
+        role === "parent" ||
+        role === "staff") &&
       !school
     ) {
       alert("Please select your school.");
       return;
     }
 
+    // =====================================================
+    // STUDENT ADMISSION APPLICATION
+    // =====================================================
+
+    if (role === "student") {
+      if (!studentClass) {
+        alert("Please select the class you are applying for.");
+        return;
+      }
+
+      if (!gender) {
+        alert("Please select your gender.");
+        return;
+      }
+
+      if (!dob) {
+        alert("Please select your date of birth.");
+        return;
+      }
+
+      if (!password || password.length < 6) {
+        alert("Student password must be at least 6 characters.");
+        return;
+      }
+
+      if (!previousSchool.trim()) {
+        alert("Please enter your previous school.");
+        return;
+      }
+
+      try {
+        setSubmitting(true);
+
+        const applicationData = {
+          firstName: firstName.trim(),
+          lastName: lastName.trim(),
+          gender,
+          dob,
+          email: email.trim().toLowerCase(),
+          password,
+          phone: studentPhone.trim(),
+          address: studentAddress.trim(),
+          previousSchool: previousSchool.trim(),
+          school,
+          applyingForClass: studentClass,
+        };
+
+        console.log("ADMISSION APPLICATION BEING SENT:", {
+          ...applicationData,
+          password: "[HIDDEN]",
+        });
+
+        const result =
+          await createAdmissionApplication(applicationData);
+
+        console.log("ADMISSION APPLICATION RESULT:", result);
+
+        const application = result?.application;
+
+        if (!application?._id) {
+          throw new Error(
+            "Admission application was created but no application ID was returned."
+          );
+        }
+
+        alert(
+          "Application submitted successfully! You will now take the entrance examination."
+        );
+
+        navigate("/entrance", {
+          state: {
+            applicationId: application._id,
+            studentClass,
+          },
+        });
+
+        return;
+      } catch (error) {
+        console.error("ADMISSION APPLICATION ERROR:", error);
+        console.error("ERROR RESPONSE:", error?.response);
+        console.error(
+          "ERROR RESPONSE DATA:",
+          error?.response?.data
+        );
+
+        alert(
+          error?.response?.data?.message ||
+            error?.message ||
+            "Unable to submit admission application."
+        );
+
+        return;
+      } finally {
+        setSubmitting(false);
+      }
+    }
+
+    // =====================================================
+    // OTHER USER REGISTRATION
+    // =====================================================
+
     const payload = {
-      firstName,
-      lastName,
-      email,
+      firstName: firstName.trim(),
+      lastName: lastName.trim(),
+      email: email.trim().toLowerCase(),
       password,
       role,
     };
 
-    // Student
-    if (role === "student") {
-      payload.school = school;
-      payload.studentClass = studentClass;
-      payload.gender = gender;
-      payload.previousSchool = previousSchool;
-    }
+    // =====================================================
+    // TEACHER
+    // =====================================================
 
-    // Teacher
     if (role === "teacher") {
       payload.school = school;
-      payload.phone = teacherPhone;
+      payload.phone = teacherPhone.trim();
       payload.subject = subject;
       payload.employmentType = employmentType;
     }
 
-    // Parent
-    if (role === "parent") {
-      payload.phone = phone;
-      payload.address = address;
-      payload.children = children;
-    }
+    // =====================================================
+    // PARENT
+    // =====================================================
 
-    // Staff
+  if (role === "parent") {
+  payload.school = school;
+  payload.phone = phone;
+  payload.address = address;
+
+  // Children are linked later using Student IDs.
+  payload.children = [];
+}
+
+    // =====================================================
+    // STAFF
+    // =====================================================
+
     if (role === "staff") {
-      payload.phone = staffPhone;
+      payload.fullName = `${firstName} ${lastName}`.trim();
+      payload.school = school;
+      payload.phone = staffPhone.trim();
       payload.staffRole = staffRole;
     }
 
-    console.log("Registration payload:", payload);
+    console.log("REGISTRATION PAYLOAD:", payload);
 
     try {
+      setSubmitting(true);
+
       const result = await register(payload);
 
-      console.log("Registration result:", result);
+      console.log("REGISTRATION RESULT:", result);
 
       if (result.success) {
-        if (role === "student") {
-          alert(
-            "Registration successful! Your admission details have been submitted to the admin dashboard. Please proceed to login when your admission is approved."
-          );
-
-          navigate("/login");
-        } else if (role === "parent") {
+        if (role === "parent") {
           navigate("/Pdashboard");
         } else if (role === "teacher") {
           navigate("/Tdashboard");
@@ -247,6 +371,8 @@ function Register() {
           error?.message ||
           "Registration failed. Please try again."
       );
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -499,6 +625,11 @@ function Register() {
           background: var(--blue);
         }
 
+        .reg-submit:disabled {
+          opacity: 0.6;
+          cursor: not-allowed;
+        }
+
         .reg-signin {
           text-align: center;
           font-size: 13px;
@@ -521,12 +652,13 @@ function Register() {
         <h2>Create your entry</h2>
 
         <p className="reg-subtitle">
-          Fields marked below are required for enrollment.
+          Students must complete an entrance examination before
+          admission can be reviewed.
         </p>
 
         <form onSubmit={handleSubmit} className="reg-form">
-
           {/* Role picker */}
+
           <div>
             <label className="reg-label">Role</label>
 
@@ -539,12 +671,15 @@ function Register() {
                     key={id}
                     type="button"
                     onClick={() => setRole(id)}
-                    className={`role-chip${active ? " active" : ""}`}
+                    className={`role-chip${
+                      active ? " active" : ""
+                    }`}
                   >
                     <Icon
                       size={16}
                       strokeWidth={active ? 2.25 : 1.75}
                     />
+
                     {label}
                   </button>
                 );
@@ -553,6 +688,7 @@ function Register() {
           </div>
 
           {/* Name row */}
+
           <div className="reg-row">
             <div>
               <label className="reg-label">
@@ -562,7 +698,9 @@ function Register() {
               <input
                 type="text"
                 value={firstName}
-                onChange={(e) => setFirstName(e.target.value)}
+                onChange={(e) =>
+                  setFirstName(e.target.value)
+                }
                 className="reg-input"
                 placeholder="Ada"
                 required
@@ -577,7 +715,9 @@ function Register() {
               <input
                 type="text"
                 value={lastName}
-                onChange={(e) => setLastName(e.target.value)}
+                onChange={(e) =>
+                  setLastName(e.target.value)
+                }
                 className="reg-input"
                 placeholder="Lovelace"
                 required
@@ -586,6 +726,7 @@ function Register() {
           </div>
 
           {/* Email + Password */}
+
           <div className="reg-row">
             <div>
               <label className="reg-label">
@@ -595,7 +736,9 @@ function Register() {
               <input
                 type="email"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                onChange={(e) =>
+                  setEmail(e.target.value)
+                }
                 className="reg-input"
                 placeholder="ada@school.edu"
                 required
@@ -610,16 +753,23 @@ function Register() {
               <input
                 type="password"
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                onChange={(e) =>
+                  setPassword(e.target.value)
+                }
                 className="reg-input"
                 placeholder="••••••••"
+                minLength={6}
                 required
               />
             </div>
           </div>
 
           {/* School */}
-          {(role === "student" || role === "teacher") && (
+
+          {(role === "student" ||
+            role === "teacher" ||
+            role === "parent" ||
+            role === "staff") && (
             <div>
               <label className="reg-label">
                 School
@@ -627,19 +777,23 @@ function Register() {
 
               <select
                 value={school}
-                onChange={(e) => setSchool(e.target.value)}
+                onChange={(e) =>
+                  setSchool(e.target.value)
+                }
                 className="reg-select"
                 required
-                disabled={loadingSchools}
               >
-                <option value="" disabled>
+                <option value="">
                   {loadingSchools
                     ? "Loading schools..."
                     : "Select your school"}
                 </option>
 
                 {schools.map((item) => (
-                  <option key={item._id} value={item._id}>
+                  <option
+                    key={item._id}
+                    value={item._id}
+                  >
                     {item.name}
                   </option>
                 ))}
@@ -648,13 +802,13 @@ function Register() {
           )}
 
           {/* Student fields */}
+
           {role === "student" && (
             <div className="role-section">
-
               <div className="reg-row">
                 <div>
                   <label className="reg-label">
-                    Class
+                    Class applying for
                   </label>
 
                   <select
@@ -699,6 +853,62 @@ function Register() {
                 </div>
               </div>
 
+              {/* Date of birth */}
+
+              <div>
+                <label className="reg-label">
+                  Date of birth
+                </label>
+
+                <input
+                  type="date"
+                  value={dob}
+                  onChange={(e) =>
+                    setDob(e.target.value)
+                  }
+                  className="reg-input"
+                  required
+                />
+              </div>
+
+              {/* Phone */}
+
+              <div>
+                <label className="reg-label">
+                  Phone number
+                </label>
+
+                <input
+                  type="tel"
+                  value={studentPhone}
+                  onChange={(e) =>
+                    setStudentPhone(e.target.value)
+                  }
+                  className="reg-input"
+                  placeholder="080X XXX XXXX"
+                />
+              </div>
+
+              {/* Address */}
+
+              <div>
+                <label className="reg-label">
+                  Home address
+                </label>
+
+                <input
+                  type="text"
+                  value={studentAddress}
+                  onChange={(e) =>
+                    setStudentAddress(e.target.value)
+                  }
+                  className="reg-input"
+                  placeholder="12 Allen Avenue, Ikeja, Lagos"
+                />
+              </div>
+
+              {/* Previous school */}
+
               <div>
                 <label className="reg-label">
                   Previous school attended
@@ -717,24 +927,17 @@ function Register() {
               </div>
 
               <p className="reg-signin">
-                Ready to move forward?{" "}
-                <span
-                  onClick={() =>
-                    navigate("/entrance", {
-                      state: { studentClass },
-                    })
-                  }
-                >
-                  Take The Entrance Exams
-                </span>
+                After submitting your details, you will take
+                the entrance examination. Your admission will
+                then be reviewed by the school administrator.
               </p>
             </div>
           )}
 
           {/* Teacher fields */}
+
           {role === "teacher" && (
             <div className="role-section">
-
               <div className="reg-row">
                 <div>
                   <label className="reg-label">
@@ -759,22 +962,24 @@ function Register() {
                   </label>
 
                   <div className="employment-picker">
-                    {["Full-time", "Part-time"].map((type) => (
-                      <button
-                        key={type}
-                        type="button"
-                        onClick={() =>
-                          setEmploymentType(type)
-                        }
-                        className={`employment-chip${
-                          employmentType === type
-                            ? " active"
-                            : ""
-                        }`}
-                      >
-                        {type}
-                      </button>
-                    ))}
+                    {["Full-time", "Part-time"].map(
+                      (type) => (
+                        <button
+                          key={type}
+                          type="button"
+                          onClick={() =>
+                            setEmploymentType(type)
+                          }
+                          className={`employment-chip${
+                            employmentType === type
+                              ? " active"
+                              : ""
+                          }`}
+                        >
+                          {type}
+                        </button>
+                      )
+                    )}
                   </div>
                 </div>
               </div>
@@ -807,9 +1012,9 @@ function Register() {
           )}
 
           {/* Parent fields */}
+
           {role === "parent" && (
             <div className="role-section">
-
               <div>
                 <label className="reg-label">
                   Phone number
@@ -818,7 +1023,9 @@ function Register() {
                 <input
                   type="tel"
                   value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
+                  onChange={(e) =>
+                    setPhone(e.target.value)
+                  }
                   className="reg-input"
                   placeholder="080X XXX XXXX"
                   required
@@ -896,9 +1103,9 @@ function Register() {
           )}
 
           {/* Staff fields */}
+
           {role === "staff" && (
             <div className="role-section">
-
               <div>
                 <label className="reg-label">
                   Phone number
@@ -944,12 +1151,21 @@ function Register() {
           )}
 
           {/* Submit */}
+
           <button
             type="submit"
             className="reg-submit"
+            disabled={submitting}
           >
-            Register
-            <ArrowRight size={16} />
+            {submitting
+              ? role === "student"
+                ? "Submitting Application..."
+                : "Registering..."
+              : role === "student"
+                ? "Submit & Take Exam"
+                : "Register"}
+
+            {!submitting && <ArrowRight size={16} />}
           </button>
 
           <p className="reg-signin">
@@ -958,7 +1174,6 @@ function Register() {
               Sign in
             </span>
           </p>
-
         </form>
       </div>
     </div>

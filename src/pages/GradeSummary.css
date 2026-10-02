@@ -1,0 +1,312 @@
+.grade-summary {
+  min-height: 100vh;
+  background: #f8fafc;
+  padding: 24px;
+}
+
+.grade-summary-container {
+  max-width: 1280px;
+  margin: 0 auto;
+}
+
+/* Header */
+.grade-summary-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+
+.grade-summary-title {
+  margin: 0;
+  color: #071a41;
+  font-size: 28px;
+  font-weight: 700;
+}
+
+.grade-summary-subtitle {
+  margin: 6px 0 0;
+  color: #64748b;
+  font-size: 14px;
+}
+
+.grade-summary-refresh {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  color: #475569;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.grade-summary-refresh:hover {
+  background: #f8fafc;
+}
+
+/* Loading */
+.grade-summary-loading {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.grade-summary-loading-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: #475569;
+}
+
+/* Error */
+.grade-summary-error {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 24px;
+  padding: 16px;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  color: #b91c1c;
+}
+
+/* Summary cards */
+.grade-summary-cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  margin-bottom: 32px;
+}
+
+.grade-summary-card {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.05);
+}
+
+.grade-summary-card-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.grade-summary-card-label {
+  margin: 0;
+  color: #64748b;
+  font-size: 14px;
+}
+
+.grade-summary-card-value {
+  margin: 4px 0 0;
+  color: #071a41;
+  font-size: 30px;
+  font-weight: 700;
+}
+
+.grade-summary-card-remark {
+  margin: 4px 0 0;
+  color: #64748b;
+  font-size: 12px;
+}
+
+.grade-summary-icon {
+  width: 50px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+}
+
+.grade-summary-icon-blue {
+  background: #eff6ff;
+  color: #2563eb;
+}
+
+.grade-summary-icon-green {
+  background: #f0fdf4;
+  color: #16a34a;
+}
+
+.grade-summary-icon-yellow {
+  background: #fefce8;
+  color: #ca8a04;
+}
+
+/* Results card */
+.grade-results-card {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.05);
+}
+
+.grade-results-header {
+  padding: 20px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.grade-results-header-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.grade-results-header-icon {
+  color: #079b68;
+}
+
+.grade-results-title {
+  margin: 0;
+  color: #071a41;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.grade-results-description {
+  margin: 4px 0 0;
+  color: #64748b;
+  font-size: 14px;
+}
+
+/* Empty state */
+.grade-results-empty {
+  padding: 50px 20px;
+  text-align: center;
+}
+
+.grade-results-empty-icon {
+  margin: 0 auto 12px;
+  color: #cbd5e1;
+}
+
+.grade-results-empty-title {
+  margin: 0;
+  color: #475569;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.grade-results-empty-text {
+  margin: 6px 0 0;
+  color: #64748b;
+  font-size: 14px;
+}
+
+/* Table */
+.grade-results-table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.grade-results-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.grade-results-table thead {
+  background: #f8fafc;
+}
+
+.grade-results-table th {
+  padding: 16px 20px;
+  color: #475569;
+  font-size: 14px;
+  font-weight: 600;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.grade-results-table th.center,
+.grade-results-table td.center {
+  text-align: center;
+}
+
+.grade-results-table td {
+  padding: 16px 20px;
+  border-top: 1px solid #e2e8f0;
+  color: #475569;
+  font-size: 14px;
+}
+
+.grade-results-table tbody tr:hover {
+  background: #f8fafc;
+}
+
+.grade-subject-name {
+  color: #334155;
+  font-weight: 500;
+}
+
+.grade-subject-code {
+  margin-top: 4px;
+  color: #94a3b8;
+  font-size: 12px;
+}
+
+.grade-total {
+  color: #1e293b;
+  font-weight: 600;
+}
+
+.grade-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 40px;
+  padding: 5px 12px;
+  border-radius: 999px;
+  background: #f0fdf4;
+  color: #15803d;
+  font-weight: 600;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .grade-summary {
+    padding: 16px;
+  }
+
+  .grade-summary-header {
+    align-items: flex-start;
+    gap: 16px;
+    flex-direction: column;
+  }
+
+  .grade-summary-cards {
+    grid-template-columns: 1fr;
+  }
+
+  .grade-summary-title {
+    font-size: 24px;
+  }
+
+  .grade-results-table th,
+  .grade-results-table td {
+    padding: 12px 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  .grade-summary {
+    padding: 12px;
+  }
+
+  .grade-summary-card {
+    padding: 16px;
+  }
+
+  .grade-summary-refresh {
+    width: 100%;
+    justify-content: center;
+  }
+}

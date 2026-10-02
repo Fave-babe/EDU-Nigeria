@@ -1214,3 +1214,69 @@
     grid-template-columns: 1fr;
   }
 }
+/* =========================================================
+   TIMETABLE
+========================================================= */
+
+.timetable-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 0 12px 13px;
+}
+
+.timetable-item {
+  position: relative;
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 12px;
+  border: 1px solid #e5ebf3;
+  border-radius: 10px;
+  background: #ffffff;
+}
+
+.class-time {
+  display: block;
+  margin-bottom: 8px;
+  color: #7187a3;
+  font-size: 9px;
+  font-weight: 600;
+}
+
+.class-information {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+}
+
+.class-details {
+  min-width: 0;
+  padding-right: 20px;
+}
+
+.class-details strong {
+  display: block;
+  overflow: hidden;
+  color: #18385d;
+  font-size: 10px;
+  font-weight: 600;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.class-details span {
+  display: block;
+  margin-top: 4px;
+  color: #8999ad;
+  font-size: 8px;
+  line-height: 1.4;
+}
+
+.timetable-item .item-arrow {
+  position: absolute;
+  right: 9px;
+  bottom: 13px;
+  color: #7690ad;
+}

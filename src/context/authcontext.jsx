@@ -42,18 +42,43 @@ export function isCounsellorUser(user) {
 }
 
 // =========================================================
+// DETERMINE BURSAR
+// =========================================================
+
+export function isBursarUser(user) {
+  if (!user) return false;
+
+  return (
+    normalizeRole(user.role) === "bursar" ||
+    (
+      normalizeRole(user.role) === "staff" &&
+      normalizeRole(user.staffRole) === "bursar"
+    )
+  );
+}
+
+// =========================================================
 // GET EFFECTIVE ROLE
 // =========================================================
+
 
 export function getEffectiveRole(user) {
   if (!user) return "";
 
-  if (isCounsellorUser(user)) {
+  const role = normalizeRole(user.role);
+  const staffRole = normalizeRole(user.staffRole);
+
+  if (role === "staff" && staffRole === "counsellor") {
     return "counsellor";
   }
 
-  return normalizeRole(user.role);
+  if (role === "staff" && staffRole === "bursar") {
+    return "bursar";
+  }
+
+  return role;
 }
+
 
 // =========================================================
 // NORMALIZE USER
@@ -62,14 +87,17 @@ export function getEffectiveRole(user) {
 export function normalizeUser(user) {
   if (!user) return null;
 
-  return {
+  const normalizedUser = {
     ...user,
-
     role: normalizeRole(user.role),
+    staffRole: user.staffRole
+      ? normalizeRole(user.staffRole)
+      : null,
+  };
 
-    staffRole: user.staffRole || null,
-
-    effectiveRole: getEffectiveRole(user),
+  return {
+    ...normalizedUser,
+    effectiveRole: getEffectiveRole(normalizedUser),
   };
 }
 
@@ -180,6 +208,10 @@ export function AuthProvider({ children }) {
           });
 
           console.log("FRESH USER:", freshUser);
+          console.log(
+            "EFFECTIVE ROLE:",
+            freshUser?.effectiveRole
+          );
 
           setUser(freshUser);
           setStoredUser(freshUser);
@@ -219,34 +251,18 @@ export function AuthProvider({ children }) {
 
       // Student registration creates admission record
       if (
-        normalizeRole(userData.role) ===
-        "student"
+        normalizeRole(userData.role) === "student"
       ) {
         const admission = {
           id: Date.now(),
-
-          firstName:
-            userData.firstName,
-
-          lastName:
-            userData.lastName,
-
-          email:
-            userData.email,
-
-          studentClass:
-            userData.studentClass,
-
-          gender:
-            userData.gender,
-
-          previousSchool:
-            userData.previousSchool,
-
+          firstName: userData.firstName,
+          lastName: userData.lastName,
+          email: userData.email,
+          studentClass: userData.studentClass,
+          gender: userData.gender,
+          previousSchool: userData.previousSchool,
           status: "pending",
-
-          createdAt:
-            new Date().toISOString(),
+          createdAt: new Date().toISOString(),
         };
 
         addItem(
@@ -275,7 +291,6 @@ export function AuthProvider({ children }) {
 
       return {
         success: false,
-
         message:
           err.message ||
           "Registration failed. Please try again.",
@@ -316,13 +331,16 @@ export function AuthProvider({ children }) {
 
       // Normalize user
       const normalizedUser =
-        normalizeUser(
-          loggedInUser
-        );
+        normalizeUser(loggedInUser);
 
       console.log(
         "NORMALIZED USER:",
         normalizedUser
+      );
+
+      console.log(
+        "EFFECTIVE ROLE:",
+        normalizedUser?.effectiveRole
       );
 
       // Store authentication
@@ -344,9 +362,7 @@ export function AuthProvider({ children }) {
 
       return {
         success: true,
-
-        user:
-          normalizedUser,
+        user: normalizedUser,
       };
     } catch (err) {
       console.error(
@@ -356,7 +372,6 @@ export function AuthProvider({ children }) {
 
       return {
         success: false,
-
         message:
           err.message ||
           "Login failed. Please try again.",
@@ -388,8 +403,7 @@ export function AuthProvider({ children }) {
     const requestedRole =
       normalizeRole(role);
 
-    // Admin has access to
-    // school management modules.
+    // Admin has access to school management modules
     if (currentRole === "admin") {
       return true;
     }
@@ -405,26 +419,27 @@ export function AuthProvider({ children }) {
   // =======================================================
 
   function canAccess(allowedRoles) {
-    if (!user) {
-      return false;
-    }
-
-    const currentRole =
-      getEffectiveRole(user);
-
-    // Admin can access school
-    // management modules.
-    if (currentRole === "admin") {
-      return true;
-    }
-
-    return allowedRoles.some(
-      (allowedRole) =>
-        normalizeRole(
-          allowedRole
-        ) === currentRole
-    );
+  if (!user) {
+    return false;
   }
+
+  const currentRole = getEffectiveRole(user);
+
+  // Admin can access school management modules
+  if (currentRole === "admin") {
+    return true;
+  }
+
+  // Make sure allowedRoles is always an array
+  const roles = Array.isArray(allowedRoles)
+    ? allowedRoles
+    : [];
+
+  return roles.some(
+    (allowedRole) =>
+      normalizeRole(allowedRole) === currentRole
+  );
+}
 
   // =======================================================
   // IS COUNSELLOR
@@ -445,27 +460,16 @@ export function AuthProvider({ children }) {
     <AuthContext.Provider
       value={{
         user,
-
         loading,
-
         register,
-
         login,
-
         logout,
-
         hasRole,
-
         canAccess,
-
         isCounsellor,
-
         getEffectiveRole,
-
         getRedirectPath,
-
         theme,
-
         toggleTheme,
       }}
     >

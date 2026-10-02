@@ -37,6 +37,14 @@ export async function getStudents(params = {}) {
   return response.data;
 }
 
+export async function getStudentsBySchool(schoolId) {
+  const response = await studentApi.get(
+    `/student/school/${schoolId}`
+  );
+
+  return response.data;
+}
+
 export async function getStudent(id) {
   const response = await studentApi.get(`/student/${id}`);
   return response.data;

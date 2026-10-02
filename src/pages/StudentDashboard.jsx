@@ -1,4 +1,3 @@
-
 import React, { useEffect, useMemo, useState } from "react";
 
 import {
@@ -15,130 +14,15 @@ import {
   GraduationCap,
   BarChart3,
 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 import { useAuth } from "../context/AuthContext";
 import { getStudentAcademicInfo } from "../api/enrollement.api";
 import { getMyStudentProfile } from "../api/student.api";
-
+import { getSchoolSubjects } from "../api/subject.api";
 import "./StudentDashboard.css";
-
-// =========================================================
-// DEMO ACADEMIC DATA
-// =========================================================
-
-const subjects = [
-  {
-    code: "MTH",
-    name: "Mathematics",
-    instructor: "Mr. Okonkwo",
-    grade: "A",
-    score: 88,
-    color: "orange",
-  },
-  {
-    code: "ENG",
-    name: "English Language & Lit.",
-    instructor: "Ms. Adeyemi",
-    grade: "B+",
-    score: 79,
-    color: "green",
-  },
-  {
-    code: "PHY",
-    name: "Physics",
-    instructor: "Mr. Mensah",
-    grade: "A-",
-    score: 85,
-    color: "blue",
-  },
-  {
-    code: "CHM",
-    name: "Chemistry",
-    instructor: "Mrs. Asante",
-    grade: "B",
-    score: 74,
-    color: "purple",
-  },
-  {
-    code: "BIO",
-    name: "Biology",
-    instructor: "Mrs. Nwosu",
-    grade: "A",
-    score: 90,
-    color: "red",
-  },
-  {
-    code: "SST",
-    name: "Social Studies",
-    instructor: "Mr. Bello",
-    grade: "B+",
-    score: 78,
-    color: "teal",
-  },
-];
-
-// =========================================================
-// TIMETABLE
-// =========================================================
-
-const timetable = [
-  {
-    time: "7:30 AM – 8:20 AM",
-    code: "MTH",
-    subject: "Mathematics",
-    teacher: "Mr. Okonkwo",
-    room: "Room 12",
-    color: "orange",
-  },
-  {
-    time: "8:25 AM – 9:15 AM",
-    code: "ENG",
-    subject: "English Language",
-    teacher: "Ms. Adeyemi",
-    room: "Room 8",
-    color: "green",
-  },
-  {
-    time: "10:00 AM – 10:50 AM",
-    code: "PHY",
-    subject: "Physics",
-    teacher: "Mr. Mensah",
-    room: "Lab 2",
-    color: "blue",
-  },
-];
-
-// =========================================================
-// ASSIGNMENTS
-// =========================================================
-
-const assignments = [
-  {
-    month: "AUG",
-    day: "26",
-    title: "Exercise 7 — Quadratic Equations",
-    subject: "Mathematics",
-    code: "MTH",
-    color: "orange",
-  },
-  {
-    month: "AUG",
-    day: "27",
-    title: "Comprehension Passage & Summary",
-    subject: "English",
-    code: "ENG",
-    color: "green",
-  },
-  {
-    month: "AUG",
-    day: "29",
-    title: "Lab Report: Motion on an Incline",
-    subject: "Physics",
-    code: "PHY",
-    color: "blue",
-  },
-];
-
+import { getSchoolAssignments } from "../api/assignment.api";
+import { getClassTimetable } from "../api/timetable.api";
 // =========================================================
 // ANNOUNCEMENTS
 // =========================================================
@@ -201,11 +85,7 @@ function getInitials(name) {
 // =========================================================
 
 function SubjectCode({ code, color }) {
-  return (
-    <span className={`subject-code subject-${color}`}>
-      {code}
-    </span>
-  );
+  return <span className={`subject-code subject-${color}`}>{code}</span>;
 }
 
 // =========================================================
@@ -213,24 +93,14 @@ function SubjectCode({ code, color }) {
 // =========================================================
 
 function GradeBadge({ grade, color }) {
-  return (
-    <span className={`grade-badge grade-${color}`}>
-      {grade}
-    </span>
-  );
+  return <span className={`grade-badge grade-${color}`}>{grade}</span>;
 }
 
 // =========================================================
 // STAT CARD
 // =========================================================
 
-function StatCard({
-  icon: Icon,
-  title,
-  value,
-  subtitle,
-  color,
-}) {
+function StatCard({ icon: Icon, title, value, subtitle, color }) {
   return (
     <div className="student-stat-card">
       <div className={`stat-icon stat-${color}`}>
@@ -238,21 +108,14 @@ function StatCard({
       </div>
 
       <div className="stat-content">
-        <span className="stat-title">
-          {title}
-        </span>
+        <span className="stat-title">{title}</span>
 
         <strong>{value}</strong>
 
-        <span className="stat-subtitle">
-          {subtitle}
-        </span>
+        <span className="stat-subtitle">{subtitle}</span>
       </div>
 
-      <ChevronRight
-        size={17}
-        className="stat-arrow"
-      />
+      <ChevronRight size={17} className="stat-arrow" />
     </div>
   );
 }
@@ -263,15 +126,12 @@ function StatCard({
 
 function AcademicResults({ student, subjects }) {
   const studentClass =
-    student?.formLevel ||
-    student?.className ||
-    student?.class ||
-    "Form 3";
-
-  const track =
-    student?.track ||
-    student?.department ||
-    "Science";
+    student?.enrollment?.class?.name ||
+    [student?.enrollment?.class?.level, student?.enrollment?.class?.arm]
+      .filter(Boolean)
+      .join(" ") ||
+    "Class not assigned";
+  const track = student?.enrollment?.class?.level || "Not assigned";
 
   return (
     <section className="dashboard-card results-card">
@@ -279,13 +139,10 @@ function AcademicResults({ student, subjects }) {
         <div>
           <h2>Academic Results</h2>
 
-          <p>
-            Your academic performance for the
-            current term.
-          </p>
+          <p>Your academic performance for the current term.</p>
         </div>
 
-        <button className="view-all-btn">
+        <button className="view-all-btn" onClick={() => navigate("/results")}>
           View Results
           <ChevronRight size={15} />
         </button>
@@ -298,7 +155,7 @@ function AcademicResults({ student, subjects }) {
         </div>
 
         <div>
-          <span>TRACK</span>
+          <span>LEVEL</span>
           <strong>{track}</strong>
         </div>
 
@@ -318,24 +175,15 @@ function AcademicResults({ student, subjects }) {
 
         {subjects.length > 0 ? (
           subjects.map((item) => (
-            <div
-              className="results-row"
-              key={item._id || item.code}
-            >
+            <div className="results-row" key={item._id || item.code}>
               <div className="result-subject">
                 <SubjectCode
-                  code={
-                    item.subject?.code ||
-                    item.code ||
-                    "SUB"
-                  }
+                  code={item.subject?.code || item.code || "SUB"}
                   color={item.color || "blue"}
                 />
 
                 <span>
-                  {item.subject?.name ||
-                    item.name ||
-                    "Unknown Subject"}
+                  {item.subject?.name || item.name || "Unknown Subject"}
                 </span>
               </div>
 
@@ -344,8 +192,7 @@ function AcademicResults({ student, subjects }) {
                   ? `${item.teacher.firstName || ""} ${
                       item.teacher.lastName || ""
                     }`.trim()
-                  : item.instructor ||
-                    "Not assigned"}
+                  : item.instructor || "Not assigned"}
               </span>
 
               <GradeBadge
@@ -355,21 +202,17 @@ function AcademicResults({ student, subjects }) {
 
               <div className="result-score">
                 <strong>
-                  {item.score !== undefined &&
-                  item.score !== null
+                  {item.score !== undefined && item.score !== null
                     ? `${item.score}%`
                     : "—"}
                 </strong>
 
                 <div className="result-progress">
                   <span
-                    className={`progress-${
-                      item.color || "blue"
-                    }`}
+                    className={`progress-${item.color || "blue"}`}
                     style={{
                       width:
-                        item.score !== undefined &&
-                        item.score !== null
+                        item.score !== undefined && item.score !== null
                           ? `${item.score}%`
                           : "0%",
                     }}
@@ -380,8 +223,7 @@ function AcademicResults({ student, subjects }) {
           ))
         ) : (
           <div className="results-empty">
-            No subjects have been assigned to your
-            class yet.
+            No subjects have been assigned to your class yet.
           </div>
         )}
       </div>
@@ -389,11 +231,17 @@ function AcademicResults({ student, subjects }) {
   );
 }
 
-// =========================================================
+/// =========================================================
 // TODAY'S TIMETABLE
-// =========================================================
+function TodayTimetable({ timetable, navigate }) {
+  const today = new Date().toLocaleDateString("en-US", {
+    weekday: "long",
+  });
 
-function TodayTimetable() {
+  const todayTimetable = timetable
+    .filter((item) => item.day === today)
+    .sort((a, b) => (a.startTime || "").localeCompare(b.startTime || ""));
+
   return (
     <section className="dashboard-card">
       <div className="small-card-header">
@@ -402,47 +250,47 @@ function TodayTimetable() {
           <h3>Today's Timetable</h3>
         </div>
 
-        <button className="text-link">
+        <button className="text-link" onClick={() => navigate("/timetable")}>
           View All
           <ChevronRight size={14} />
         </button>
       </div>
 
       <p className="card-description">
-        3 classes today
+        {todayTimetable.length}{" "}
+        {todayTimetable.length === 1 ? "class" : "classes"} today
       </p>
 
       <div className="timetable-list">
-        {timetable.map((item) => (
-          <div
-            className="timetable-item"
-            key={item.code}
-          >
-            <span className="class-time">
-              {item.time}
-            </span>
-
-            <div className="class-information">
-              <SubjectCode
-                code={item.code}
-                color={item.color}
-              />
-
-              <div>
-                <strong>{item.subject}</strong>
-
-                <span>
-                  {item.teacher} • {item.room}
-                </span>
+        {todayTimetable.length === 0 ? (
+          <div className="results-empty">No classes scheduled for today.</div>
+        ) : (
+          todayTimetable.map((item) => (
+            <div className="timetable-item" key={item._id}>
+              <div className="class-time">
+                {item.startTime || "Time not set"}
+                {item.endTime ? ` - ${item.endTime}` : ""}
               </div>
-            </div>
 
-            <ChevronRight
-              size={16}
-              className="item-arrow"
-            />
-          </div>
-        ))}
+              <div className="class-information">
+                <SubjectCode code={item.subject?.code || "SUB"} color="blue" />
+
+                <div className="class-details">
+                  <strong>{item.subject?.name || "Subject"}</strong>
+
+                  <span>
+                    {item.teacher?.firstName || ""}{" "}
+                    {item.teacher?.lastName || ""}
+                    {" • "}
+                    {item.room || "Room not assigned"}
+                  </span>
+                </div>
+              </div>
+
+              <ChevronRight size={16} className="item-arrow" />
+            </div>
+          ))
+        )}
       </div>
     </section>
   );
@@ -452,7 +300,20 @@ function TodayTimetable() {
 // ASSIGNMENTS
 // =========================================================
 
-function UpcomingAssignments() {
+function UpcomingAssignments({ navigate, assignments }) {
+  const upcomingAssignments = assignments
+    .filter((assignment) => {
+      if (!assignment?.dueDate) return false;
+
+      return new Date(assignment.dueDate) >= new Date();
+    })
+    .sort(
+      (a, b) =>
+        new Date(a.dueDate).getTime() -
+        new Date(b.dueDate).getTime(),
+    )
+    .slice(0, 5);
+
   return (
     <section className="dashboard-card">
       <div className="small-card-header">
@@ -461,7 +322,10 @@ function UpcomingAssignments() {
           <h3>Upcoming Assignments</h3>
         </div>
 
-        <button className="text-link">
+        <button
+          className="text-link"
+          onClick={() => navigate("/assignments")}
+        >
           View All
           <ChevronRight size={14} />
         </button>
@@ -472,35 +336,54 @@ function UpcomingAssignments() {
       </p>
 
       <div className="assignment-list">
-        {assignments.map((assignment) => (
-          <div
-            className="assignment-item"
-            key={assignment.day}
-          >
-            <div className="assignment-date">
-              <span>{assignment.month}</span>
-              <strong>{assignment.day}</strong>
-            </div>
-
-            <div className="assignment-information">
-              <strong>{assignment.title}</strong>
-
-              <span>
-                {assignment.subject}
-              </span>
-            </div>
-
-            <SubjectCode
-              code={assignment.code}
-              color={assignment.color}
-            />
-
-            <ChevronRight
-              size={16}
-              className="item-arrow"
-            />
+        {upcomingAssignments.length === 0 ? (
+          <div className="results-empty">
+            No upcoming assignments.
           </div>
-        ))}
+        ) : (
+          upcomingAssignments.map((assignment) => {
+            const dueDate = new Date(assignment.dueDate);
+
+            const month = dueDate.toLocaleDateString("en-US", {
+              month: "short",
+            });
+
+            const day = dueDate.toLocaleDateString("en-US", {
+              day: "numeric",
+            });
+
+            return (
+              <div
+                className="assignment-item"
+                key={assignment._id}
+              >
+                <div className="assignment-date">
+                  <span>{month}</span>
+                  <strong>{day}</strong>
+                </div>
+
+                <div className="assignment-information">
+                  <strong>{assignment.title}</strong>
+
+                  <span>
+                    {assignment.subject?.name ||
+                      "Subject not assigned"}
+                  </span>
+                </div>
+
+                <SubjectCode
+                  code={assignment.subject?.code || "SUB"}
+                  color="blue"
+                />
+
+                <ChevronRight
+                  size={16}
+                  className="item-arrow"
+                />
+              </div>
+            );
+          })
+        )}
       </div>
     </section>
   );
@@ -510,19 +393,13 @@ function UpcomingAssignments() {
 // ATTENDANCE
 // =========================================================
 
-function AttendanceCard({ student }) {
+function AttendanceCard({ student, navigate }) {
   const attendance =
-    student?.attendancePercentage ??
-    student?.attendance ??
-    null;
+    student?.attendancePercentage ?? student?.attendance ?? null;
 
-  const hasAttendance =
-    attendance !== null &&
-    attendance !== undefined;
+  const hasAttendance = attendance !== null && attendance !== undefined;
 
-  const displayAttendance = hasAttendance
-    ? `${attendance}%`
-    : "—";
+  const displayAttendance = hasAttendance ? `${attendance}%` : "—";
 
   return (
     <section className="dashboard-card attendance-card">
@@ -532,7 +409,7 @@ function AttendanceCard({ student }) {
           <h3>Attendance</h3>
         </div>
 
-        <button className="text-link">
+        <button className="text-link" onClick={() => navigate("/attendance")}>
           View Details
           <ChevronRight size={14} />
         </button>
@@ -543,11 +420,7 @@ function AttendanceCard({ student }) {
           <div className="attendance-inner">
             <strong>{displayAttendance}</strong>
 
-            <span>
-              {hasAttendance
-                ? "Attendance"
-                : "Not available"}
-            </span>
+            <span>{hasAttendance ? "Attendance" : "Not available"}</span>
           </div>
         </div>
 
@@ -556,18 +429,14 @@ function AttendanceCard({ student }) {
             <CheckCircle2 size={17} />
             <span>Present</span>
 
-            <strong>
-              {student?.daysPresent ?? "—"}
-            </strong>
+            <strong>{student?.daysPresent ?? "—"}</strong>
           </div>
 
           <div>
             <AlertCircle size={17} />
             <span>Absent</span>
 
-            <strong>
-              {student?.daysAbsent ?? "—"}
-            </strong>
+            <strong>{student?.daysAbsent ?? "—"}</strong>
           </div>
         </div>
       </div>
@@ -580,19 +449,12 @@ function AttendanceCard({ student }) {
 // =========================================================
 
 function FeeStatus({ student }) {
-  const feeStatus =
-    student?.feeStatus ||
-    student?.fees?.status ||
-    null;
+  const feeStatus = student?.feeStatus || student?.fees?.status || null;
 
   const outstanding =
-    student?.outstandingFees ??
-    student?.fees?.outstanding ??
-    null;
+    student?.outstandingFees ?? student?.fees?.outstanding ?? null;
 
-  const hasFeeData =
-    feeStatus !== null ||
-    outstanding !== null;
+  const hasFeeData = feeStatus !== null || outstanding !== null;
 
   return (
     <section className="dashboard-card fee-card">
@@ -610,9 +472,7 @@ function FeeStatus({ student }) {
 
       <div className="fee-content">
         <div className="fee-status-icon">
-          {hasFeeData &&
-          String(feeStatus).toLowerCase() ===
-            "paid" ? (
+          {hasFeeData && String(feeStatus).toLowerCase() === "paid" ? (
             <CheckCircle2 size={28} />
           ) : (
             <WalletCards size={27} />
@@ -629,10 +489,7 @@ function FeeStatus({ student }) {
           </strong>
 
           {outstanding !== null && (
-            <small>
-              Outstanding: ₦
-              {Number(outstanding).toLocaleString()}
-            </small>
+            <small>Outstanding: ₦{Number(outstanding).toLocaleString()}</small>
           )}
         </div>
       </div>
@@ -644,7 +501,7 @@ function FeeStatus({ student }) {
 // ANNOUNCEMENTS
 // =========================================================
 
-function Announcements() {
+function Announcements({ navigate }) {
   return (
     <section className="dashboard-card announcements-card">
       <div className="small-card-header">
@@ -653,7 +510,7 @@ function Announcements() {
           <h3>Latest Announcements</h3>
         </div>
 
-        <button className="text-link">
+        <button className="text-link" onClick={() => navigate("/announcements")}>
           View All
           <ChevronRight size={14} />
         </button>
@@ -661,18 +518,11 @@ function Announcements() {
 
       <div className="announcement-list">
         {announcements.map((announcement) => (
-          <div
-            className="announcement-item"
-            key={announcement.title}
-          >
-            <span
-              className={`announcement-dot dot-${announcement.color}`}
-            />
+          <div className="announcement-item" key={announcement.title}>
+            <span className={`announcement-dot dot-${announcement.color}`} />
 
             <div>
-              <strong>
-                {announcement.title}
-              </strong>
+              <strong>{announcement.title}</strong>
 
               <span>
                 {announcement.date}
@@ -681,10 +531,7 @@ function Announcements() {
               </span>
             </div>
 
-            <ChevronRight
-              size={16}
-              className="item-arrow"
-            />
+            <ChevronRight size={16} className="item-arrow" />
           </div>
         ))}
       </div>
@@ -696,7 +543,7 @@ function Announcements() {
 // REPORT CARD
 // =========================================================
 
-function ReportCard() {
+function ReportCard({ navigate }) {
   return (
     <section className="dashboard-card report-card">
       <div className="small-card-header">
@@ -712,19 +559,19 @@ function ReportCard() {
         </div>
 
         <div className="report-information">
-          <strong>
-            Term 1 Report Card
-          </strong>
+          <strong>Term 1 Report Card</strong>
 
           <span>
-            View your complete academic report,
-            grades and teacher remarks.
+            View your complete academic report, grades and teacher remarks.
           </span>
 
-          <button className="report-btn">
-            View Report Card
-            <ChevronRight size={15} />
-          </button>
+          <button
+  className="report-btn"
+  onClick={() => navigate("/results")}
+>
+  View Report Card
+  <ChevronRight size={15} />
+</button>
         </div>
       </div>
     </section>
@@ -736,14 +583,16 @@ function ReportCard() {
 // =========================================================
 
 export default function StudentDashboard() {
+  const navigate = useNavigate();
   const { user } = useAuth();
 
   const studentId = user?._id || user?.id;
 
   const [student, setStudent] = useState(null);
-  const [academicInfo, setAcademicInfo] =
-    useState(null);
+  const [academicInfo, setAcademicInfo] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [timetable, setTimetable] = useState([]);
+  const [assignments, setAssignments] = useState([]);
 
   // =======================================================
   // LOAD STUDENT DATA
@@ -757,31 +606,119 @@ export default function StudentDashboard() {
         setLoading(true);
 
         // Get student profile
-        const response =
-          await getMyStudentProfile();
+        const response = await getMyStudentProfile();
 
         const studentData =
           response?.data?.student ||
           response?.student ||
           response?.data ||
           null;
-
+          const schoolId = studentData?.school?._id;
+        console.log("STUDENT PROFILE RESPONSE:", response);
+        console.log("STUDENT DATA:", studentData);
+        console.log("SCHOOL:", studentData?.school);
+        console.log("ENROLLMENT:", studentData?.enrollment);
+        console.log("CLASS:", studentData?.enrollment?.class);
         if (mounted) {
           setStudent(studentData);
+          const classId = studentData?.enrollment?.class?._id;
+
+          if (classId) {
+            try {
+              const timetableResponse = await getClassTimetable(
+                classId,
+                "6aa71820239080fa23f5f8eb",
+              );
+              console.log("CLASS TIMETABLE RESPONSE:", timetableResponse);
+
+              const timetableData =
+                timetableResponse?.timetable ||
+                timetableResponse?.entries ||
+                timetableResponse?.data?.timetable ||
+                timetableResponse?.data ||
+                [];
+
+              if (mounted) {
+                setTimetable(Array.isArray(timetableData) ? timetableData : []);
+              }
+            } catch (error) {
+              console.error("Failed to load class timetable:", error);
+            }
+          }
+          const schoolId = studentData?.school?._id;
+
+          if (schoolId) {
+            try {
+              const subjectsResponse = await getSchoolSubjects(schoolId);
+
+              console.log(
+                "SCHOOL SUBJECTS:",
+                JSON.stringify(
+                  subjectsResponse?.data?.subjects ||
+                    subjectsResponse?.subjects ||
+                    [],
+                  null,
+                  2,
+                ),
+              );
+            } catch (error) {
+              console.error("Failed to load school subjects:", error);
+            }
+          }
         }
+        if (schoolId) {
+  try {
+    const assignmentsResponse = await getSchoolAssignments(schoolId);
+
+    const schoolAssignments =
+      assignmentsResponse?.data?.assignments ||
+      assignmentsResponse?.assignments ||
+      [];
+
+    const studentClassId = studentData?.enrollment?.class?._id;
+
+    console.log("ALL SCHOOL ASSIGNMENTS:", schoolAssignments);
+console.log("STUDENT CLASS ID:", studentClassId);
+
+const studentAssignments = schoolAssignments.filter((assignment) => {
+  const assignmentClassId =
+    assignment?.class?._id || assignment?.class;
+
+  console.log("ASSIGNMENT:", assignment);
+  console.log("ASSIGNMENT CLASS ID:", assignmentClassId);
+  console.log("ASSIGNMENT STATUS:", assignment?.status);
+
+  return (
+    studentClassId &&
+    assignmentClassId &&
+    String(assignmentClassId) === String(studentClassId) &&
+    assignment.status === "published"
+  );
+});
+
+    if (mounted) {
+      setAssignments(studentAssignments);
+    }
+
+    console.log("STUDENT ASSIGNMENTS:", studentAssignments);
+  } catch (error) {
+    console.error("Failed to load student assignments:", error);
+
+    if (mounted) {
+      setAssignments([]);
+    }
+  }
+}
 
         // Get academic information
         if (studentId) {
           try {
-            const academicResponse =
-              await getStudentAcademicInfo(
-                studentId
-              );
+            const academicResponse = await getStudentAcademicInfo(studentId);
 
-            const academicData =
-              academicResponse?.data?.academicInfo ||
-              academicResponse?.academicInfo ||
-              null;
+            const academicData = academicResponse?.academicInfo || null;
+            console.log("ACADEMIC RESPONSE:", academicResponse);
+            console.log("ACADEMIC DATA:", academicData);
+            console.log("ACADEMIC SUBJECTS:", academicData?.subjects);
 
             if (mounted) {
               setAcademicInfo(academicData);
@@ -789,15 +726,12 @@ export default function StudentDashboard() {
           } catch (error) {
             console.error(
               "Failed to load student academic information:",
-              error
+              error,
             );
           }
         }
       } catch (error) {
-        console.error(
-          "Failed to load student profile:",
-          error
-        );
+        console.error("Failed to load student profile:", error);
       } finally {
         if (mounted) {
           setLoading(false);
@@ -817,22 +751,21 @@ export default function StudentDashboard() {
   // =======================================================
 
   const currentUser = student || user;
+  const realSubjects = academicInfo?.subjects || [];
 
-  const studentName =
-    getUserName(currentUser);
+  const schoolName = student?.school?.name || "School not assigned";
 
-  const firstName =
-    getFirstName(currentUser);
+  const studentClass =
+    student?.enrollment?.class?.name ||
+    [student?.enrollment?.class?.level, student?.enrollment?.class?.arm]
+      .filter(Boolean)
+      .join(" ") ||
+    "Class not assigned";
+  const studentName = getUserName(currentUser);
 
-  const initials =
-    getInitials(studentName);
+  const firstName = getFirstName(currentUser);
 
-  // =======================================================
-  // REAL SUBJECTS
-  // =======================================================
-
-  const realSubjects =
-    academicInfo?.subjects || [];
+  const initials = getInitials(studentName);
 
   // =======================================================
   // AVERAGE SCORE
@@ -840,48 +773,39 @@ export default function StudentDashboard() {
 
   const averageScore = useMemo(() => {
     if (!realSubjects.length) {
-      return 0;
+      return null;
     }
 
-    const subjectsWithScores =
-      realSubjects.filter(
-        (item) =>
-          item.score !== undefined &&
-          item.score !== null
-      );
+    const subjectsWithScores = realSubjects.filter(
+      (item) =>
+        item.score !== undefined &&
+        item.score !== null &&
+        !Number.isNaN(Number(item.score)),
+    );
 
     if (!subjectsWithScores.length) {
-      return 0;
+      return null;
     }
 
-    const total =
-      subjectsWithScores.reduce(
-        (sum, item) =>
-          sum + Number(item.score),
-        0
-      );
-
-    return Math.round(
-      total / subjectsWithScores.length
+    const total = subjectsWithScores.reduce(
+      (sum, item) => sum + Number(item.score),
+      0,
     );
+
+    return Math.round(total / subjectsWithScores.length);
   }, [realSubjects]);
 
   // =======================================================
   // OTHER DASHBOARD DATA
   // =======================================================
 
-  const pendingAssignments =
-    assignments.length;
+  const pendingAssignments = assignments.length;
 
   const attendance =
-    student?.attendancePercentage ??
-    student?.attendance ??
-    null;
+    student?.attendancePercentage ?? student?.attendance ?? null;
 
   const feeStatus =
-    student?.feeStatus ||
-    student?.fees?.status ||
-    "View status";
+    student?.feeStatus || student?.fees?.status || "View status";
 
   // =======================================================
   // LOADING
@@ -892,9 +816,7 @@ export default function StudentDashboard() {
       <div className="student-dashboard-loading">
         <div className="loading-spinner" />
 
-        <p>
-          Loading your dashboard...
-        </p>
+        <p>Loading your dashboard...</p>
       </div>
     );
   }
@@ -905,24 +827,22 @@ export default function StudentDashboard() {
 
   return (
     <div className="student-dashboard">
-
       {/* ===================================================
           TOP HEADER
       =================================================== */}
 
       <header className="student-header">
         <div className="student-header-right">
-          <button
-            className="student-notification"
-            aria-label="Notifications"
-          >
+          <button className="student-notification" aria-label="Notifications">
             <Bell size={21} />
-            <span>3</span>
           </button>
 
-          <div className="student-avatar">
-            {initials}
+          <div className="student-class-info">
+            <strong>{studentClass}</strong>
+            <span>{schoolName}</span>
           </div>
+
+          <div className="student-avatar">{initials}</div>
         </div>
       </header>
 
@@ -931,25 +851,19 @@ export default function StudentDashboard() {
       =================================================== */}
 
       <div className="student-dashboard-container">
-
         {/* =================================================
             WELCOME
         ================================================= */}
 
         <section className="student-welcome">
           <div className="welcome-left">
-            <span className="welcome-emoji">
-              👋
-            </span>
+            <span className="welcome-emoji">👋</span>
 
             <div>
-              <h1>
-                Welcome back, {firstName}
-              </h1>
+              <h1>Welcome back, {firstName}</h1>
 
               <p>
-                Here's what's happening with
-                your studies today.
+                {schoolName} • {studentClass}
               </p>
             </div>
           </div>
@@ -964,15 +878,10 @@ export default function StudentDashboard() {
         ================================================= */}
 
         <section className="student-stat-grid">
-
           <StatCard
             icon={TrendingUp}
             title="Attendance"
-            value={
-              attendance !== null
-                ? `${attendance}%`
-                : "—"
-            }
+            value={attendance !== null ? `${attendance}%` : "—"}
             subtitle="Current term"
             color="green"
           />
@@ -980,7 +889,7 @@ export default function StudentDashboard() {
           <StatCard
             icon={BarChart3}
             title="Average Result"
-            value={`${averageScore}%`}
+            value={averageScore !== null ? `${averageScore}%` : "—"}
             subtitle="Current term"
             color="purple"
           />
@@ -1000,7 +909,6 @@ export default function StudentDashboard() {
             subtitle="School fees"
             color="blue"
           />
-
         </section>
 
         {/* =================================================
@@ -1008,36 +916,27 @@ export default function StudentDashboard() {
         ================================================= */}
 
         <section className="student-content-grid">
-
           {/* LEFT COLUMN */}
 
           <div className="student-main-column">
+            <AcademicResults student={currentUser} subjects={realSubjects} />
 
-            <AcademicResults
-              student={currentUser}
-              subjects={realSubjects}
-            />
-
-            <UpcomingAssignments />
-
+          <UpcomingAssignments
+  navigate={navigate}
+  assignments={assignments}
+/>
           </div>
 
           {/* RIGHT COLUMN */}
 
           <div className="student-side-column">
-
-            <TodayTimetable />
-
+            <TodayTimetable timetable={timetable} navigate={navigate} />
             <AttendanceCard
-              student={currentUser}
-            />
-
-            <FeeStatus
-              student={currentUser}
-            />
-
+  student={currentUser}
+  navigate={navigate}
+/>
+            <FeeStatus student={currentUser} />
           </div>
-
         </section>
 
         {/* =================================================
@@ -1045,13 +944,10 @@ export default function StudentDashboard() {
         ================================================= */}
 
         <section className="student-bottom-grid">
+          <Announcements navigate={navigate} />
 
-          <Announcements />
-
-          <ReportCard />
-
+         <ReportCard navigate={navigate} />
         </section>
-
       </div>
     </div>
   );

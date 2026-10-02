@@ -14,4 +14,10 @@ export const teacherApi = {
   getTeachersBySchool: async (schoolId) => {
     return http.get(`/teacher/school/${schoolId}`);
   },
-};
+
+  getDashboard: async () => {
+    return http.get("/teacher/dashboard");
+  },
+
+ getStudents: async () => http.get("/student/teacher"),
+  };

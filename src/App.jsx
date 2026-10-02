@@ -11,7 +11,7 @@ import {
   useAuth,
 } from "./context/AuthContext";
 
-import { PERMISSIONS } from "./config/permissions";
+import { PERMISSIONS, ROLES } from "./config/permissions";
 
 import Layout from "./components/Layout";
 
@@ -31,10 +31,13 @@ import TeachingOpportunities from "./pages/TeachingOpportunities";
 // DASHBOARDS
 // =========================================================
 
+import TeacherAttendance from "./pages/TeacherAttendance";
+import SuperAdminUsers from "./pages/SuperAdminUsers";
 import AdminDashboard from "./pages/AdminDashboard";
 import StaffDashboard from "./pages/StaffDashboard";
 import TeacherDashboard from "./pages/TeacherDashboard";
-import CounsellorDashboard from "./pages/CounsellorDashboard";
+import Cdashboard from "./pages/Cdashboard";
+//  import Counsellor from "./pages/counsellorStudents";
 import BursarDashboard from "./pages/BursarDashboard";
 import StudentDashboard from "./pages/StudentDashboard";
 import ParentDashboard from "./pages/ParentDashboard";
@@ -46,11 +49,22 @@ import ParentDashboard from "./pages/ParentDashboard";
 import Students, {
   StudentProfile,
 } from "./pages/Students";
-
+import Invoice from "./pages/Invoice";
+import GradeSummary from "./pages/GradeSummary";
+import ClassSubjects from "./pages/ClassSubjects";
+import LessonNotes from "./pages/LessonNotes";
+import Subjects from "./pages/Subject";
+import Classes from "./pages/Classes";
 import SchoolsPage from "./pages/SchoolsPage";
 import Staff from "./pages/Staff";
 import Teacher from "./pages/Teacher";
-import Counsellor from "./pages/Counsellor";
+import CounsellorFollowups from "./pages/CounsellorFollowups";
+import CounsellorStudents from "./pages/CounsellorStudents.jsx";
+// import Counsellor from "./pages/Counsellor";
+import AnnouncementManagement from "./pages/AnnouncementManagement";
+import AdminAdmissions from "./pages/AdminAdmission.jsx";
+import RecordPayment from "./pages/RecordPayment";
+import StudentLessonNotes from "./pages/StudentsLessonNotes";
 import Academics from "./pages/Academics";
 import Attendance from "./pages/Attendance";
 import Timetable from "./pages/Timetable";
@@ -63,7 +77,8 @@ import Announcements from "./pages/Announcements";
 import Notifications from "./pages/Notifications";
 import Settings from "./pages/Settings";
 import Profile from "./pages/Profile";
-
+import CounsellingRecords from "./pages/CounsellingRecords";
+import TeacherStudents from "./pages/TeacherStudents";
 // =========================================================
 // SUPER ADMIN
 // =========================================================
@@ -268,13 +283,22 @@ function AppRoutes() {
       =================================================== */}
 
       <Route
-        path="/superadmin/admins"
-        element={
-          <RoleRoute allowed={["super_admin"]}>
-            <SuperAdminDashboard />
-          </RoleRoute>
-        }
-      />
+  path="/superadmin"
+  element={
+    <RoleRoute allowed={["super_admin"]}>
+      <SuperAdminDashboard />
+    </RoleRoute>
+  }
+/>
+
+      <Route
+  path="/superadmin/users"
+  element={
+    <RoleRoute allowed={["super_admin"]}>
+      <SuperAdminUsers />
+    </RoleRoute>
+  }
+/>
 
       {/* ===================================================
           RESULTS
@@ -332,15 +356,14 @@ function AppRoutes() {
           SETTINGS
       =================================================== */}
 
-      <Route
-        path="/settings"
-        element={
-          <RoleRoute allowed={PERMISSIONS.settings}>
-            <Settings />
-          </RoleRoute>
-        }
-      />
-
+     <Route
+  path="/settings"
+  element={
+    <RoleRoute allowed={["student"]}>
+      <Settings />
+    </RoleRoute>
+  }
+/>
       {/* ===================================================
           PROFILE
       =================================================== */}
@@ -378,6 +401,19 @@ function AppRoutes() {
             </RoleRoute>
           }
         />
+        <Route
+  path="/class-subjects"
+  element={<ClassSubjects />}
+/>
+<Route
+  path="/announcement-management"
+  element={
+    <RoleRoute allowed={["admin"]}>
+      <AnnouncementManagement />
+    </RoleRoute>
+  }
+/>
+        <Route path="/admissions" element={<AdminAdmissions />} />
 
         {/* =================================================
             STAFF DASHBOARD
@@ -397,14 +433,39 @@ function AppRoutes() {
         ================================================= */}
 
         <Route
-          path="/Cdashboard"
-          element={
-            <RoleRoute allowed={["counsellor"]}>
-              <CounsellorDashboard />
-            </RoleRoute>
-          }
-        />
+  path="/Cdashboard"
+  element={
+    <RoleRoute allowed={["counsellor"]}>
+      <Cdashboard />
+    </RoleRoute>
+  }
+/>
 
+<Route
+  path="/counsellor/students"
+  element={
+    <RoleRoute allowed={["counsellor"]}>
+      <CounsellorStudents />
+    </RoleRoute>
+  }
+/>
+
+<Route
+  path="/counsellor/counselling"
+  element={
+    <RoleRoute allowed={["counsellor"]}>
+      <CounsellingRecords />
+    </RoleRoute>
+  }
+/>
+<Route
+  path="/counsellor/followups"
+  element={
+    <RoleRoute allowed={["counsellor"]}>
+      <CounsellorFollowups />
+    </RoleRoute>
+  }
+/>
         {/* =================================================
             TEACHER DASHBOARD
         ================================================= */}
@@ -417,6 +478,27 @@ function AppRoutes() {
             </RoleRoute>
           }
         />
+        <Route path="/subjects" element={<Subjects />} />
+        <Route
+  path="/Tstudents"
+  element={<TeacherStudents />}
+/>
+<Route
+  path="/Tattendance"
+  element={<TeacherAttendance />}
+/>
+<Route
+  path="/lesson-notes"
+  element={<LessonNotes />}
+/>
+<Route
+  path="/student/lesson-notes"
+  element={
+    <RoleRoute allowed={["student"]}>
+      <StudentLessonNotes />
+    </RoleRoute>
+  }
+/>
 
         {/* =================================================
             BURSAR DASHBOARD
@@ -430,6 +512,11 @@ function AppRoutes() {
             </RoleRoute>
           }
         />
+        <Route
+  path="/finance/invoice/:paymentId"
+  element={<Invoice />}
+/>
+        <Route path="/record-payment" element={<RecordPayment />} />
 
         {/* =================================================
             STUDENT DASHBOARD
@@ -443,6 +530,10 @@ function AppRoutes() {
             </RoleRoute>
           }
         />
+        <Route
+  path="/grades"
+  element={<GradeSummary />}
+/>
 
         {/* =================================================
             PARENT DASHBOARD
@@ -506,6 +597,19 @@ function AppRoutes() {
         />
 
         {/* =================================================
+    CLASSES
+================================================= */}
+
+<Route
+  path="/classes"
+  element={
+    <RoleRoute allowed={["admin", "super_admin"]}>
+      <Classes />
+    </RoleRoute>
+  }
+/>
+
+        {/* =================================================
             ACADEMICS
         ================================================= */}
 
@@ -565,7 +669,7 @@ function AppRoutes() {
           path="/counselling"
           element={
             <RoleRoute allowed={PERMISSIONS.counselling}>
-              <Counsellor />
+             <Cdashboard />
             </RoleRoute>
           }
         />

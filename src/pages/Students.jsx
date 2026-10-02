@@ -661,51 +661,52 @@ export default function Students() {
   }
 
   async function handleSubmit(e) {
-    e.preventDefault();
+  e.preventDefault();
 
-    try {
-      setSaving(true);
-      setError("");
+  try {
+    setSaving(true);
+    setError("");
 
-      const data = {
-        firstName: form.firstName,
-        lastName: form.lastName,
-        gender: form.gender,
-        dob: form.dob,
-        address: form.address,
-        email: form.email,
-        admissionNo: form.admissionNo,
-        session: form.session,
-        medicalNotes: form.medicalNotes,
-        registrationStatus:
-          form.registrationStatus,
-            school: form.school,
-      };
+    const data = {
+      firstName: form.firstName,
+      lastName: form.lastName,
+      gender: form.gender,
+      dob: form.dob,
+      address: form.address,
+      email: form.email,
+      admissionNo: form.admissionNo,
+      session: form.session,
+      medicalNotes: form.medicalNotes,
+      registrationStatus: form.registrationStatus,
+      school: form.school,
+    };
 
-      try {
-  if (editing) {
-    await updateStudent(editing._id, data);
-  } else {
-    await createStudent(data);
-  }
+    console.log("STUDENT DATA BEING SENT:", data);
 
-  await fetchStudents();
-
-  resetForm();
-  setShowForm(false);
-  setEditing(null);
-} catch (err) {
-  console.error("SAVE STUDENT ERROR:", err);
-}
-
-      setError(
-        err.response?.data?.message ||
-          "Failed to save student"
-      );
-    } finally {
-      setSaving(false);
+    if (editing) {
+      await updateStudent(editing._id, data);
+    } else {
+      await createStudent(data);
     }
+
+    await fetchStudents();
+
+    resetForm();
+    setShowForm(false);
+    setEditing(null);
+
+  } catch (err) {
+    console.error("SAVE STUDENT ERROR:", err);
+
+    setError(
+      err.response?.data?.message ||
+        err.message ||
+        "Failed to save student"
+    );
+  } finally {
+    setSaving(false);
   }
+}
 
   async function handleDelete(id) {
     if (

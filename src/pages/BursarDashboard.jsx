@@ -1,4 +1,6 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+
 import {
   Wallet,
   CreditCard,
@@ -8,179 +10,823 @@ import {
   Printer,
   DollarSign,
   BarChart3,
+  ArrowUpRight,
+  Users,
+  Clock,
+  CheckCircle2,
+  MoreHorizontal,
+  RefreshCw,
+  Building2,
 } from "lucide-react";
 
-export default function BursarDashboard() {
-  const transactions = [
-    "John Doe paid ₦150,000 School Fees",
-    "Receipt #10021 generated",
-    "Invoice sent to Mary Johnson",
-    "Outstanding fee reminder sent",
-    "Transport fee payment received",
-  ];
+import { useAuth } from "../context/AuthContext";
 
-  const actions = [
-    { title: "Record Payment", icon: <DollarSign size={20} /> },
-    { title: "Generate Invoice", icon: <FileText size={20} /> },
-    { title: "Print Receipt", icon: <Printer size={20} /> },
-    { title: "Financial Report", icon: <BarChart3 size={20} /> },
-  ];
+import {
+  getPayments,
+  getTotalRevenue,
+  getTodayRevenue,
+} from "../api/payment.api";
+
+import "./BursarDashboard.css";
+
+export default function BursarDashboard() {
+  const navigate = useNavigate();
+  const { user } = useAuth();
+
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [error, setError] = useState("");
+
+  const [totalRevenue, setTotalRevenue] = useState(0);
+  const [todayRevenue, setTodayRevenue] = useState(0);
+  const [todayPaymentCount, setTodayPaymentCount] = useState(0);
+  const [payments, setPayments] = useState([]);
+
+  // ==================================================
+  // SCHOOL INFORMATION
+  // ==================================================
+
+  const schoolId =
+    typeof user?.school === "object"
+      ? user?.school?._id
+      : user?.school;
+
+  const schoolName =
+    typeof user?.school === "object"
+      ? user?.school?.name
+      : "School";
+
+  // ==================================================
+  // LOAD DASHBOARD DATA
+  // ==================================================
+
+  const loadDashboard = async () => {
+    if (!schoolId) {
+      setError("Your account is not connected to a school.");
+      setLoading(false);
+      setRefreshing(false);
+      return;
+    }
+
+    try {
+      setError("");
+
+      const [
+        revenueResponse,
+        todayRevenueResponse,
+        paymentsResponse,
+      ] = await Promise.all([
+        getTotalRevenue(schoolId),
+
+        getTodayRevenue(schoolId),
+
+        getPayments({
+          school: schoolId,
+          page: 1,
+          limit: 5,
+        }),
+      ]);
+
+      console.log(
+        "BURSAR REVENUE RESPONSE:",
+        revenueResponse
+      );
+
+      console.log(
+        "BURSAR TODAY REVENUE RESPONSE:",
+        todayRevenueResponse
+      );
+
+      console.log(
+        "BURSAR PAYMENTS RESPONSE:",
+        paymentsResponse
+      );
+
+      // ==================================================
+      // TOTAL REVENUE
+      // ==================================================
+
+      const total =
+        revenueResponse?.total ??
+        revenueResponse?.data?.total ??
+        0;
+
+      setTotalRevenue(Number(total) || 0);
+
+      // ==================================================
+      // TODAY'S REVENUE
+      // ==================================================
+
+      const todayTotal =
+        todayRevenueResponse?.total ??
+        todayRevenueResponse?.data?.total ??
+        0;
+
+      const todayCount =
+        todayRevenueResponse?.count ??
+        todayRevenueResponse?.data?.count ??
+        0;
+
+      setTodayRevenue(Number(todayTotal) || 0);
+
+      setTodayPaymentCount(Number(todayCount) || 0);
+
+      // ==================================================
+      // RECENT PAYMENTS
+      // ==================================================
+
+      const paymentList =
+        paymentsResponse?.payments ??
+        paymentsResponse?.data?.payments ??
+        [];
+
+      setPayments(
+        Array.isArray(paymentList)
+          ? paymentList
+          : []
+      );
+    } catch (err) {
+      console.error(
+        "BURSAR DASHBOARD ERROR:",
+        err
+      );
+
+      setError(
+        err?.response?.data?.message ||
+          err?.message ||
+          "Failed to load financial information."
+      );
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  };
+
+  // ==================================================
+  // INITIAL LOAD
+  // ==================================================
+
+  useEffect(() => {
+    loadDashboard();
+  }, [schoolId]);
+
+  // ==================================================
+  // REFRESH
+  // ==================================================
+
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    await loadDashboard();
+  };
+
+  // ==================================================
+  // FORMAT CURRENCY
+  // ==================================================
+
+  const formatCurrency = (amount) => {
+    return new Intl.NumberFormat("en-NG", {
+      style: "currency",
+      currency: "NGN",
+      maximumFractionDigits: 0,
+    }).format(Number(amount) || 0);
+  };
+
+  // ==================================================
+  // FORMAT DATE
+  // ==================================================
+
+  const formatDate = (date) => {
+    if (!date) {
+      return "—";
+    }
+
+    const parsedDate = new Date(date);
+
+    if (Number.isNaN(parsedDate.getTime())) {
+      return "—";
+    }
+
+    return parsedDate.toLocaleString("en-NG", {
+      dateStyle: "medium",
+      timeStyle: "short",
+    });
+  };
+
+  // ==================================================
+  // RECENT PAYMENT COUNTS
+  // ==================================================
+
+  const paidPayments = payments.filter(
+    (payment) =>
+      String(payment.status || "").toLowerCase() ===
+      "paid"
+  ).length;
+
+  const pendingPayments = payments.filter(
+    (payment) =>
+      String(payment.status || "").toLowerCase() ===
+      "pending"
+  ).length;
+
+  const failedPayments = payments.filter(
+    (payment) =>
+      String(payment.status || "").toLowerCase() ===
+      "failed"
+  ).length;
+
+  // ==================================================
+  // LOADING STATE
+  // ==================================================
+
+  if (loading) {
+    return (
+      <div className="bursar-loading">
+        <RefreshCw
+          size={30}
+          className="bursar-refresh-spin"
+        />
+
+        <p>Loading financial dashboard...</p>
+      </div>
+    );
+  }
+
+  // ==================================================
+  // DASHBOARD
+  // ==================================================
 
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div className="bursar-dashboard">
 
-      {/* Header */}
+      {/* ==================================================
+          HEADER
+      ================================================== */}
 
-      <div className="bg-white shadow px-8 py-5 flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-800">
+      <div className="bursar-header">
+        <div className="bursar-header-left">
+          <h1 className="bursar-title">
             Bursar Dashboard
           </h1>
 
-          <p className="text-gray-500 mt-1">
-            Monitor school finances and fee collections.
-          </p>
+          <div className="bursar-school">
+            <Building2 size={17} />
+            <span>{schoolName}</span>
+          </div>
         </div>
 
-        <button className="bg-emerald-600 text-white px-5 py-2 rounded-lg hover:bg-emerald-700">
-          Finance Report
-        </button>
+        <div className="bursar-header-actions">
+          <button
+            type="button"
+            className="bursar-refresh-button"
+            onClick={handleRefresh}
+            disabled={refreshing}
+          >
+            <RefreshCw
+              size={17}
+              className={
+                refreshing
+                  ? "bursar-refresh-spin"
+                  : ""
+              }
+            />
+
+            {refreshing
+              ? "Refreshing..."
+              : "Refresh"}
+          </button>
+
+          <button
+            type="button"
+            className="bursar-report-button"
+            onClick={() => navigate("/reports")}
+          >
+            <BarChart3 size={17} />
+            Financial Report
+          </button>
+        </div>
       </div>
 
-      <div className="p-8">
+      {/* ==================================================
+          ERROR
+      ================================================== */}
 
-        {/* Statistics */}
+      {error && (
+        <div className="bursar-error">
+          <AlertCircle size={20} />
 
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+          <div>
+            <strong>
+              Unable to load some information
+            </strong>
 
-          <div className="bg-white rounded-xl shadow p-6">
-            <Wallet className="text-green-600 mb-3" size={35}/>
-            <h2 className="text-gray-500">Total Revenue</h2>
-            <p className="text-3xl font-bold">₦14.5M</p>
+            <p>{error}</p>
+          </div>
+        </div>
+      )}
+
+      {/* ==================================================
+          STATISTICS
+      ================================================== */}
+
+      <div className="bursar-stats-grid">
+
+        {/* TOTAL REVENUE */}
+
+        <div className="bursar-stat-card">
+          <div className="bursar-stat-icon">
+            <Wallet size={22} />
           </div>
 
-          <div className="bg-white rounded-xl shadow p-6">
-            <CreditCard className="text-blue-600 mb-3" size={35}/>
-            <h2 className="text-gray-500">Payments Today</h2>
-            <p className="text-3xl font-bold">42</p>
-          </div>
+          <div className="bursar-stat-content">
+            <span className="bursar-stat-label">
+              Total Revenue
+            </span>
 
-          <div className="bg-white rounded-xl shadow p-6">
-            <Receipt className="text-orange-500 mb-3" size={35}/>
-            <h2 className="text-gray-500">Invoices Issued</h2>
-            <p className="text-3xl font-bold">315</p>
-          </div>
+            <h2 className="bursar-stat-value">
+              {formatCurrency(totalRevenue)}
+            </h2>
 
-          <div className="bg-white rounded-xl shadow p-6">
-            <AlertCircle className="text-red-600 mb-3" size={35}/>
-            <h2 className="text-gray-500">Outstanding Fees</h2>
-            <p className="text-3xl font-bold">₦2.1M</p>
+            <span className="bursar-stat-description">
+              All recorded paid transactions
+            </span>
           </div>
-
         </div>
 
-        {/* Fee Collection Progress */}
+        {/* TODAY'S PAYMENTS */}
 
-        <div className="bg-white rounded-xl shadow p-6 mt-8">
-
-          <h2 className="text-xl font-semibold mb-6">
-            Fee Collection Progress
-          </h2>
-
-          <div className="space-y-5">
-
-            <div>
-              <div className="flex justify-between mb-2">
-                <span>School Fees</span>
-                <span>85%</span>
-              </div>
-
-              <div className="w-full bg-gray-200 rounded-full h-3">
-                <div className="bg-green-600 h-3 rounded-full w-[85%]"></div>
-              </div>
-            </div>
-
-            <div>
-              <div className="flex justify-between mb-2">
-                <span>Transport Fees</span>
-                <span>70%</span>
-              </div>
-
-              <div className="w-full bg-gray-200 rounded-full h-3">
-                <div className="bg-blue-600 h-3 rounded-full w-[70%]"></div>
-              </div>
-            </div>
-
-            <div>
-              <div className="flex justify-between mb-2">
-                <span>Uniform Fees</span>
-                <span>60%</span>
-              </div>
-
-              <div className="w-full bg-gray-200 rounded-full h-3">
-                <div className="bg-yellow-500 h-3 rounded-full w-[60%]"></div>
-              </div>
-            </div>
-
+        <div className="bursar-stat-card">
+          <div className="bursar-stat-icon">
+            <CreditCard size={22} />
           </div>
 
+          <div className="bursar-stat-content">
+            <span className="bursar-stat-label">
+              Payments Today
+            </span>
+
+            <h2 className="bursar-stat-value">
+              {formatCurrency(todayRevenue)}
+            </h2>
+
+            <span className="bursar-stat-description">
+              {todayPaymentCount} payment
+              {todayPaymentCount === 1
+                ? ""
+                : "s"} today
+            </span>
+          </div>
         </div>
 
-        {/* Bottom Section */}
+        {/* RECENT PAYMENTS */}
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
+        <div className="bursar-stat-card">
+          <div className="bursar-stat-icon">
+            <Receipt size={22} />
+          </div>
 
-          {/* Transactions */}
+          <div className="bursar-stat-content">
+            <span className="bursar-stat-label">
+              Recent Payments
+            </span>
 
-          <div className="bg-white rounded-xl shadow p-6">
+            <h2 className="bursar-stat-value">
+              {payments.length}
+            </h2>
 
-            <h2 className="text-xl font-semibold mb-4">
+            <span className="bursar-stat-description">
+              Latest transactions
+            </span>
+          </div>
+        </div>
+
+        {/* OUTSTANDING FEES */}
+
+        <div className="bursar-stat-card">
+          <div className="bursar-stat-icon">
+            <AlertCircle size={22} />
+          </div>
+
+          <div className="bursar-stat-content">
+            <span className="bursar-stat-label">
+              Outstanding Fees
+            </span>
+
+            <h2 className="bursar-stat-value">
+              —
+            </h2>
+
+            <span className="bursar-stat-description">
+              Fee tracking will appear here
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {/* ==================================================
+          FINANCE OVERVIEW
+      ================================================== */}
+
+      <div className="bursar-section">
+
+        <div className="bursar-section-header">
+          <div>
+            <h2>Finance Overview</h2>
+
+            <p>
+              Overview of the school's recorded
+              financial activity.
+            </p>
+          </div>
+        </div>
+
+        <div className="bursar-overview-grid">
+
+          {/* FEE COLLECTION */}
+
+          <div className="bursar-card">
+            <div className="bursar-card-header">
+              <div>
+                <h3>Fee Collection</h3>
+
+                <p>
+                  Recorded payment activity
+                </p>
+              </div>
+
+              <Wallet size={21} />
+            </div>
+
+            <div className="bursar-collection-value">
+              {formatCurrency(totalRevenue)}
+            </div>
+
+            <div className="bursar-collection-row">
+              <span>
+                Total collected
+              </span>
+
+              <strong>
+                {formatCurrency(totalRevenue)}
+              </strong>
+            </div>
+
+            <div className="bursar-collection-row">
+              <span>
+                Collected today
+              </span>
+
+              <strong>
+                {formatCurrency(todayRevenue)}
+              </strong>
+            </div>
+          </div>
+
+          {/* PAYMENT SUMMARY */}
+
+          <div className="bursar-card">
+            <div className="bursar-card-header">
+              <div>
+                <h3>
+                  Recent Payment Status
+                </h3>
+
+                <p>
+                  Status of the latest transactions
+                </p>
+              </div>
+
+              <BarChart3 size={21} />
+            </div>
+
+            <div className="bursar-summary-list">
+
+              <div className="bursar-summary-item">
+                <span>
+                  <CheckCircle2 size={17} />
+                  Paid
+                </span>
+
+                <strong>
+                  {paidPayments}
+                </strong>
+              </div>
+
+              <div className="bursar-summary-item">
+                <span>
+                  <Clock size={17} />
+                  Pending
+                </span>
+
+                <strong>
+                  {pendingPayments}
+                </strong>
+              </div>
+
+              <div className="bursar-summary-item">
+                <span>
+                  <AlertCircle size={17} />
+                  Failed
+                </span>
+
+                <strong>
+                  {failedPayments}
+                </strong>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* ==================================================
+          RECENT TRANSACTIONS
+      ================================================== */}
+
+      <div className="bursar-section">
+
+        <div className="bursar-section-header">
+
+          <div>
+            <h2>
               Recent Transactions
             </h2>
 
-            <ul className="space-y-3">
-
-              {transactions.map((item, index) => (
-                <li
-                  key={index}
-                  className="border-b pb-2 text-gray-700"
-                >
-                  • {item}
-                </li>
-              ))}
-
-            </ul>
-
+            <p>
+              Latest payment transactions
+              recorded in the school.
+            </p>
           </div>
 
-          {/* Quick Actions */}
+          <button
+            type="button"
+            className="bursar-view-all"
+            onClick={() =>
+              navigate("/finance")
+            }
+          >
+            View All
 
-          <div className="bg-white rounded-xl shadow p-6">
+            <ArrowUpRight size={16} />
+          </button>
+        </div>
 
-            <h2 className="text-xl font-semibold mb-4">
+        <div className="bursar-card">
+
+          {payments.length === 0 ? (
+            <div className="bursar-empty-state">
+
+              <Receipt size={35} />
+
+              <h3>
+                No payments recorded yet
+              </h3>
+
+              <p>
+                Recorded payments will
+                appear here.
+              </p>
+            </div>
+          ) : (
+            <div className="bursar-transactions">
+
+              {payments.map((payment) => {
+                const student =
+                  payment.student || {};
+
+                const studentName =
+                  `${student.firstName || ""} ${
+                    student.lastName || ""
+                  }`.trim() ||
+                  "Unknown Student";
+
+                const paymentStatus =
+                  payment.status || "Pending";
+
+                return (
+                  <div
+                    className="bursar-transaction"
+                    key={payment._id}
+                  >
+
+                    <div className="bursar-transaction-icon">
+                      <DollarSign size={18} />
+                    </div>
+
+                    <div className="bursar-transaction-info">
+
+                      <strong>
+                        {studentName}
+                      </strong>
+
+                      <span>
+                        {payment.feeType ||
+                          "Payment"}
+                      </span>
+
+                      <small>
+                        {formatDate(
+                          payment.paymentDate
+                        )}
+                      </small>
+                    </div>
+
+                    <div className="bursar-transaction-amount">
+
+                      <strong>
+                        {formatCurrency(
+                          payment.amount
+                        )}
+                      </strong>
+
+                      <span
+                        className={`bursar-payment-status bursar-status-${String(
+                          paymentStatus
+                        ).toLowerCase()}`}
+                      >
+                        {paymentStatus}
+                      </span>
+                    </div>
+
+                    <button
+                      type="button"
+                      className="bursar-more-button"
+                      onClick={() =>
+                        navigate(
+                          `/finance/invoice/${payment._id}`
+                        )
+                      }
+                      title="View payment"
+                    >
+                      <MoreHorizontal size={19} />
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* ==================================================
+          OUTSTANDING FEES
+      ================================================== */}
+
+      <div className="bursar-section">
+
+        <div className="bursar-section-header">
+
+          <div>
+            <h2>
+              Outstanding Fees
+            </h2>
+
+            <p>
+              Track students with unpaid
+              school fees.
+            </p>
+          </div>
+
+          <button
+            type="button"
+            className="bursar-view-all"
+            onClick={() =>
+              navigate("/finance")
+            }
+          >
+            View All
+
+            <ArrowUpRight size={16} />
+          </button>
+        </div>
+
+        <div className="bursar-card bursar-outstanding-card">
+
+          <Users size={32} />
+
+          <div>
+            <h3>
+              Outstanding fee tracking
+            </h3>
+
+            <p>
+              Student fee balances will
+              appear here once fee records
+              are connected.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* ==================================================
+          QUICK ACTIONS
+      ================================================== */}
+
+      <div className="bursar-section bursar-quick-actions">
+
+        <div className="bursar-section-header">
+
+          <div>
+            <h2>
               Quick Actions
             </h2>
 
-            <div className="grid grid-cols-2 gap-4">
-
-              {actions.map((action, index) => (
-                <button
-                  key={index}
-                  className="flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg p-4"
-                >
-                  {action.icon}
-                  {action.title}
-                </button>
-              ))}
-
-            </div>
-
+            <p>
+              Quickly access common
+              bursar operations.
+            </p>
           </div>
-
         </div>
 
-      </div>
+        <div className="bursar-actions-grid">
 
+          {/* RECORD PAYMENT */}
+
+          <button
+            type="button"
+            className="bursar-action"
+            onClick={() =>
+              navigate("/record-payment")
+            }
+          >
+            <div className="bursar-action-icon">
+              <DollarSign size={21} />
+            </div>
+
+            <h3 className="bursar-action-title">
+              Record Payment
+            </h3>
+
+            <p className="bursar-action-description">
+              Record a student payment
+            </p>
+          </button>
+
+          {/* FINANCE */}
+
+          <button
+            type="button"
+            className="bursar-action"
+            onClick={() =>
+              navigate("/finance")
+            }
+          >
+            <div className="bursar-action-icon">
+              <FileText size={21} />
+            </div>
+
+            <h3 className="bursar-action-title">
+              Fees & Finance
+            </h3>
+
+            <p className="bursar-action-description">
+              View payment and fee records
+            </p>
+          </button>
+
+          {/* RECEIPTS */}
+
+          <button
+            type="button"
+            className="bursar-action"
+            onClick={() =>
+              navigate("/finance")
+            }
+          >
+            <div className="bursar-action-icon">
+              <Printer size={21} />
+            </div>
+
+            <h3 className="bursar-action-title">
+              Payment Records
+            </h3>
+
+            <p className="bursar-action-description">
+              View recorded payments
+            </p>
+          </button>
+
+          {/* REPORTS */}
+
+          <button
+            type="button"
+            className="bursar-action"
+            onClick={() =>
+              navigate("/reports")
+            }
+          >
+            <div className="bursar-action-icon">
+              <BarChart3 size={21} />
+            </div>
+
+            <h3 className="bursar-action-title">
+              Financial Report
+            </h3>
+
+            <p className="bursar-action-description">
+              View financial reports
+            </p>
+          </button>
+        </div>
+      </div>
     </div>
   );
 }

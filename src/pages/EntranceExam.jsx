@@ -1,7 +1,9 @@
+
 import { useState, useMemo } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { ArrowRight, RotateCcw } from "lucide-react";
-import { useAuth } from "../context/AuthContext";
+
+import { submitEntranceExam } from "../api/admissionApplication.api";
 
 const QUESTION_BANKS = {
   nursery: [
@@ -36,6 +38,7 @@ const QUESTION_BANKS = {
       answer: "5",
     },
   ],
+
   primary: [
     {
       id: "primary-q1",
@@ -68,6 +71,7 @@ const QUESTION_BANKS = {
       answer: "goes",
     },
   ],
+
   jss: [
     {
       id: "jss-q1",
@@ -100,6 +104,7 @@ const QUESTION_BANKS = {
       answer: "Roots",
     },
   ],
+
   ss: [
     {
       id: "ss-q1",
@@ -115,7 +120,8 @@ const QUESTION_BANKS = {
     },
     {
       id: "ss-q3",
-      prompt: "Which law states that energy cannot be created or destroyed?",
+      prompt:
+        "Which law states that energy cannot be created or destroyed?",
       options: [
         "Newton's Law",
         "Law of Conservation of Energy",
@@ -134,7 +140,12 @@ const QUESTION_BANKS = {
       id: "ss-q5",
       prompt:
         "Which literary device is used in 'The wind whispered through the trees'?",
-      options: ["Simile", "Personification", "Hyperbole", "Metaphor"],
+      options: [
+        "Simile",
+        "Personification",
+        "Hyperbole",
+        "Metaphor",
+      ],
       answer: "Personification",
     },
   ],
@@ -145,15 +156,27 @@ function getQuestionsForClass(studentClass) {
 
   const normalized = studentClass.toLowerCase();
 
-  if (normalized.includes("nursery")) return QUESTION_BANKS.nursery;
-  if (normalized.includes("primary")) return QUESTION_BANKS.primary;
-  if (normalized.includes("jss")) return QUESTION_BANKS.jss;
-  if (normalized.includes("ss")) return QUESTION_BANKS.ss;
+  if (normalized.includes("nursery")) {
+    return QUESTION_BANKS.nursery;
+  }
+
+  if (normalized.includes("primary")) {
+    return QUESTION_BANKS.primary;
+  }
+
+  if (normalized.includes("jss")) {
+    return QUESTION_BANKS.jss;
+  }
+
+  if (normalized.includes("ss")) {
+    return QUESTION_BANKS.ss;
+  }
 
   return QUESTION_BANKS.primary;
 }
 
 const PASS_THRESHOLD = 0.6;
+
 const LETTERS = ["A", "B", "C", "D", "E", "F"];
 
 function Seal() {
@@ -165,7 +188,14 @@ function Seal() {
       fill="none"
       aria-hidden="true"
     >
-      <circle cx="26" cy="26" r="24" stroke="var(--gold)" strokeWidth="1.5" />
+      <circle
+        cx="26"
+        cy="26"
+        r="24"
+        stroke="var(--gold)"
+        strokeWidth="1.5"
+      />
+
       <circle
         cx="26"
         cy="26"
@@ -174,6 +204,7 @@ function Seal() {
         strokeWidth="1"
         strokeDasharray="2 3"
       />
+
       <path
         d="M26 15L28.5 21.5H35.5L29.8 25.6L32 32.5L26 28.2L20 32.5L22.2 25.6L16.5 21.5H23.5L26 15Z"
         fill="var(--gold)"
@@ -185,67 +216,154 @@ function Seal() {
 export default function EntranceExam({ onContinue }) {
   const navigate = useNavigate();
   const location = useLocation();
-  const { user, saveEntranceExamResult } = useAuth();
+
+  const applicationId = location.state?.applicationId || "";
   const studentClass = location.state?.studentClass || "";
-  const [phase, setPhase] = useState("exam"); // 'exam' | 'results' | 'registration-demo'
+
+  const [phase, setPhase] = useState("exam");
   const [answers, setAnswers] = useState({});
   const [score, setScore] = useState(0);
   const [error, setError] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [examSaved, setExamSaved] = useState(false);
 
   const QUESTIONS = useMemo(
     () => getQuestionsForClass(studentClass),
-    [studentClass],
+    [studentClass]
   );
+
   const answeredCount = Object.keys(answers).length;
   const total = QUESTIONS.length;
-  const passed = useMemo(() => score / total >= PASS_THRESHOLD, [score, total]);
+
+  const percentage = useMemo(() => {
+    if (!total) return 0;
+
+    return Math.round((score / total) * 100);
+  }, [score, total]);
+
+  const passed = useMemo(() => {
+    if (!total) return false;
+
+    return score / total >= PASS_THRESHOLD;
+  }, [score, total]);
 
   const handleSelect = (questionId, option) => {
-    setAnswers((prev) => ({ ...prev, [questionId]: option }));
-    if (error) setError("");
+    setAnswers((prev) => ({
+      ...prev,
+      [questionId]: option,
+    }));
+
+    if (error) {
+      setError("");
+    }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (!applicationId) {
+      setError(
+        "Your admission application could not be found. Please return to registration and start again."
+      );
+      return;
+    }
+
     if (answeredCount < total) {
       setError("Answer every question before submitting.");
       return;
     }
+
     const correctCount = QUESTIONS.filter(
-      (q) => answers[q.id] === q.answer,
+      (question) => answers[question.id] === question.answer
     ).length;
-    const passedExam = correctCount / total >= PASS_THRESHOLD;
+
+    const examPercentage = (correctCount / total) * 100;
+
+    const passedExam =
+      correctCount / total >= PASS_THRESHOLD;
+
+    const examAnswers = QUESTIONS.map((question) => ({
+      questionId: question.id,
+      answer: answers[question.id],
+    }));
+
     setScore(correctCount);
+    setError("");
 
-    if (user?.role === "student" && user?.id) {
-      saveEntranceExamResult(user.id, {
-        entranceExamScore: correctCount,
-        entranceExamTotal: total,
-        entranceExamPassed: passedExam,
-        entranceExamDate: new Date().toISOString(),
-        entranceExamClass: studentClass || user.studentClass || "",
-      });
+    try {
+      setSubmitting(true);
+
+      const examData = {
+        examScore: correctCount,
+        examTotal: total,
+        examPercentage,
+        examPassed: passedExam,
+        examAnswers,
+      };
+
+      console.log(
+        "ENTRANCE EXAM RESULT BEING SENT:",
+        examData
+      );
+
+      const result = await submitEntranceExam(
+        applicationId,
+        examData
+      );
+
+      console.log(
+        "ENTRANCE EXAM RESULT:",
+        result
+      );
+
+      setExamSaved(true);
+      setPhase("results");
+    } catch (error) {
+      console.error(
+        "ENTRANCE EXAM SUBMISSION ERROR:",
+        error
+      );
+
+      console.error(
+        "ERROR RESPONSE:",
+        error?.response
+      );
+
+      console.error(
+        "ERROR RESPONSE DATA:",
+        error?.response?.data
+      );
+
+      setError(
+        error?.response?.data?.message ||
+          error?.message ||
+          "Unable to submit your examination result. Please try again."
+      );
+    } finally {
+      setSubmitting(false);
     }
-
-    setPhase("results");
   };
 
   const handleRetake = () => {
     setAnswers({});
+    setScore(0);
     setError("");
+    setExamSaved(false);
     setPhase("exam");
   };
 
   const handleContinue = () => {
-    if (typeof onContinue === "function") onContinue();
-    else navigate("/Stdashboard");
+    if (typeof onContinue === "function") {
+      onContinue();
+      return;
+    }
+
+    navigate("/");
   };
 
   return (
     <div className="exam-root">
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap');
-
         .exam-root {
           --ink: #1557b0;
           --ink-deep: #1557b0;
@@ -256,34 +374,62 @@ export default function EntranceExam({ onContinue }) {
           --graphite: #1557b0;
           --maroon: #1557b0;
           --forest: #1557b0;
+
           min-height: 100vh;
           width: 100%;
           background: var(--ink-deep);
+
           background-image:
-            radial-gradient(circle at 20% 15%, rgba(184,134,43,0.10), transparent 40%),
-            radial-gradient(circle at 85% 80%, rgba(184,134,43,0.08), transparent 45%);
+            radial-gradient(
+              circle at 20% 15%,
+              rgba(184,134,43,0.10),
+              transparent 40%
+            ),
+            radial-gradient(
+              circle at 85% 80%,
+              rgba(184,134,43,0.08),
+              transparent 45%
+            );
+
           display: flex;
           justify-content: center;
           padding: 48px 16px;
+
           font-family: 'IBM Plex Sans', sans-serif;
           color: var(--graphite);
           box-sizing: border-box;
         }
-        .exam-root *, .exam-root *::before, .exam-root *::after { box-sizing: border-box; }
 
-        .mono { font-family: 'IBM Plex Mono', monospace; letter-spacing: 0.06em; }
+        .exam-root *,
+        .exam-root *::before,
+        .exam-root *::after {
+          box-sizing: border-box;
+        }
+
+        .mono {
+          font-family: 'IBM Plex Mono', monospace;
+          letter-spacing: 0.06em;
+        }
 
         .exam-sheet {
           width: 100%;
           max-width: 640px;
+
           background: var(--paper);
           border: 1px solid var(--paper-line);
           border-radius: 3px;
-          box-shadow: 0 30px 60px -20px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.02);
+
+          box-shadow:
+            0 30px 60px -20px rgba(0,0,0,0.5),
+            0 0 0 1px rgba(255,255,255,0.02);
+
           padding: 40px 40px 44px;
         }
+
         @media (max-width: 560px) {
-          .exam-sheet { padding: 28px 20px 32px; }
+          .exam-sheet {
+            padding: 28px 20px 32px;
+          }
         }
 
         .sheet-header {
@@ -291,13 +437,19 @@ export default function EntranceExam({ onContinue }) {
           align-items: flex-start;
           gap: 16px;
         }
-        .header-text { flex: 1; min-width: 0; }
+
+        .header-text {
+          flex: 1;
+          min-width: 0;
+        }
+
         .eyebrow-mono {
           font-size: 11px;
           text-transform: uppercase;
           color: var(--gold);
           font-weight: 500;
         }
+
         .exam-title {
           font-family: 'Source Serif 4', serif;
           font-weight: 700;
@@ -306,6 +458,7 @@ export default function EntranceExam({ onContinue }) {
           margin: 6px 0 10px;
           color: var(--ink);
         }
+
         .exam-instructions {
           font-size: 14px;
           line-height: 1.55;
@@ -313,6 +466,7 @@ export default function EntranceExam({ onContinue }) {
           margin: 0;
           max-width: 46ch;
         }
+
         .answered-count {
           font-size: 11px;
           color: #8a8570;
@@ -320,9 +474,17 @@ export default function EntranceExam({ onContinue }) {
           text-align: right;
           padding-top: 4px;
         }
+
         @media (max-width: 560px) {
-          .sheet-header { flex-wrap: wrap; }
-          .answered-count { order: 3; text-align: left; padding-top: 8px; }
+          .sheet-header {
+            flex-wrap: wrap;
+          }
+
+          .answered-count {
+            order: 3;
+            text-align: left;
+            padding-top: 8px;
+          }
         }
 
         .gold-rule {
@@ -336,14 +498,19 @@ export default function EntranceExam({ onContinue }) {
           gap: 8px;
           margin-bottom: 30px;
         }
+
         .progress-dot {
           width: 10px;
           height: 10px;
           border-radius: 50%;
           border: 1.5px solid var(--gold-soft);
           background: transparent;
-          transition: background-color 150ms ease, border-color 150ms ease;
+
+          transition:
+            background-color 150ms ease,
+            border-color 150ms ease;
         }
+
         .progress-dot.filled {
           background: var(--gold);
           border-color: var(--gold);
@@ -361,12 +528,14 @@ export default function EntranceExam({ onContinue }) {
           gap: 10px;
           margin-bottom: 12px;
         }
+
         .q-number {
           font-size: 12px;
           color: var(--gold);
           font-weight: 600;
           flex-shrink: 0;
         }
+
         .q-prompt {
           font-size: 16px;
           line-height: 1.4;
@@ -385,46 +554,71 @@ export default function EntranceExam({ onContinue }) {
           display: flex;
           align-items: center;
           gap: 9px;
+
           background: transparent;
           border: 1px solid var(--paper-line);
           border-radius: 999px;
+
           padding: 7px 14px 7px 7px;
+
           cursor: pointer;
+
           font-family: 'IBM Plex Sans', sans-serif;
           font-size: 14px;
           color: var(--graphite);
-          transition: border-color 150ms ease, background-color 150ms ease;
+
+          transition:
+            border-color 150ms ease,
+            background-color 150ms ease;
         }
-        .bubble-option:hover { border-color: var(--gold-soft); }
+
+        .bubble-option:hover {
+          border-color: var(--gold-soft);
+        }
+
         .bubble-option:focus-visible {
           outline: 2px solid var(--ink);
           outline-offset: 2px;
         }
+
         .bubble-letter {
           width: 22px;
           height: 22px;
           border-radius: 50%;
+
           border: 1.5px solid var(--ink);
+
           display: flex;
           align-items: center;
           justify-content: center;
+
           font-family: 'IBM Plex Mono', monospace;
           font-size: 11px;
           font-weight: 500;
+
           color: var(--ink);
           flex-shrink: 0;
-          transition: background-color 150ms ease, color 150ms ease, transform 150ms ease;
+
+          transition:
+            background-color 150ms ease,
+            color 150ms ease,
+            transform 150ms ease;
         }
+
         .bubble-option.selected {
           border-color: var(--ink);
           background: rgba(27,42,74,0.04);
         }
+
         .bubble-option.selected .bubble-letter {
           background: var(--ink);
           color: var(--paper);
         }
+
         @media (prefers-reduced-motion: no-preference) {
-          .bubble-option.selected .bubble-letter { transform: scale(1.06); }
+          .bubble-option.selected .bubble-letter {
+            transform: scale(1.06);
+          }
         }
 
         .form-error {
@@ -432,74 +626,122 @@ export default function EntranceExam({ onContinue }) {
           font-size: 13px;
           color: var(--maroon);
           font-weight: 500;
+
           border-left: 2px solid var(--maroon);
           padding-left: 10px;
         }
 
         .btn-submit {
           margin-top: 30px;
+
           display: inline-flex;
           align-items: center;
           gap: 8px;
+
           background: var(--ink);
           color: var(--paper);
+
           border: none;
           border-radius: 2px;
+
           padding: 13px 22px;
+
           font-family: 'IBM Plex Sans', sans-serif;
           font-size: 14px;
           font-weight: 600;
           letter-spacing: 0.02em;
-          cursor: pointer;
-          transition: background-color 150ms ease, transform 150ms ease;
-        }
-        .btn-submit:hover { background: var(--ink-deep); }
-        .btn-submit:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
-        .btn-submit:active { transform: translateY(1px); }
 
-        /* Results phase */
-        .results-sheet { text-align: center; }
+          cursor: pointer;
+
+          transition:
+            background-color 150ms ease,
+            transform 150ms ease;
+        }
+
+        .btn-submit:hover {
+          background: var(--ink-deep);
+        }
+
+        .btn-submit:focus-visible {
+          outline: 2px solid var(--gold);
+          outline-offset: 2px;
+        }
+
+        .btn-submit:active {
+          transform: translateY(1px);
+        }
+
+        .btn-submit:disabled {
+          opacity: 0.6;
+          cursor: not-allowed;
+        }
+
+        .results-sheet {
+          text-align: center;
+        }
+
         .stamp-wrap {
           display: flex;
           justify-content: center;
           margin: 8px 0 22px;
         }
+
         .stamp {
           width: 108px;
           height: 108px;
           border-radius: 50%;
+
           border: 3px solid var(--forest);
           color: var(--forest);
+
           display: flex;
           flex-direction: column;
           align-items: center;
           justify-content: center;
+
           transform: rotate(-8deg);
+
           font-family: 'IBM Plex Mono', monospace;
         }
+
         .stamp .stamp-word {
           font-size: 15px;
           font-weight: 600;
           letter-spacing: 0.05em;
         }
+
         .stamp .stamp-sub {
           font-size: 9px;
           margin-top: 3px;
           letter-spacing: 0.08em;
         }
+
         @media (prefers-reduced-motion: no-preference) {
           .stamp {
-            animation: stamp-in 320ms cubic-bezier(0.2, 0.9, 0.3, 1.2);
+            animation:
+              stamp-in
+              320ms
+              cubic-bezier(0.2, 0.9, 0.3, 1.2);
           }
         }
+
         @keyframes stamp-in {
-          from { opacity: 0; transform: rotate(-8deg) scale(1.4); }
-          to { opacity: 1; transform: rotate(-8deg) scale(1); }
+          from {
+            opacity: 0;
+            transform: rotate(-8deg) scale(1.4);
+          }
+
+          to {
+            opacity: 1;
+            transform: rotate(-8deg) scale(1);
+          }
         }
+
         .register-mark {
           width: 108px;
           height: 108px;
           border-radius: 50%;
+
           border: 3px solid var(--maroon);
           color: var(--maroon);
         }
@@ -511,12 +753,14 @@ export default function EntranceExam({ onContinue }) {
           color: var(--ink);
           margin: 0 0 10px;
         }
+
         .results-score {
           font-family: 'IBM Plex Mono', monospace;
           font-size: 13px;
           color: #5b5849;
           margin: 0 0 6px;
         }
+
         .results-body {
           font-size: 14px;
           line-height: 1.6;
@@ -525,40 +769,70 @@ export default function EntranceExam({ onContinue }) {
           margin: 0 auto 26px;
         }
 
-        .btn-row { display: flex; justify-content: center; }
+        .btn-row {
+          display: flex;
+          justify-content: center;
+        }
+
         .btn-secondary {
           display: inline-flex;
           align-items: center;
           gap: 8px;
+
           background: transparent;
           border: 1px solid var(--ink);
           color: var(--ink);
+
           border-radius: 2px;
           padding: 12px 20px;
+
           font-family: 'IBM Plex Sans', sans-serif;
           font-size: 14px;
           font-weight: 600;
+
           cursor: pointer;
-          transition: background-color 150ms ease;
+
+          transition:
+            background-color 150ms ease;
         }
-        .btn-secondary:hover { background: rgba(27,42,74,0.06); }
-        .btn-secondary:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+
+        .btn-secondary:hover {
+          background: rgba(27,42,74,0.06);
+        }
+
+        .btn-secondary:focus-visible {
+          outline: 2px solid var(--gold);
+          outline-offset: 2px;
+        }
       `}</style>
+
+      {/* =====================================================
+          EXAM
+      ===================================================== */}
 
       {phase === "exam" && (
         <div className="exam-sheet">
           <div className="sheet-header">
             <Seal />
+
             <div className="header-text">
-              <span className="eyebrow-mono mono">Exam Code · ENT-2026</span>
-              <h1 className="exam-title">Entrance Examination</h1>
+              <span className="eyebrow-mono mono">
+                Exam Code · ENT-2026
+              </span>
+
+              <h1 className="exam-title">
+                Entrance Examination
+              </h1>
+
               <p className="exam-instructions">
                 This exam is tailored for{" "}
-                {studentClass || "your selected class"}. Answer all {total}{" "}
-                questions below. A score of {Math.round(PASS_THRESHOLD * 100)}%
-                or higher is required to proceed to registration.
+                {studentClass || "your selected class"}. Answer
+                all {total} questions below. Your examination
+                result will be sent to the school administrator
+                for review.
               </p>
             </div>
+
             <span className="answered-count mono">
               {answeredCount}/{total} answered
             </span>
@@ -566,17 +840,28 @@ export default function EntranceExam({ onContinue }) {
 
           <hr className="gold-rule" />
 
-          <div className="progress-trail" aria-hidden="true">
+          <div
+            className="progress-trail"
+            aria-hidden="true"
+          >
             {QUESTIONS.map((q) => (
               <span
                 key={q.id}
-                className={`progress-dot${answers[q.id] ? " filled" : ""}`}
+                className={`progress-dot${
+                  answers[q.id] ? " filled" : ""
+                }`}
               />
             ))}
           </div>
 
           <form onSubmit={handleSubmit}>
-            <fieldset style={{ border: "none", padding: 0, margin: 0 }}>
+            <fieldset
+              style={{
+                border: "none",
+                padding: 0,
+                margin: 0,
+              }}
+            >
               <legend
                 className="sr-only"
                 style={{
@@ -590,11 +875,20 @@ export default function EntranceExam({ onContinue }) {
               </legend>
 
               {QUESTIONS.map((q, index) => (
-                <div className="question-block" key={q.id}>
+                <div
+                  className="question-block"
+                  key={q.id}
+                >
                   <div className="q-label-row">
-                    <span className="q-number mono">Q{index + 1}</span>
-                    <p className="q-prompt">{q.prompt}</p>
+                    <span className="q-number mono">
+                      Q{index + 1}
+                    </span>
+
+                    <p className="q-prompt">
+                      {q.prompt}
+                    </p>
                   </div>
+
                   <div
                     className="options-row"
                     role="radiogroup"
@@ -605,11 +899,25 @@ export default function EntranceExam({ onContinue }) {
                         type="button"
                         key={option}
                         role="radio"
-                        aria-checked={answers[q.id] === option}
-                        className={`bubble-option${answers[q.id] === option ? " selected" : ""}`}
-                        onClick={() => handleSelect(q.id, option)}
+                        aria-checked={
+                          answers[q.id] === option
+                        }
+                        className={`bubble-option${
+                          answers[q.id] === option
+                            ? " selected"
+                            : ""
+                        }`}
+                        onClick={() =>
+                          handleSelect(
+                            q.id,
+                            option
+                          )
+                        }
                       >
-                        <span className="bubble-letter">{LETTERS[i]}</span>
+                        <span className="bubble-letter">
+                          {LETTERS[i]}
+                        </span>
+
                         {option}
                       </button>
                     ))}
@@ -618,78 +926,82 @@ export default function EntranceExam({ onContinue }) {
               ))}
             </fieldset>
 
-            {error && <p className="form-error">{error}</p>}
+            {error && (
+              <p className="form-error">
+                {error}
+              </p>
+            )}
 
-            <button type="submit" className="btn-submit">
-              Submit Exam
-              <ArrowRight size={16} />
+            <button
+              type="submit"
+              className="btn-submit"
+              disabled={submitting}
+            >
+              {submitting
+                ? "Submitting Exam..."
+                : "Submit Exam"}
+
+              {!submitting && (
+                <ArrowRight size={16} />
+              )}
             </button>
           </form>
         </div>
       )}
 
+      {/* =====================================================
+          RESULTS
+      ===================================================== */}
+
       {phase === "results" && (
         <div className="exam-sheet results-sheet">
           <div className="stamp-wrap">
-            {passed ? (
-              <div className="stamp">
-                <span className="stamp-word">PASSED</span>
-                <span className="stamp-sub">ENT-2026</span>
-              </div>
-            ) : (
-              <div className="stamp register-mark">
-                <span className="stamp-word">RETAKE</span>
-                <span className="stamp-sub">REQUIRED</span>
-              </div>
-            )}
+            <div className="stamp">
+              <span className="stamp-word">
+                SUBMITTED
+              </span>
+
+              <span className="stamp-sub">
+                ENT-2026
+              </span>
+            </div>
           </div>
 
           <h2 className="results-title">
-            {passed ? "You passed" : "You did not pass this exam"}
+            Examination Submitted
           </h2>
+
           <p className="results-score mono">
-            {score} / {total} correct
-          </p>
-          <p className="results-body">
-            {passed
-              ? "You can now continue to your dashboard."
-              : `You need at least ${Math.round(PASS_THRESHOLD * 100)}% to proceed. You can retake the exam or go back home.`}
+            {score} / {total} correct ({percentage}%)
           </p>
 
-          <div className="btn-row" style={{ gap: "12px", flexWrap: "wrap" }}>
-            {passed ? (
-              <button className="btn-submit" onClick={handleContinue}>
-                Back to Dashboard
-                <ArrowRight size={16} />
-              </button>
-            ) : (
-              <>
-                <button className="btn-secondary" onClick={handleRetake}>
-                  <RotateCcw size={16} />
-                  Retake Exam
-                </button>
-                <button className="btn-submit" onClick={() => navigate("/")}>
-                  Go to Home
-                  <ArrowRight size={16} />
-                </button>
-              </>
-            )}
-          </div>
-        </div>
-      )}
-
-      {phase === "registration-demo" && (
-        <div className="exam-sheet results-sheet">
-          <h2 className="results-title">Registration</h2>
           <p className="results-body">
-            We would get back to you shortly. Thanks
+            {examSaved
+              ? "Your entrance examination result has been successfully sent to the school administrator. The administrator will review your application and examination score before deciding whether to approve or reject your admission."
+              : "Your examination was completed."}
           </p>
-          <div className="btn-row">
+
+          <div
+            className="btn-row"
+            style={{
+              gap: "12px",
+              flexWrap: "wrap",
+            }}
+          >
+            <button
+              className="btn-submit"
+              onClick={handleContinue}
+            >
+              Finish
+              <ArrowRight size={16} />
+            </button>
+
             <button
               className="btn-secondary"
-              onClick={() => navigate("/Stdashboard")}
+              onClick={handleRetake}
             >
-              Back
+              <RotateCcw size={16} />
+              Retake Exam
             </button>
           </div>
         </div>
