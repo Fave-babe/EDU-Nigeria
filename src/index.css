@@ -2670,8 +2670,6 @@ main {
 .filters-bar .form-group { min-width: 180px; }
 
 @media (max-width: 1024px) {
-  .right-sidebar {width:15%; position:relative}
-  .main-content { margin-left:1 rem; position :absolute , width:100%}
   .form-grid { grid-template-columns: 1fr; }
   .dashboard-sections { grid-template-columns: 1fr; }
   .stats-grid { grid-template-columns: 1fr; }

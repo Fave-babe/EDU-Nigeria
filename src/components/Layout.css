@@ -8,17 +8,19 @@
 .main-content {
   flex: 1;
   min-width: 0;
+  margin-left: 270px;
   padding: 24px;
   overflow-x: hidden;
 }
 
-/* Mobile */
-@media (max-width: 768px) {
+/* The sidebar becomes an overlay below this width. */
+@media (max-width: 900px) {
   .app-layout {
     display: block;
   }
 
   .main-content {
+    margin-left: 0;
     padding: 16px;
     width: 100%;
   }

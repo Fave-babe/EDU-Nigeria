@@ -50,6 +50,7 @@ import Teacher from "./pages/Teacher";
 import CounsellorFollowups from "./pages/CounsellorFollowups";
 import CounsellorStudents from "./pages/CounsellorStudents.jsx";
 // import Counsellor from "./pages/Counsellor";
+import ChangePassword from "./pages/ChangePassword";
 import AnnouncementManagement from "./pages/AnnouncementManagement";
 import AdminAdmissions from "./pages/AdminAdmission.jsx";
 import RecordPayment from "./pages/RecordPayment";
@@ -312,6 +313,14 @@ function AppRoutes() {
           </ProtectedRoute>
         }
       >
+        <Route
+          path="/change-password"
+          element={
+            <RoleRoute allowed={["student"]}>
+              <ChangePassword />
+            </RoleRoute>
+          }
+        />
         {/* =================================================
             ADMIN DASHBOARD
         ================================================= */}
