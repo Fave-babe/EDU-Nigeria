@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-
 import {
   Bell,
   ArrowLeft,
@@ -13,7 +12,12 @@ import {
   CheckCircle2,
 } from "lucide-react";
 
-import http from "../api/http";
+import {
+  getMyNotifications,
+  markNotificationAsRead,
+  markAllNotificationsAsRead,
+} from "../api/notification.api";
+
 import "./Pages.css";
 
 export default function Notifications() {
@@ -28,11 +32,17 @@ export default function Notifications() {
       setLoading(true);
       setError("");
 
-      const response = await http.get("/notifications/me");
+     const response = await getMyNotifications();
 
-      console.log("STUDENT NOTIFICATIONS RESPONSE:", response);
+console.log("MY NOTIFICATIONS RESPONSE:", response);
 
-      setNotifications(response.notifications || []);
+const notificationData = Array.isArray(response?.notifications)
+  ? response.notifications
+  : Array.isArray(response?.data?.notifications)
+    ? response.data.notifications
+    : [];
+
+setNotifications(notificationData);
     } catch (err) {
       console.error("Failed to load notifications:", err);
 
