@@ -751,7 +751,7 @@ function Cdashboard() {
 
       <div className="counsellor-container">
         {/* HEADER */}
-        <header className="counsellor-header">
+        <header className="counsellor-header dashboard-topbar">
           <div className="header-copy">
             <span className="eyebrow">Support Hub</span>
 

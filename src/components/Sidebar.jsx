@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
+import ThemeToggle from "./ThemeToggle";
 
 import {
   LayoutDashboard,
@@ -624,13 +625,16 @@ export default function Sidebar() {
             </div>
           </div>
 
-          <button
-            className="close-sidebar"
-            onClick={closeMobileSidebar}
-            aria-label="Close navigation menu"
-          >
-            <X size={22} />
-          </button>
+          <div className="sidebar-header-actions">
+            <ThemeToggle />
+            <button
+              className="close-sidebar"
+              onClick={closeMobileSidebar}
+              aria-label="Close navigation menu"
+            >
+              <X size={22} />
+            </button>
+          </div>
         </div>
 
         {/* SCHOOL INFORMATION */}

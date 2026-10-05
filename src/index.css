@@ -9,6 +9,11 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxyge
   background: #f8fafc;
 }
 
+:root[data-theme="dark"] .teaching-opportunities {
+  color: var(--text-primary);
+  background: var(--bg-primary);
+}
+
 :root {
   --color-primary: #2261ba;      
   --color-primary-dark: #2261ba;
@@ -32,15 +37,21 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxyge
 }
 
 /* Dark theme */
-[data-theme="dark"] :root {
-  --color-primary: #4f9cff;
-  --color-primary-dark: #2563eb;
-  --color-text: #e6eefc;
-  --color-text-muted: #c9d9f8;
-  --color-bg-light: #0f1724;
-  --color-border: #1f2937;
-  --color-body-bg: #071029;
-  --body-text: #e6eefc;
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --color-primary: #72b68c;
+  --color-primary-dark: #467d5d;
+  --color-secondary: #a7cbb1;
+  --color-text: #edf4ee;
+  --color-text-muted: #a9b9ad;
+  --color-bg-light: #17231c;
+  --color-border: #304237;
+  --color-body-bg: #101914;
+  --body-text: #edf4ee;
+}
+
+:root[data-theme="light"] {
+  color-scheme: light;
 }
 
 /* Header / toggle styles */
@@ -3014,6 +3025,337 @@ main {
 } */
 }
 
+:root {
+  --bg-primary: #f5f7fb;
+  --bg-secondary: #ffffff;
+  --bg-card: #ffffff;
+  --text-primary: #111827;
+  --text-secondary: #6b7280;
+  --text-muted: #9ca3af;
+  --border-color: #e5e7eb;
+  --sidebar-bg: #ffffff;
+  --input-bg: #ffffff;
+  --hover-bg: #f3f4f6;
+  --active-bg: #eff6ff;
+  --active-text: #2563eb;
+  --school-bg: #f8fafc;
+  --school-avatar-bg: #eff6ff;
+  --scrollbar-thumb: #d1d5db;
+  --mobile-button-bg: #ffffff;
+  --overlay-bg: rgba(0, 0, 0, 0.35);
+  --menu-bg: #ffffff;
+  --danger: #dc2626;
+  --danger-hover-bg: #fef2f2;
+}
 
+[data-theme="dark"] {
+  --bg-primary: #080a09;
+  --bg-secondary: #101311;
+  --bg-card: #151916;
+  --text-primary: #ffffff;
+  --text-secondary: #ffffff;
+  --text-muted: #e6e6e6;
+  --border-color: #2b332e;
+  --sidebar-bg: #0c0f0d;
+  --input-bg: #111512;
+  --hover-bg: #1d241f;
+  --active-bg: #193024;
+  --active-text: #a8d8b6;
+  --school-bg: #111613;
+  --school-avatar-bg: #1a2b20;
+  --scrollbar-thumb: #414a44;
+  --mobile-button-bg: #101311;
+  --overlay-bg: rgba(0, 0, 0, 0.55);
+  --menu-bg: #141815;
+  --danger: #ff9a8d;
+  --danger-hover-bg: #382321;
+}
 
+body {
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  transition:
+    background-color 0.25s ease,
+    color 0.25s ease;
+}
 
+/* =========================================================
+   GLOBAL LIGHT / DARK MODE
+========================================================= */
+
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  transition:
+    background-color 0.25s ease,
+    color 0.25s ease;
+}
+
+#root {
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  transition:
+    background-color 0.25s ease,
+    color 0.25s ease;
+}
+
+/* Common page containers */
+.main-content,
+.main-container,
+.page-container,
+.dashboard,
+.dashboard-page,
+.content,
+.content-area {
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  transition:
+    background-color 0.25s ease,
+    color 0.25s ease;
+}
+
+/* Common cards */
+.card,
+.stat-card,
+.dashboard-card,
+.content-card,
+.panel,
+.table-container {
+  background: var(--bg-card);
+  color: var(--text-primary);
+  border-color: var(--border-color);
+  transition:
+    background-color 0.25s ease,
+    color 0.25s ease,
+    border-color 0.25s ease;
+}
+
+[data-theme="dark"] .app-layout {
+  background-color: var(--bg-primary);
+  background-image:
+    radial-gradient(ellipse at 18% 0%, rgba(76, 112, 86, 0.12), transparent 36%),
+    linear-gradient(145deg, #0d100e 0%, #080a09 55%, #0c100d 100%);
+}
+
+[data-theme="dark"] .main-content {
+  background-color: transparent;
+  background-image: radial-gradient(ellipse at 85% 0%, rgba(73, 100, 81, 0.08), transparent 34%);
+}
+
+[data-theme="dark"] .app-header {
+  background: linear-gradient(110deg, #111512, #0b0e0c 72%);
+  border-color: var(--border-color);
+  box-shadow: 0 1px 0 rgba(210, 229, 214, 0.035), 0 10px 26px rgba(0, 0, 0, 0.18);
+}
+
+[data-theme="dark"] #root * {
+  background-color: transparent;
+}
+
+[data-theme="dark"] :is(
+  .login-card,
+  .stat-card,
+  .table-wrapper,
+  .timetable-day,
+  .modal,
+  .dashboard-card,
+  .report-card,
+  .message-card,
+  .card,
+  .content-card,
+  .panel,
+  .table-container,
+  .profile-menu
+) {
+  background-color: var(--bg-card);
+  background-image: linear-gradient(145deg, rgba(220, 241, 225, 0.045), transparent 42%);
+  color: var(--text-primary);
+  border-color: var(--border-color);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(232, 245, 235, 0.035);
+}
+
+[data-theme="dark"] #root :is(input:not([type="checkbox"]):not([type="radio"]), select, textarea) {
+  background-color: var(--input-bg);
+  color: var(--text-primary);
+  border-color: var(--border-color);
+}
+
+[data-theme="dark"] input::placeholder,
+[data-theme="dark"] textarea::placeholder {
+  color: var(--text-muted);
+}
+
+[data-theme="dark"] table {
+  color: var(--text-primary);
+  border-color: var(--border-color);
+}
+
+[data-theme="dark"] :is(th, td) {
+  border-color: var(--border-color);
+}
+
+[data-theme="dark"] #root thead {
+  background: var(--bg-secondary);
+  color: var(--text-secondary);
+}
+
+[data-theme="dark"] #root tbody tr:nth-child(even) {
+  background: rgba(255, 255, 255, 0.025);
+}
+
+[data-theme="dark"] #root .school-section {
+  background-color: var(--school-bg);
+}
+
+[data-theme="dark"] #root .profile-menu {
+  background-color: var(--menu-bg);
+}
+
+[data-theme="dark"] #root .nav-link.active {
+  background-color: var(--active-bg);
+}
+
+[data-theme="dark"] #root .nav-link:hover,
+[data-theme="dark"] #root .profile-menu button:hover {
+  background-color: var(--hover-bg);
+}
+
+[data-theme="dark"] #root :is([class*="page"], [class*="dashboard"]):not([class*="card"]):not([class*="panel"]) {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+}
+
+[data-theme="dark"] #root :is(
+  [class*="card"],
+  [class*="panel"],
+  [class*="table-wrapper"],
+  [class*="table-container"],
+  [class*="modal"],
+  [class*="dropdown"]
+):not([class*="alert"]):not([class*="status"]):not([class*="badge"]) {
+  background-color: var(--bg-card);
+  background-image: linear-gradient(145deg, rgba(220, 241, 225, 0.045), transparent 42%);
+  color: var(--text-primary);
+  border-color: var(--border-color);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(232, 245, 235, 0.035);
+}
+
+[data-theme="dark"] #root :is(h1, h2, h3, h4) {
+  color: var(--text-primary);
+}
+
+[data-theme="dark"] #root :is(p, label, small, caption, th, td) {
+  color: #ffffff;
+}
+
+[data-theme="dark"] #root *:not(svg):not(path) {
+  color: #ffffff;
+}
+
+[data-theme="dark"] #root .theme-toggle svg {
+  color: #f0ce84;
+}
+
+[data-theme="dark"] .theme-toggle {
+  width: 42px;
+  height: 42px;
+  min-width: 42px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  background: linear-gradient(145deg, #252c27 0%, #111512 80%);
+  color: #f0ce84;
+  border-color: #39443d;
+  cursor: pointer;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.11), 0 5px 16px rgba(0, 0, 0, 0.32);
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease,
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+[data-theme="dark"] .theme-toggle:hover {
+  transform: translateY(-1px);
+  border-color: #786744;
+  background: linear-gradient(145deg, #30362f 0%, #171b18 80%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.16), 0 8px 20px rgba(0, 0, 0, 0.38);
+}
+
+[data-theme="dark"] .theme-toggle svg {
+  color: #f0ce84;
+  transition: transform 0.25s ease;
+}
+
+[data-theme="dark"] .theme-toggle:hover svg {
+  transform: rotate(-12deg);
+}
+
+.theme-toggle:focus-visible {
+  outline: 3px solid var(--active-text);
+  outline-offset: 3px;
+}
+
+.global-theme-control {
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  z-index: 1800;
+}
+
+.global-theme-control .theme-toggle {
+  width: 46px;
+  height: 46px;
+  min-width: 46px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--border-color);
+  border-radius: 14px;
+  background: var(--bg-card);
+  color: var(--text-primary);
+  box-shadow: 0 6px 20px rgba(10, 20, 14, 0.18);
+  cursor: pointer;
+}
+
+[data-theme="dark"] .global-theme-control .theme-toggle {
+  border-color: #39443d;
+  background: linear-gradient(145deg, #252c27 0%, #111512 80%);
+  color: #f0ce84;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.11), 0 5px 16px rgba(0, 0, 0, 0.32);
+}
+
+[data-theme="dark"] .theme-toggle:focus-visible {
+  outline-color: #d8bd7a;
+}
+
+:root {
+  --bg-primary: #f5f7fb;
+  --bg-secondary: #ffffff;
+  --bg-card: #ffffff;
+  --text-primary: #111827;
+  --text-secondary: #6b7280;
+  --border-color: #e5e7eb;
+  --hover-bg: #f3f4f6;
+}
+
+[data-theme="dark"] {
+  --bg-primary: #0f172a;
+  --bg-secondary: #111827;
+  --bg-card: #1e293b;
+  --text-primary: #f8fafc;
+  --text-secondary: #94a3b8;
+  --border-color: #334155;
+  --hover-bg: #1e293b;
+}

@@ -1,11 +1,11 @@
 import { useAuth, getEffectiveRole } from "../context/authcontext";
-import { useTheme } from "../context/ThemeContext";
 import { useNavigate } from "react-router-dom";
-import { Bell, Sun, Moon } from "lucide-react";
+import { Bell } from "lucide-react";
+import ThemeToggle from "./ThemeToggle";
+import "./Header.css";
 
 export default function Header({ title, subtitle }) {
   const { user } = useAuth();
-  const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
 
   const role = getEffectiveRole(user);
@@ -26,7 +26,7 @@ export default function Header({ title, subtitle }) {
           : "User";
 
   return (
-    <header className="app-header">
+    <header className="app-header dashboard-topbar">
       {/* Page information */}
       <div className="header-left">
         <h1 className="page-title">{title}</h1>
@@ -37,17 +37,7 @@ export default function Header({ title, subtitle }) {
       {/* Header actions */}
       <div className="header-actions">
         {/* Theme toggle */}
-        <button
-          type="button"
-          className="theme-toggle"
-          onClick={toggleTheme}
-          aria-label="Toggle theme"
-          title={
-            theme === "dark" ? "Switch to light mode" : "Switch to dark mode"
-          }
-        >
-          {theme === "dark" ? <Moon size={20} /> : <Sun size={20} />}
-        </button>
+        <ThemeToggle />
 
         {/* Notifications */}
         <button

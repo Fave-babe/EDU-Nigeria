@@ -12,8 +12,8 @@
   display: flex;
   flex-direction: column;
 
-  background: #ffffff;
-  border-right: 1px solid #e5e7eb;
+  background: var(--sidebar-bg);
+  border-right: 1px solid var(--border-color);
 
   z-index: 1000;
 
@@ -33,7 +33,14 @@
   align-items: center;
   justify-content: space-between;
 
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.sidebar-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
 }
 
 .brand {
@@ -55,8 +62,8 @@
 
   border-radius: 10px;
 
-  background: #2563eb;
-  color: #ffffff;
+  background: var(--active-bg);
+  color: var(--active-text);
 }
 
 .brand h2 {
@@ -65,7 +72,7 @@
   font-size: 17px;
   font-weight: 700;
 
-  color: #111827;
+  color: var(--text-primary);
 }
 
 .brand span {
@@ -74,7 +81,7 @@
   margin-top: 2px;
 
   font-size: 10px;
-  color: #6b7280;
+  color: var(--text-secondary);
 }
 
 .close-sidebar {
@@ -83,7 +90,7 @@
   border: none;
   background: transparent;
 
-  color: #6b7280;
+  color: var(--text-secondary);
 
   cursor: pointer;
 }
@@ -103,8 +110,8 @@
 
   border-radius: 10px;
 
-  background: #f8fafc;
-  border: 1px solid #e5e7eb;
+  background: var(--school-bg);
+  border: 1px solid var(--border-color);
 }
 
 .school-avatar {
@@ -119,8 +126,8 @@
 
   border-radius: 9px;
 
-  background: #eff6ff;
-  color: #2563eb;
+  background: var(--school-avatar-bg);
+  color: var(--active-text);
 }
 
 .school-info {
@@ -133,7 +140,7 @@
   font-size: 13px;
   font-weight: 600;
 
-  color: #111827;
+  color: var(--text-primary);
 
   white-space: nowrap;
   overflow: hidden;
@@ -146,7 +153,7 @@
   margin-top: 2px;
 
   font-size: 11px;
-  color: #6b7280;
+  color: var(--text-secondary);
 }
 
 
@@ -167,7 +174,7 @@
 }
 
 .sidebar-nav::-webkit-scrollbar-thumb {
-  background: #d1d5db;
+  background: var(--scrollbar-thumb);
   border-radius: 10px;
 }
 
@@ -179,7 +186,7 @@
 
   letter-spacing: 0.08em;
 
-  color: #9ca3af;
+  color: var(--text-muted);
 }
 
 .nav-link {
@@ -194,7 +201,7 @@
 
   border-radius: 8px;
 
-  color: #4b5563;
+  color: var(--text-secondary);
   text-decoration: none;
 
   font-size: 14px;
@@ -210,15 +217,38 @@
 }
 
 .nav-link:hover {
-  background: #f3f4f6;
-  color: #111827;
+  background: var(--hover-bg);
+  color: var(--text-primary);
 }
 
 .nav-link.active {
-  background: #eff6ff;
-  color: #2563eb;
+  background: var(--active-bg);
+  color: var(--active-text);
 
   font-weight: 600;
+}
+
+[data-theme="dark"] .sidebar {
+  background:
+    radial-gradient(ellipse at 10% 0%, rgba(101, 137, 108, 0.13), transparent 34%),
+    linear-gradient(165deg, #111512 0%, #0a0d0b 58%, #0d110e 100%);
+  box-shadow: 14px 0 36px rgba(0, 0, 0, 0.28), inset -1px 0 0 rgba(231, 242, 233, 0.025);
+}
+
+[data-theme="dark"] .sidebar-header {
+  box-shadow: 0 1px 0 rgba(228, 241, 231, 0.025);
+}
+
+[data-theme="dark"] .brand-icon {
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.09), 0 5px 14px rgba(0, 0, 0, 0.2);
+}
+
+[data-theme="dark"] .school-section {
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.035), 0 5px 14px rgba(0, 0, 0, 0.12);
+}
+
+[data-theme="dark"] .nav-link.active {
+  box-shadow: inset 0 1px 0 rgba(204, 236, 212, 0.08), 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
 
@@ -229,7 +259,7 @@
 .sidebar-bottom {
   padding: 12px;
 
-  border-top: 1px solid #e5e7eb;
+  border-top: 1px solid var(--border-color);
 
   position: relative;
 }
@@ -261,11 +291,11 @@
 
   text-align: left;
 
-  color: #111827;
+  color: var(--text-primary);
 }
 
 .profile-button:hover {
-  background: #f3f4f6;
+  background: var(--hover-bg);
 }
 
 .profile-avatar {
@@ -280,8 +310,8 @@
 
   border-radius: 50%;
 
-  background: #2563eb;
-  color: #ffffff;
+  background: var(--active-bg);
+  color: var(--active-text);
 
   font-size: 14px;
   font-weight: 700;
@@ -298,7 +328,7 @@
   font-size: 13px;
   font-weight: 600;
 
-  color: #111827;
+  color: var(--text-primary);
 
   white-space: nowrap;
   overflow: hidden;
@@ -311,7 +341,7 @@
   margin-top: 2px;
 
   font-size: 11px;
-  color: #6b7280;
+  color: var(--text-secondary);
 
   text-transform: capitalize;
 }
@@ -319,7 +349,7 @@
 .profile-button > svg {
   flex-shrink: 0;
 
-  color: #6b7280;
+  color: var(--text-secondary);
 
   transition: transform 0.2s ease;
 }
@@ -342,9 +372,9 @@
 
   padding: 6px;
 
-  background: #ffffff;
+  background: var(--menu-bg);
 
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--border-color);
   border-radius: 10px;
 
   box-shadow:
@@ -368,7 +398,7 @@
 
   background: transparent;
 
-  color: #374151;
+  color: var(--text-secondary);
 
   font-family: inherit;
   font-size: 13px;
@@ -380,7 +410,7 @@
 }
 
 .profile-menu button:hover {
-  background: #f3f4f6;
+  background: var(--hover-bg);
 }
 
 .profile-menu button svg {
@@ -388,11 +418,11 @@
 }
 
 .profile-menu .logout-button {
-  color: #dc2626;
+  color: var(--danger);
 }
 
 .profile-menu .logout-button:hover {
-  background: #fef2f2;
+  background: var(--danger-hover-bg);
 }
 
 
@@ -414,11 +444,11 @@
   align-items: center;
   justify-content: center;
 
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--border-color);
   border-radius: 8px;
 
-  background: #ffffff;
-  color: #374151;
+  background: var(--mobile-button-bg);
+  color: var(--text-primary);
 
   cursor: pointer;
 
@@ -426,7 +456,7 @@
 }
 
 .mobile-menu-btn:hover {
-  background: #f3f4f6;
+  background: var(--hover-bg);
 }
 
 
@@ -472,8 +502,14 @@
     border-radius: 7px;
   }
 
+  .sidebar-header-actions .theme-toggle {
+    width: 38px;
+    height: 38px;
+    min-width: 38px;
+  }
+
   .close-sidebar:hover {
-    background: #f3f4f6;
+    background: var(--hover-bg);
   }
 
   .mobile-menu-btn {
@@ -499,6 +535,10 @@
     padding: 0 15px;
   }
 
+  .brand h2 {
+    font-size: 15px;
+  }
+
   .school-section {
     margin-left: 10px;
     margin-right: 10px;
@@ -514,3 +554,4 @@
     padding-right: 10px;
   }
 }
+

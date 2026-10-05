@@ -752,6 +752,11 @@ export default function StudentDashboard() {
   const firstName = getFirstName(currentUser);
 
   const initials = getInitials(studentName);
+  const currentDate = new Date().toLocaleDateString("en-NG", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+  });
 
   // =======================================================
   // AVERAGE SCORE
@@ -817,9 +822,20 @@ export default function StudentDashboard() {
           TOP HEADER
       =================================================== */}
 
-      <header className="student-header">
+      <header className="student-header dashboard-topbar">
+        <div className="student-header-heading">
+          <span>STUDENT PORTAL</span>
+          <h2>Student Dashboard</h2>
+          <p>{currentDate}</p>
+        </div>
+
         <div className="student-header-right">
-          <button className="student-notification" aria-label="Notifications">
+          <button
+            className="student-notification"
+            onClick={() => navigate("/notifications")}
+            aria-label="Notifications"
+            title="Notifications"
+          >
             <Bell size={21} />
           </button>
 

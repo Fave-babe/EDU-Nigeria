@@ -1,10 +1,17 @@
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import {
+  BrowserRouter,
+  Routes,
+  Route,
+  Navigate,
+  useLocation,
+} from "react-router-dom";
 
 import { AuthProvider, useAuth } from "./context/authcontext.jsx";
 
 import { PERMISSIONS, ROLES } from "./config/permissions";
 
 import Layout from "./components/Layout";
+import ThemeToggle from "./components/ThemeToggle";
 
 // =========================================================
 // PUBLIC PAGES
@@ -67,6 +74,7 @@ import Announcements from "./pages/Announcements";
 import Notifications from "./pages/Notifications";
 import Settings from "./pages/Settings";
 import Profile from "./pages/Profile";
+
 import CounsellingRecords from "./pages/CounsellingRecords";
 import TeacherStudents from "./pages/TeacherStudents";
 // =========================================================
@@ -137,503 +145,532 @@ function GuestRoute({ children }) {
 // APPLICATION ROUTES
 // =========================================================
 
+const routesWithoutLocalThemeToggle = new Set([
+  "/about",
+  "/entrance",
+  "/careers/apply",
+  "/careers/teaching",
+  "/login",
+  "/register",
+  "/super-admin",
+  "/schools",
+  "/superadmin",
+  "/superadmin/users",
+  "/results",
+  "/assignments",
+  "/announcements",
+  "/notifications",
+  "/settings",
+  "/profile",
+]);
+
 function AppRoutes() {
+  const { pathname } = useLocation();
+
   return (
-    <Routes>
-      {/* ===================================================
+    <>
+      {routesWithoutLocalThemeToggle.has(pathname) && (
+        <div className="global-theme-control">
+          <ThemeToggle />
+        </div>
+      )}
+
+      <Routes>
+        {/* ===================================================
           PUBLIC ROUTES
       =================================================== */}
 
-      <Route path="/" element={<Home />} />
+        <Route path="/" element={<Home />} />
 
-      <Route path="/about" element={<About />} />
+        <Route path="/about" element={<About />} />
 
-      <Route path="/entrance" element={<EntranceExam />} />
+        <Route path="/entrance" element={<EntranceExam />} />
 
-      <Route path="/careers/apply" element={<CareerApplication />} />
+        <Route path="/careers/apply" element={<CareerApplication />} />
 
-      <Route path="/careers/teaching" element={<TeachingOpportunities />} />
+        <Route path="/careers/teaching" element={<TeachingOpportunities />} />
 
-      {/* ===================================================
+        {/* ===================================================
           AUTH
       =================================================== */}
 
-      <Route
-        path="/login"
-        element={
-          <GuestRoute>
-            <Login />
-          </GuestRoute>
-        }
-      />
+        <Route
+          path="/login"
+          element={
+            <GuestRoute>
+              <Login />
+            </GuestRoute>
+          }
+        />
 
-      <Route
-        path="/register"
-        element={
-          <GuestRoute>
-            <Register />
-          </GuestRoute>
-        }
-      />
+        <Route
+          path="/register"
+          element={
+            <GuestRoute>
+              <Register />
+            </GuestRoute>
+          }
+        />
 
-      {/* ===================================================
+        {/* ===================================================
           SUPER ADMIN
       =================================================== */}
 
-      <Route
-        path="/super-admin"
-        element={
-          <RoleRoute allowed={["super_admin"]}>
-            <SuperAdminDashboard />
-          </RoleRoute>
-        }
-      />
+        <Route
+          path="/super-admin"
+          element={
+            <RoleRoute allowed={["super_admin"]}>
+              <SuperAdminDashboard />
+            </RoleRoute>
+          }
+        />
 
-      {/* ===================================================
+        {/* ===================================================
           SUPER ADMIN SCHOOLS
       =================================================== */}
 
-      <Route
-        path="/schools"
-        element={
-          <RoleRoute allowed={["super_admin"]}>
-            <SchoolsPage />
-          </RoleRoute>
-        }
-      />
+        <Route
+          path="/schools"
+          element={
+            <RoleRoute allowed={["super_admin"]}>
+              <SchoolsPage />
+            </RoleRoute>
+          }
+        />
 
-      {/* ===================================================
+        {/* ===================================================
           SUPER ADMIN ADMINS
           Kept for existing project compatibility.
       =================================================== */}
 
-      <Route
-        path="/superadmin"
-        element={
-          <RoleRoute allowed={["super_admin"]}>
-            <SuperAdminDashboard />
-          </RoleRoute>
-        }
-      />
+        <Route
+          path="/superadmin"
+          element={
+            <RoleRoute allowed={["super_admin"]}>
+              <SuperAdminDashboard />
+            </RoleRoute>
+          }
+        />
 
-      <Route
-        path="/superadmin/users"
-        element={
-          <RoleRoute allowed={["super_admin"]}>
-            <SuperAdminUsers />
-          </RoleRoute>
-        }
-      />
+        <Route
+          path="/superadmin/users"
+          element={
+            <RoleRoute allowed={["super_admin"]}>
+              <SuperAdminUsers />
+            </RoleRoute>
+          }
+        />
 
-      {/* ===================================================
+        {/* ===================================================
           RESULTS
       =================================================== */}
 
-      <Route
-        path="/results"
-        element={
-          <RoleRoute allowed={PERMISSIONS.results}>
-            <Results />
-          </RoleRoute>
-        }
-      />
+        <Route
+          path="/results"
+          element={
+            <RoleRoute allowed={PERMISSIONS.results}>
+              <Results />
+            </RoleRoute>
+          }
+        />
 
-      {/* ===================================================
+        {/* ===================================================
           ASSIGNMENTS
       =================================================== */}
 
-      <Route
-        path="/assignments"
-        element={
-          <RoleRoute allowed={PERMISSIONS.assignments}>
-            <Assignments />
-          </RoleRoute>
-        }
-      />
+        <Route
+          path="/assignments"
+          element={
+            <RoleRoute allowed={PERMISSIONS.assignments}>
+              <Assignments />
+            </RoleRoute>
+          }
+        />
 
-      {/* ===================================================
+        {/* ===================================================
           ANNOUNCEMENTS
       =================================================== */}
 
-      <Route
-        path="/announcements"
-        element={
-          <RoleRoute allowed={PERMISSIONS.announcements}>
-            <Announcements />
-          </RoleRoute>
-        }
-      />
+        <Route
+          path="/announcements"
+          element={
+            <RoleRoute allowed={PERMISSIONS.announcements}>
+              <Announcements />
+            </RoleRoute>
+          }
+        />
 
-      {/* ===================================================
+        {/* ===================================================
           NOTIFICATIONS
       =================================================== */}
 
-      <Route
-        path="/notifications"
-        element={
-          <RoleRoute allowed={PERMISSIONS.notifications}>
-            <Notifications />
-          </RoleRoute>
-        }
-      />
+        <Route
+          path="/notifications"
+          element={
+            <RoleRoute allowed={PERMISSIONS.notifications}>
+              <Notifications />
+            </RoleRoute>
+          }
+        />
 
-      {/* ===================================================
+        {/* ===================================================
           SETTINGS
       =================================================== */}
 
-      <Route
-        path="/settings"
-        element={
-          <RoleRoute allowed={["student"]}>
-            <Settings />
-          </RoleRoute>
-        }
-      />
-      {/* ===================================================
+        <Route
+          path="/settings"
+          element={
+            <RoleRoute allowed={["student"]}>
+              <Settings />
+            </RoleRoute>
+          }
+        />
+        {/* ===================================================
           PROFILE
       =================================================== */}
 
-      <Route
-        path="/profile"
-        element={
-          <RoleRoute allowed={PERMISSIONS.profile}>
-            <Profile />
-          </RoleRoute>
-        }
-      />
+        <Route
+          path="/profile"
+          element={
+            <RoleRoute allowed={PERMISSIONS.profile}>
+              <Profile />
+            </RoleRoute>
+          }
+        />
 
-      {/* ===================================================
+        {/* ===================================================
           PROTECTED APPLICATION
       =================================================== */}
 
-      <Route
-        element={
-          <ProtectedRoute>
-            <Layout />
-          </ProtectedRoute>
-        }
-      >
         <Route
-          path="/change-password"
           element={
-            <RoleRoute allowed={["student"]}>
-              <ChangePassword />
-            </RoleRoute>
+            <ProtectedRoute>
+              <Layout />
+            </ProtectedRoute>
           }
-        />
-        {/* =================================================
+        >
+          <Route
+            path="/change-password"
+            element={
+              <RoleRoute allowed={["student"]}>
+                <ChangePassword />
+              </RoleRoute>
+            }
+          />
+          {/* =================================================
             ADMIN DASHBOARD
         ================================================= */}
 
-        <Route
-          path="/dashboard"
-          element={
-            <RoleRoute allowed={["admin"]}>
-              <AdminDashboard />
-            </RoleRoute>
-          }
-        />
-        <Route path="/class-subjects" element={<ClassSubjects />} />
-        <Route
-          path="/announcement-management"
-          element={
-            <RoleRoute allowed={["admin"]}>
-              <AnnouncementManagement />
-            </RoleRoute>
-          }
-        />
-        <Route path="/admissions" element={<AdminAdmissions />} />
+          <Route
+            path="/dashboard"
+            element={
+              <RoleRoute allowed={["admin"]}>
+                <AdminDashboard />
+              </RoleRoute>
+            }
+          />
+          <Route path="/class-subjects" element={<ClassSubjects />} />
+          <Route
+            path="/announcement-management"
+            element={
+              <RoleRoute allowed={["admin"]}>
+                <AnnouncementManagement />
+              </RoleRoute>
+            }
+          />
+          <Route path="/admissions" element={<AdminAdmissions />} />
 
-        {/* =================================================
+          {/* =================================================
             STAFF DASHBOARD
         ================================================= */}
 
-        <Route
-          path="/Sdashboard"
-          element={
-            <RoleRoute allowed={["staff"]}>
-              <StaffDashboard />
-            </RoleRoute>
-          }
-        />
+          <Route
+            path="/Sdashboard"
+            element={
+              <RoleRoute allowed={["staff"]}>
+                <StaffDashboard />
+              </RoleRoute>
+            }
+          />
 
-        {/* =================================================
+          {/* =================================================
             COUNSELLOR DASHBOARD
         ================================================= */}
 
-        <Route
-          path="/Cdashboard"
-          element={
-            <RoleRoute allowed={["counsellor"]}>
-              <Cdashboard />
-            </RoleRoute>
-          }
-        />
+          <Route
+            path="/Cdashboard"
+            element={
+              <RoleRoute allowed={["counsellor"]}>
+                <Cdashboard />
+              </RoleRoute>
+            }
+          />
 
-        <Route
-          path="/counsellor/students"
-          element={
-            <RoleRoute allowed={["counsellor"]}>
-              <CounsellorStudents />
-            </RoleRoute>
-          }
-        />
+          <Route
+            path="/counsellor/students"
+            element={
+              <RoleRoute allowed={["counsellor"]}>
+                <CounsellorStudents />
+              </RoleRoute>
+            }
+          />
 
-        <Route
-          path="/counsellor/counselling"
-          element={
-            <RoleRoute allowed={["counsellor"]}>
-              <CounsellingRecords />
-            </RoleRoute>
-          }
-        />
-        <Route
-          path="/counsellor/followups"
-          element={
-            <RoleRoute allowed={["counsellor"]}>
-              <CounsellorFollowups />
-            </RoleRoute>
-          }
-        />
-        {/* =================================================
+          <Route
+            path="/counsellor/counselling"
+            element={
+              <RoleRoute allowed={["counsellor"]}>
+                <CounsellingRecords />
+              </RoleRoute>
+            }
+          />
+          <Route
+            path="/counsellor/followups"
+            element={
+              <RoleRoute allowed={["counsellor"]}>
+                <CounsellorFollowups />
+              </RoleRoute>
+            }
+          />
+          {/* =================================================
             TEACHER DASHBOARD
         ================================================= */}
 
-        <Route
-          path="/Tdashboard"
-          element={
-            <RoleRoute allowed={["teacher"]}>
-              <TeacherDashboard />
-            </RoleRoute>
-          }
-        />
-        <Route path="/subjects" element={<Subjects />} />
-        <Route path="/Tstudents" element={<TeacherStudents />} />
-        <Route path="/Tattendance" element={<TeacherAttendance />} />
-        <Route path="/lesson-notes" element={<LessonNotes />} />
-        <Route
-          path="/student/lesson-notes"
-          element={
-            <RoleRoute allowed={["student"]}>
-              <StudentLessonNotes />
-            </RoleRoute>
-          }
-        />
+          <Route
+            path="/Tdashboard"
+            element={
+              <RoleRoute allowed={["teacher"]}>
+                <TeacherDashboard />
+              </RoleRoute>
+            }
+          />
+          <Route path="/subjects" element={<Subjects />} />
+          <Route path="/Tstudents" element={<TeacherStudents />} />
+          <Route path="/Tattendance" element={<TeacherAttendance />} />
+          <Route path="/lesson-notes" element={<LessonNotes />} />
+          <Route
+            path="/student/lesson-notes"
+            element={
+              <RoleRoute allowed={["student"]}>
+                <StudentLessonNotes />
+              </RoleRoute>
+            }
+          />
 
-        {/* =================================================
+          {/* =================================================
             BURSAR DASHBOARD
         ================================================= */}
 
-        <Route
-          path="/Bdashboard"
-          element={
-            <RoleRoute allowed={["bursar"]}>
-              <BursarDashboard />
-            </RoleRoute>
-          }
-        />
-        <Route path="/finance/invoice/:paymentId" element={<Invoice />} />
-        <Route path="/record-payment" element={<RecordPayment />} />
+          <Route
+            path="/Bdashboard"
+            element={
+              <RoleRoute allowed={["bursar"]}>
+                <BursarDashboard />
+              </RoleRoute>
+            }
+          />
+          <Route path="/finance/invoice/:paymentId" element={<Invoice />} />
+          <Route path="/record-payment" element={<RecordPayment />} />
 
-        {/* =================================================
+          {/* =================================================
             STUDENT DASHBOARD
         ================================================= */}
 
-        <Route
-          path="/Stdashboard"
-          element={
-            <RoleRoute allowed={["student"]}>
-              <StudentDashboard />
-            </RoleRoute>
-          }
-        />
-        <Route path="/grades" element={<GradeSummary />} />
+          <Route
+            path="/Stdashboard"
+            element={
+              <RoleRoute allowed={["student"]}>
+                <StudentDashboard />
+              </RoleRoute>
+            }
+          />
+          <Route path="/grades" element={<GradeSummary />} />
 
-        {/* =================================================
+          {/* =================================================
             PARENT DASHBOARD
         ================================================= */}
 
-        <Route
-          path="/Pdashboard"
-          element={
-            <RoleRoute allowed={["parent"]}>
-              <ParentDashboard />
-            </RoleRoute>
-          }
-        />
+          <Route
+            path="/Pdashboard"
+            element={
+              <RoleRoute allowed={["parent"]}>
+                <ParentDashboard />
+              </RoleRoute>
+            }
+          />
 
-        {/* =================================================
+          {/* =================================================
             STUDENTS
         ================================================= */}
 
-        <Route
-          path="/students"
-          element={
-            <RoleRoute allowed={PERMISSIONS.students}>
-              <Students />
-            </RoleRoute>
-          }
-        />
+          <Route
+            path="/students"
+            element={
+              <RoleRoute allowed={PERMISSIONS.students}>
+                <Students />
+              </RoleRoute>
+            }
+          />
 
-        <Route
-          path="/students/:id"
-          element={
-            <RoleRoute allowed={PERMISSIONS.students}>
-              <StudentProfile />
-            </RoleRoute>
-          }
-        />
+          <Route
+            path="/students/:id"
+            element={
+              <RoleRoute allowed={PERMISSIONS.students}>
+                <StudentProfile />
+              </RoleRoute>
+            }
+          />
 
-        {/* =================================================
+          {/* =================================================
             STAFF
         ================================================= */}
 
-        <Route
-          path="/staff"
-          element={
-            <RoleRoute allowed={PERMISSIONS.staff}>
-              <Staff />
-            </RoleRoute>
-          }
-        />
+          <Route
+            path="/staff"
+            element={
+              <RoleRoute allowed={PERMISSIONS.staff}>
+                <Staff />
+              </RoleRoute>
+            }
+          />
 
-        {/* =================================================
+          {/* =================================================
             TEACHERS
         ================================================= */}
 
-        <Route
-          path="/teachers"
-          element={
-            <RoleRoute allowed={PERMISSIONS.teachers}>
-              <Teacher />
-            </RoleRoute>
-          }
-        />
+          <Route
+            path="/teachers"
+            element={
+              <RoleRoute allowed={PERMISSIONS.teachers}>
+                <Teacher />
+              </RoleRoute>
+            }
+          />
 
-        {/* =================================================
+          {/* =================================================
     CLASSES
 ================================================= */}
 
-        <Route
-          path="/classes"
-          element={
-            <RoleRoute allowed={["admin", "super_admin"]}>
-              <Classes />
-            </RoleRoute>
-          }
-        />
+          <Route
+            path="/classes"
+            element={
+              <RoleRoute allowed={["admin", "super_admin"]}>
+                <Classes />
+              </RoleRoute>
+            }
+          />
 
-        {/* =================================================
+          {/* =================================================
             ACADEMICS
         ================================================= */}
 
-        <Route
-          path="/academics"
-          element={
-            <RoleRoute allowed={PERMISSIONS.academics}>
-              <Academics />
-            </RoleRoute>
-          }
-        />
+          <Route
+            path="/academics"
+            element={
+              <RoleRoute allowed={PERMISSIONS.academics}>
+                <Academics />
+              </RoleRoute>
+            }
+          />
 
-        {/* =================================================
+          {/* =================================================
             ATTENDANCE
         ================================================= */}
 
-        <Route
-          path="/attendance"
-          element={
-            <RoleRoute allowed={PERMISSIONS.attendance}>
-              <Attendance />
-            </RoleRoute>
-          }
-        />
+          <Route
+            path="/attendance"
+            element={
+              <RoleRoute allowed={PERMISSIONS.attendance}>
+                <Attendance />
+              </RoleRoute>
+            }
+          />
 
-        {/* =================================================
+          {/* =================================================
             TIMETABLE
         ================================================= */}
 
-        <Route
-          path="/timetable"
-          element={
-            <RoleRoute allowed={PERMISSIONS.timetable}>
-              <Timetable />
-            </RoleRoute>
-          }
-        />
+          <Route
+            path="/timetable"
+            element={
+              <RoleRoute allowed={PERMISSIONS.timetable}>
+                <Timetable />
+              </RoleRoute>
+            }
+          />
 
-        {/* =================================================
+          {/* =================================================
             FINANCE
         ================================================= */}
 
-        <Route
-          path="/finance"
-          element={
-            <RoleRoute allowed={PERMISSIONS.finance}>
-              <Finance />
-            </RoleRoute>
-          }
-        />
+          <Route
+            path="/finance"
+            element={
+              <RoleRoute allowed={PERMISSIONS.finance}>
+                <Finance />
+              </RoleRoute>
+            }
+          />
 
-        {/* =================================================
+          {/* =================================================
             COUNSELLING
         ================================================= */}
 
-        <Route
-          path="/counselling"
-          element={
-            <RoleRoute allowed={PERMISSIONS.counselling}>
-              <Cdashboard />
-            </RoleRoute>
-          }
-        />
+          <Route
+            path="/counselling"
+            element={
+              <RoleRoute allowed={PERMISSIONS.counselling}>
+                <Cdashboard />
+              </RoleRoute>
+            }
+          />
 
-        {/* =================================================
+          {/* =================================================
             COMMUNICATIONS
         ================================================= */}
 
-        <Route
-          path="/communications"
-          element={
-            <RoleRoute allowed={PERMISSIONS.communications}>
-              <Communications />
-            </RoleRoute>
-          }
-        />
+          <Route
+            path="/communications"
+            element={
+              <RoleRoute allowed={PERMISSIONS.communications}>
+                <Communications />
+              </RoleRoute>
+            }
+          />
 
-        {/* =================================================
+          {/* =================================================
             REPORTS
         ================================================= */}
 
-        <Route
-          path="/reports"
-          element={
-            <RoleRoute allowed={PERMISSIONS.reports}>
-              <Reports />
-            </RoleRoute>
-          }
-        />
+          <Route
+            path="/reports"
+            element={
+              <RoleRoute allowed={PERMISSIONS.reports}>
+                <Reports />
+              </RoleRoute>
+            }
+          />
 
-        {/* =================================================
+          {/* =================================================
             TEACHING OPPORTUNITIES
         ================================================= */}
 
-        <Route
-          path="/opportunities"
-          element={
-            <RoleRoute allowed={["admin", "staff"]}>
-              <TeachingOpportunities />
-            </RoleRoute>
-          }
-        />
-      </Route>
+          <Route
+            path="/opportunities"
+            element={
+              <RoleRoute allowed={["admin", "staff"]}>
+                <TeachingOpportunities />
+              </RoleRoute>
+            }
+          />
+        </Route>
 
-      {/* ===================================================
+        {/* ===================================================
           CATCH ALL
       =================================================== */}
 
-      <Route path="*" element={<Navigate to="/" replace />} />
-    </Routes>
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </>
   );
 }
 

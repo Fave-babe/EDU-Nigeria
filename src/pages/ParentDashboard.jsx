@@ -198,7 +198,7 @@ function ParentDashboard() {
           HEADER
       ================================================== */}
 
-      <div className="parent-header">
+      <div className="parent-header dashboard-topbar">
         <div>
           <span className="parent-eyebrow">Parent Portal</span>
 

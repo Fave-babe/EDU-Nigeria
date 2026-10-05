@@ -670,6 +670,183 @@
   color: #7690ad;
 }
 
+[data-theme="dark"] #root .student-dashboard {
+  background: linear-gradient(145deg, #0b0f0c 0%, #080a09 52%, #101713 100%);
+  color: #ffffff;
+}
+
+.student-dashboard .student-header.dashboard-topbar {
+  height: auto;
+  min-height: 76px;
+  justify-content: space-between;
+  padding: 12px 22px;
+}
+
+.student-header-heading {
+  min-width: 0;
+}
+
+.student-header-heading > span {
+  display: block;
+  color: #16845f;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+}
+
+.student-header-heading h2 {
+  margin: 3px 0 0;
+  color: #142540;
+  font-size: 18px;
+  line-height: 1.2;
+}
+
+.student-header-heading p {
+  margin: 3px 0 0;
+  color: #718096;
+  font-size: 10px;
+}
+
+.student-class-info {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  text-align: right;
+}
+
+.student-class-info strong {
+  color: #18385d;
+  font-size: 11px;
+}
+
+.student-class-info span {
+  color: #8191a6;
+  font-size: 9px;
+}
+
+.student-dashboard .student-header .student-notification {
+  width: 40px;
+  height: 40px;
+  flex: 0 0 40px;
+  border-radius: 11px;
+  transition: transform 0.2s ease, background-color 0.2s ease;
+}
+
+.student-dashboard .student-header .student-notification:hover {
+  transform: translateY(-1px);
+}
+
+.student-dashboard .student-header .student-notification:focus-visible {
+  outline: 3px solid #16845f;
+  outline-offset: 3px;
+}
+
+.student-dashboard .student-header .student-avatar {
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(13, 46, 31, 0.14);
+}
+
+[data-theme="dark"] #root .student-dashboard .student-header.dashboard-topbar {
+  background-color: #101512;
+  background-image:
+    linear-gradient(110deg, rgba(211, 237, 218, 0.075), transparent 44%),
+    linear-gradient(120deg, #171d19 0%, #0e1210 68%, #131914 100%);
+  border-color: #303a33;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.28), inset 0 1px 0 rgba(233, 246, 236, 0.08);
+}
+
+[data-theme="dark"] #root .student-dashboard .student-welcome {
+  background-color: #131a15;
+  background-image: linear-gradient(110deg, #18251c 0%, #111713 58%, #17221a 100%);
+  border-color: #344439;
+  box-shadow: inset 0 1px 0 rgba(232, 245, 235, 0.06), 0 14px 32px rgba(0, 0, 0, 0.22);
+}
+
+[data-theme="dark"] #root .student-dashboard .student-welcome::after {
+  background: rgba(154, 202, 165, 0.08);
+}
+
+[data-theme="dark"] #root .student-header-heading > span {
+  color: #a8d8b6;
+}
+
+[data-theme="dark"] #root .student-dashboard .student-header-heading h2,
+[data-theme="dark"] #root .student-dashboard .student-header-heading p,
+[data-theme="dark"] #root .student-dashboard .student-class-info strong,
+[data-theme="dark"] #root .student-dashboard .student-class-info span {
+  color: #ffffff;
+}
+
+[data-theme="dark"] #root .student-dashboard .student-stat-card {
+  border-color: #303a33;
+  background-color: #151916;
+  background-image: linear-gradient(145deg, rgba(220, 241, 225, 0.045), transparent 42%);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(232, 245, 235, 0.035);
+}
+
+[data-theme="dark"] #root .student-dashboard .stat-green {
+  background-color: #173225;
+  color: #8fdbaf;
+}
+
+[data-theme="dark"] #root .student-dashboard .stat-purple {
+  background-color: #29203b;
+  color: #c3a6fa;
+}
+
+[data-theme="dark"] #root .student-dashboard .stat-orange {
+  background-color: #382916;
+  color: #f4c16b;
+}
+
+[data-theme="dark"] #root .student-dashboard .stat-blue {
+  background-color: #1b2b3d;
+  color: #91c8ff;
+}
+
+[data-theme="dark"] #root .student-dashboard .subject-code {
+  background-color: #1c2b22;
+  color: #c3e7cb;
+}
+
+[data-theme="dark"] #root .student-dashboard .grade-badge {
+  background-color: #111713;
+}
+
+[data-theme="dark"] #root .student-dashboard .assignment-date,
+[data-theme="dark"] #root .student-dashboard .fee-status-icon {
+  background-color: #173225;
+  color: #8fdbaf;
+}
+
+[data-theme="dark"] #root .student-dashboard .attendance-circle {
+  background: conic-gradient(#73c994 0deg 338deg, #303a33 338deg 360deg);
+}
+
+[data-theme="dark"] #root .student-dashboard .attendance-circle::before {
+  background: #151a17;
+}
+
+[data-theme="dark"] #root .student-dashboard .result-progress {
+  background-color: #303a33;
+}
+
+@media (max-width: 600px) {
+  .student-dashboard .student-header.dashboard-topbar {
+    min-height: 66px;
+    padding: 0 14px;
+  }
+
+  .student-header-heading h2 {
+    font-size: 15px;
+  }
+
+  .student-header-heading p,
+  .student-class-info {
+    display: none;
+  }
+}
+
 /* =========================================================
    ASSIGNMENTS
 ========================================================= */
@@ -901,8 +1078,8 @@
 }
 
 .announcement-item {
-  min-height: 59px;
-  padding: 10px 0;
+  min-height: 64px;
+  padding: 12px 0;
   border-bottom: 1px solid #edf1f5;
   display: flex;
   align-items: center;
@@ -939,18 +1116,78 @@
 
 .announcement-item strong {
   display: block;
-  overflow: hidden;
   color: #18385d;
-  font-size: 10px;
-  white-space: nowrap;
-  text-overflow: ellipsis;
+  font-size: 13px;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
 }
 
 .announcement-item span:last-child {
   display: block;
   margin-top: 5px;
   color: #8b9aad;
-  font-size: 8px;
+  font-size: 11px;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
+.announcement-item .item-arrow {
+  flex: 0 0 auto;
+}
+
+.student-dashboard .announcements-card .announcement-item {
+  min-height: 64px;
+  padding: 12px 0;
+  gap: 10px;
+  border: 0;
+  border-bottom: 1px solid var(--border-color);
+  border-radius: 0;
+  background: transparent;
+}
+
+.student-dashboard .announcements-card .announcement-dot {
+  width: 9px;
+  height: 9px;
+  min-width: 9px;
+  flex: 0 0 9px;
+  display: block;
+  border-radius: 50%;
+}
+
+.student-dashboard .announcements-card .announcement-item > div {
+  flex: 1 1 auto;
+  width: 0;
+  min-width: 0;
+}
+
+.student-dashboard .announcements-card .announcement-item:last-child {
+  border-bottom: 0;
+}
+
+[data-theme="dark"] #root .student-dashboard .announcements-card .announcement-item strong {
+  color: #ffffff;
+}
+
+[data-theme="dark"] #root .student-dashboard .announcements-card .announcement-item span:last-child {
+  color: #e4e9e5;
+}
+
+[data-theme="dark"] #root .student-dashboard .announcements-card .announcement-item {
+  background-color: #111713;
+  background-image: linear-gradient(110deg, rgba(220, 241, 225, 0.035), transparent 55%);
+  border-bottom-color: #303a33;
+}
+
+[data-theme="dark"] #root .student-dashboard .announcements-card .announcement-dot.dot-green {
+  background-color: #80d6a2;
+}
+
+[data-theme="dark"] #root .student-dashboard .announcements-card .announcement-dot.dot-blue {
+  background-color: #82bbf4;
+}
+
+[data-theme="dark"] #root .student-dashboard .announcements-card .announcement-dot.dot-orange {
+  background-color: #f1bd67;
 }
 
 /* =========================================================

@@ -220,7 +220,7 @@ export default function BursarDashboard() {
           HEADER
       ================================================== */}
 
-      <div className="bursar-header">
+      <div className="bursar-header dashboard-topbar">
         <div className="bursar-header-left">
           <h1 className="bursar-title">Bursar Dashboard</h1>
 

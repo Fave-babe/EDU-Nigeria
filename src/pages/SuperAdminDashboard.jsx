@@ -474,7 +474,7 @@ function SuperAdminDashboard() {
       <div className="sa-main-wrapper">
         {/* TOPBAR */}
 
-        <header className="sa-topbar">
+        <header className="sa-topbar dashboard-topbar">
           <div className="sa-topbar-left">
             <button
               className="sa-mobile-menu"

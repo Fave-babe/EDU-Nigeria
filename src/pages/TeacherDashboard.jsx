@@ -13,6 +13,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/authcontext";
 import { teacherApi } from "../api/teacher.api";
+import Header from "../components/Header";
 import "./TeacherDashboard.css";
 
 export default function TeacherDashboard() {
@@ -163,6 +164,7 @@ export default function TeacherDashboard() {
 
   return (
     <div className="teacher-dashboard">
+      <Header title="Teacher Dashboard" subtitle={schoolName} />
       {/* =====================================================
           TOP HEADER
       ===================================================== */}

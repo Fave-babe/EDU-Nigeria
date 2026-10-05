@@ -1,11 +1,11 @@
-.app-layout {
+#root .app-layout {
   display: flex;
   min-height: 100vh;
   width: 100%;
-  background: #f5f7fb;
+  background: var(--bg-primary, #f5f7fb);
 }
 
-.main-content {
+#root .app-layout > .main-content {
   flex: 1;
   min-width: 0;
   margin-left: 270px;
@@ -15,11 +15,11 @@
 
 /* The sidebar becomes an overlay below this width. */
 @media (max-width: 900px) {
-  .app-layout {
+  #root .app-layout {
     display: block;
   }
 
-  .main-content {
+  #root .app-layout > .main-content {
     margin-left: 0;
     padding: 16px;
     width: 100%;
