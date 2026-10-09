@@ -3359,3 +3359,384 @@ body {
   --border-color: #334155;
   --hover-bg: #1e293b;
 }
+
+/* =========================================
+   EDUNIGERIA LOGIN PAGE
+========================================= */
+
+.login-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 24px;
+  background:
+    radial-gradient(
+      circle at 10% 10%,
+      rgba(16, 185, 129, 0.12),
+      transparent 32%
+    ),
+    radial-gradient(
+      circle at 90% 90%,
+      rgba(59, 130, 246, 0.10),
+      transparent 32%
+    ),
+    #f4f7fb;
+  font-family: Inter, system-ui, -apple-system, sans-serif;
+}
+
+.login-card {
+  width: 100%;
+  max-width: 1040px;
+  min-height: 620px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  overflow: hidden;
+  background: #ffffff;
+  border: 1px solid #e5eaf2;
+  border-radius: 24px;
+  box-shadow: 0 25px 80px rgba(15, 23, 42, 0.10);
+}
+
+/* =========================================
+   LEFT / BRANDING PANEL
+========================================= */
+
+.login-header {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 56px 44px;
+  text-align: left;
+  color: #ffffff;
+  background:
+    radial-gradient(
+      circle at 100% 0%,
+      rgba(255, 255, 255, 0.13),
+      transparent 35%
+    ),
+    linear-gradient(145deg, #071a41 0%, #0b315c 55%, #087f68 100%);
+  position: relative;
+  overflow: hidden;
+}
+
+.login-header::before,
+.login-header::after {
+  content: "";
+  position: absolute;
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.login-header::before {
+  width: 320px;
+  height: 320px;
+  right: -150px;
+  top: -100px;
+}
+
+.login-header::after {
+  width: 230px;
+  height: 230px;
+  right: -90px;
+  top: -55px;
+}
+
+.brand-icon-lg {
+  width: 58px;
+  height: 58px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 28px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+  font-size: 28px;
+  font-weight: 800;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12);
+  position: relative;
+  z-index: 1;
+}
+
+.login-header h1 {
+  margin: 0 0 12px;
+  color: #ffffff;
+  font-size: 34px;
+  font-weight: 800;
+  letter-spacing: -1.2px;
+  position: relative;
+  z-index: 1;
+}
+
+.login-header > p {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.78);
+  font-size: 15px;
+  line-height: 1.8;
+  position: relative;
+  z-index: 1;
+}
+
+.login-school-name {
+  max-width: 100%;
+  margin: 8px 0 14px;
+  color: #ffffff;
+  font-size: clamp(25px, 3vw, 36px);
+  font-weight: 800;
+  line-height: 1.25;
+  letter-spacing: -0.8px;
+  overflow-wrap: anywhere;
+  position: relative;
+  z-index: 1;
+}
+
+.login-header .login-school-name + p {
+  margin-top: 0;
+}
+
+.login-header::selection {
+  background: #10b981;
+}
+
+/* =========================================
+   RIGHT / LOGIN FORM
+========================================= */
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 64px 52px;
+  background: #ffffff;
+}
+
+.login-form::before {
+  content: "ACCOUNT ACCESS";
+  display: block;
+  margin-bottom: 12px;
+  color: #059669;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 2px;
+}
+
+.login-form::after {
+  content: "Sign in with your registered school email and password.";
+  display: block;
+  order: -1;
+  margin-bottom: 30px;
+  color: #64748b;
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+/* =========================================
+   FORM FIELDS
+========================================= */
+
+.login-form .form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  margin-bottom: 22px;
+}
+
+.login-form .form-group label {
+  color: #1e293b;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.login-form .form-group input {
+  width: 100%;
+  min-height: 52px;
+  padding: 14px 16px;
+  border: 1px solid #dbe3ed;
+  border-radius: 11px;
+  outline: none;
+  background: #f8fafc;
+  color: #0f172a;
+  font-family: inherit;
+  font-size: 14px;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    background 0.2s ease;
+  box-sizing: border-box;
+}
+
+.login-form .form-group input::placeholder {
+  color: #94a3b8;
+}
+
+.login-form .form-group input:hover {
+  border-color: #a7b6c9;
+}
+
+.login-form .form-group input:focus {
+  border-color: #059669;
+  background: #ffffff;
+  box-shadow: 0 0 0 4px rgba(5, 150, 105, 0.11);
+}
+
+/* =========================================
+   SIGN IN BUTTON
+========================================= */
+
+.login-form .btn-primary {
+  width: 100%;
+  min-height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 6px;
+  padding: 14px 20px;
+  border: none;
+  border-radius: 11px;
+  background: linear-gradient(135deg, #059669, #047857);
+  color: #ffffff;
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 750;
+  cursor: pointer;
+  box-shadow: 0 8px 20px rgba(5, 150, 105, 0.18);
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    background 0.2s ease;
+}
+
+.login-form .btn-primary:hover:not(:disabled) {
+  transform: translateY(-2px);
+  background: linear-gradient(135deg, #047857, #065f46);
+  box-shadow: 0 12px 25px rgba(5, 150, 105, 0.25);
+}
+
+.login-form .btn-primary:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.login-form .btn-primary:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+/* =========================================
+   ERROR MESSAGE
+========================================= */
+
+.login-form .error-msg {
+  margin-bottom: 20px;
+  padding: 13px 15px;
+  border: 1px solid #fecaca;
+  border-radius: 10px;
+  background: #fef2f2;
+  color: #b91c1c;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+/* =========================================
+   LOGIN FOOTER
+========================================= */
+
+.login-footer {
+  padding: 0 52px 38px;
+  background: #ffffff;
+  text-align: center;
+}
+
+.login-footer > a {
+  display: inline-block;
+  color: #047857;
+  font-size: 13px;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.login-footer > a:hover {
+  color: #065f46;
+  text-decoration: underline;
+}
+
+.login-footer p {
+  margin: 24px 0 0;
+  padding-top: 20px;
+  border-top: 1px solid #edf1f5;
+  color: #94a3b8;
+  font-size: 12px;
+}
+
+.login-footer p strong {
+  color: #475569;
+}
+
+/* =========================================
+   TABLET AND MOBILE
+========================================= */
+
+@media (max-width: 760px) {
+  .login-page {
+    padding: 20px 14px;
+    align-items: flex-start;
+  }
+
+  .login-card {
+    max-width: 480px;
+    min-height: auto;
+    grid-template-columns: 1fr;
+    border-radius: 20px;
+  }
+
+  .login-header {
+    min-height: 220px;
+    padding: 32px 28px;
+  }
+
+  .brand-icon-lg {
+    width: 46px;
+    height: 46px;
+    margin-bottom: 18px;
+    border-radius: 14px;
+    font-size: 23px;
+  }
+
+  .login-header h1 {
+    font-size: 28px;
+  }
+
+  .login-school-name {
+    font-size: 27px;
+  }
+
+  .login-form {
+    padding: 34px 28px 24px;
+  }
+
+  .login-footer {
+    padding: 0 28px 28px;
+  }
+}
+
+@media (max-width: 380px) {
+  .login-page {
+    padding: 12px;
+  }
+
+  .login-header {
+    padding: 26px 22px;
+  }
+
+  .login-form {
+    padding: 28px 22px 20px;
+  }
+
+  .login-footer {
+    padding: 0 22px 24px;
+  }
+}

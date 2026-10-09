@@ -1,10 +1,4 @@
-
-import {
-  createContext,
-  useContext,
-  useState,
-  useEffect,
-} from "react";
+import { createContext, useContext, useState, useEffect } from "react";
 
 import { authApi } from "../api/auth.api";
 
@@ -50,17 +44,14 @@ export function isBursarUser(user) {
 
   return (
     normalizeRole(user.role) === "bursar" ||
-    (
-      normalizeRole(user.role) === "staff" &&
-      normalizeRole(user.staffRole) === "bursar"
-    )
+    (normalizeRole(user.role) === "staff" &&
+      normalizeRole(user.staffRole) === "bursar")
   );
 }
 
 // =========================================================
 // GET EFFECTIVE ROLE
 // =========================================================
-
 
 export function getEffectiveRole(user) {
   if (!user) return "";
@@ -79,7 +70,6 @@ export function getEffectiveRole(user) {
   return role;
 }
 
-
 // =========================================================
 // NORMALIZE USER
 // =========================================================
@@ -90,9 +80,7 @@ export function normalizeUser(user) {
   const normalizedUser = {
     ...user,
     role: normalizeRole(user.role),
-    staffRole: user.staffRole
-      ? normalizeRole(user.staffRole)
-      : null,
+    staffRole: user.staffRole ? normalizeRole(user.staffRole) : null,
   };
 
   return {
@@ -117,8 +105,20 @@ export function getRedirectPath(user) {
     case "superadmin":
       return "/super-admin";
 
-    case "admin":
-      return "/dashboard";
+    case "admin": {
+      const schoolName = user.school?.name || user.schoolName || "";
+
+      const schoolSlug =
+        user.school?.slug ||
+        user.schoolSlug ||
+        schoolName
+          .toLowerCase()
+          .trim()
+          .replace(/[^a-z0-9]+/g, "-")
+          .replace(/^-|-$/g, "");
+
+      return schoolSlug ? `/school/${schoolSlug}` : "/login";
+    }
 
     case "staff":
       return "/Sdashboard";
@@ -160,18 +160,13 @@ export function AuthProvider({ children }) {
   });
 
   useEffect(() => {
-    document.documentElement.setAttribute(
-      "data-theme",
-      theme
-    );
+    document.documentElement.setAttribute("data-theme", theme);
 
     localStorage.setItem("theme", theme);
   }, [theme]);
 
   function toggleTheme() {
-    setTheme((prev) =>
-      prev === "light" ? "dark" : "light"
-    );
+    setTheme((prev) => (prev === "light" ? "dark" : "light"));
   }
 
   // =======================================================
@@ -183,8 +178,7 @@ export function AuthProvider({ children }) {
     const storedUser = getStoredUser();
 
     if (token && storedUser) {
-      const normalizedStoredUser =
-        normalizeUser(storedUser);
+      const normalizedStoredUser = normalizeUser(storedUser);
 
       setUser(normalizedStoredUser);
 
@@ -196,39 +190,27 @@ export function AuthProvider({ children }) {
           const freshUser = normalizeUser({
             ...res.user,
 
-            role:
-              res.role ??
-              res.user?.role ??
-              storedUser?.role,
+            role: res.role ?? res.user?.role ?? storedUser?.role,
 
             staffRole:
-              res.staffRole ??
-              res.user?.staffRole ??
-              storedUser?.staffRole,
+              res.staffRole ?? res.user?.staffRole ?? storedUser?.staffRole,
           });
 
           console.log("FRESH USER:", freshUser);
-          console.log(
-            "EFFECTIVE ROLE:",
-            freshUser?.effectiveRole
-          );
+          console.log("EFFECTIVE ROLE:", freshUser?.effectiveRole);
 
           setUser(freshUser);
           setStoredUser(freshUser);
         })
         .catch((err) => {
-          console.error(
-            "SESSION RESTORE ERROR:",
-            err
-          );
+          console.error("SESSION RESTORE ERROR:", err);
 
           clearToken();
+          setStoredUser(null);
           setUser(null);
         })
         .finally(() => {
-          console.log(
-            "SESSION RESTORE FINISHED"
-          );
+          console.log("SESSION RESTORE FINISHED");
 
           setLoading(false);
         });
@@ -250,9 +232,7 @@ export function AuthProvider({ children }) {
       await authApi.register(payload);
 
       // Student registration creates admission record
-      if (
-        normalizeRole(userData.role) === "student"
-      ) {
+      if (normalizeRole(userData.role) === "student") {
         const admission = {
           id: Date.now(),
           firstName: userData.firstName,
@@ -265,18 +245,12 @@ export function AuthProvider({ children }) {
           createdAt: new Date().toISOString(),
         };
 
-        addItem(
-          "admissions",
-          admission
-        );
+        addItem("admissions", admission);
 
         window.dispatchEvent(
-          new CustomEvent(
-            "faveschool:admissions-updated",
-            {
-              detail: admission,
-            }
-          )
+          new CustomEvent("faveschool:admissions-updated", {
+            detail: admission,
+          }),
         );
       }
 
@@ -284,16 +258,11 @@ export function AuthProvider({ children }) {
         success: true,
       };
     } catch (err) {
-      console.error(
-        "REGISTRATION ERROR:",
-        err
-      );
+      console.error("REGISTRATION ERROR:", err);
 
       return {
         success: false,
-        message:
-          err.message ||
-          "Registration failed. Please try again.",
+        message: err.message || "Registration failed. Please try again.",
       };
     }
   }
@@ -306,75 +275,46 @@ export function AuthProvider({ children }) {
     try {
       console.log("LOGIN STARTED");
 
-      const res = await authApi.login(
-        email,
-        password
-      );
+      const res = await authApi.login(email, password);
 
-      console.log(
-        "LOGIN API RESPONSE:",
-        res
-      );
+      console.log("LOGIN API RESPONSE:", res);
 
-      const {
-        token,
-        user: loggedInUser,
-      } = res;
+      const { token, user: loggedInUser } = res;
 
       if (!token || !loggedInUser) {
         return {
           success: false,
-          message:
-            "Login response is missing user or token.",
+          message: "Login response is missing user or token.",
         };
       }
 
       // Normalize user
-      const normalizedUser =
-        normalizeUser(loggedInUser);
+      const normalizedUser = normalizeUser(loggedInUser);
 
-      console.log(
-        "NORMALIZED USER:",
-        normalizedUser
-      );
+      console.log("NORMALIZED USER:", normalizedUser);
 
-      console.log(
-        "EFFECTIVE ROLE:",
-        normalizedUser?.effectiveRole
-      );
+      console.log("EFFECTIVE ROLE:", normalizedUser?.effectiveRole);
 
       // Store authentication
       setToken(token);
 
-      setStoredUser(
-        normalizedUser
-      );
+      setStoredUser(normalizedUser);
 
       // Update context
-      setUser(
-        normalizedUser
-      );
+      setUser(normalizedUser);
 
-      console.log(
-        "LOGIN SUCCESS:",
-        normalizedUser
-      );
+      console.log("LOGIN SUCCESS:", normalizedUser);
 
       return {
         success: true,
         user: normalizedUser,
       };
     } catch (err) {
-      console.error(
-        "LOGIN ERROR:",
-        err
-      );
+      console.error("LOGIN ERROR:", err);
 
       return {
         success: false,
-        message:
-          err.message ||
-          "Login failed. Please try again.",
+        message: err.message || "Login failed. Please try again.",
       };
     }
   }
@@ -386,6 +326,7 @@ export function AuthProvider({ children }) {
   function logout() {
     clearToken();
     setUser(null);
+    setStoredUser(null);
   }
 
   // =======================================================
@@ -397,21 +338,16 @@ export function AuthProvider({ children }) {
       return false;
     }
 
-    const currentRole =
-      getEffectiveRole(user);
+    const currentRole = getEffectiveRole(user);
 
-    const requestedRole =
-      normalizeRole(role);
+    const requestedRole = normalizeRole(role);
 
     // Admin has access to school management modules
     if (currentRole === "admin") {
       return true;
     }
 
-    return (
-      currentRole ===
-      requestedRole
-    );
+    return currentRole === requestedRole;
   }
 
   // =======================================================
@@ -419,37 +355,31 @@ export function AuthProvider({ children }) {
   // =======================================================
 
   function canAccess(allowedRoles) {
-  if (!user) {
-    return false;
+    if (!user) {
+      return false;
+    }
+
+    const currentRole = getEffectiveRole(user);
+
+    // Admin can access school management modules
+    if (currentRole === "admin") {
+      return true;
+    }
+
+    // Make sure allowedRoles is always an array
+    const roles = Array.isArray(allowedRoles) ? allowedRoles : [];
+
+    return roles.some(
+      (allowedRole) => normalizeRole(allowedRole) === currentRole,
+    );
   }
-
-  const currentRole = getEffectiveRole(user);
-
-  // Admin can access school management modules
-  if (currentRole === "admin") {
-    return true;
-  }
-
-  // Make sure allowedRoles is always an array
-  const roles = Array.isArray(allowedRoles)
-    ? allowedRoles
-    : [];
-
-  return roles.some(
-    (allowedRole) =>
-      normalizeRole(allowedRole) === currentRole
-  );
-}
 
   // =======================================================
   // IS COUNSELLOR
   // =======================================================
 
   function isCounsellor(u = user) {
-    return (
-      getEffectiveRole(u) ===
-      "counsellor"
-    );
+    return getEffectiveRole(u) === "counsellor";
   }
 
   // =======================================================
@@ -483,15 +413,11 @@ export function AuthProvider({ children }) {
 // =========================================================
 
 export function useAuth() {
-  const ctx =
-    useContext(AuthContext);
+  const ctx = useContext(AuthContext);
 
   if (!ctx) {
-    throw new Error(
-      "useAuth must be used within AuthProvider"
-    );
+    throw new Error("useAuth must be used within AuthProvider");
   }
 
   return ctx;
 }
-

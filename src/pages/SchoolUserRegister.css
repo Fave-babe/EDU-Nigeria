@@ -1,0 +1,257 @@
+.school-user-register-page {
+min-height: 100vh;
+padding: 36px 20px;
+background: #f3f6fb;
+color: #14213d;
+}
+
+.school-user-register-container {
+width: 100%;
+max-width: 620px;
+margin: 0 auto;
+}
+
+.school-register-back {
+display: inline-flex;
+align-items: center;
+gap: 9px;
+margin-bottom: 22px;
+color: #174b91;
+font-size: 14px;
+font-weight: 600;
+text-decoration: none;
+}
+
+.school-register-back:hover {
+color: #087f5b;
+}
+
+.school-user-register-card {
+padding: 34px;
+background: #ffffff;
+border: 1px solid #e5eaf2;
+border-radius: 20px;
+box-shadow: 0 18px 55px rgba(15, 35, 70, 0.08);
+}
+
+.school-register-brand {
+display: flex;
+align-items: center;
+justify-content: center;
+gap: 11px;
+margin-bottom: 28px;
+color: #102c5b;
+font-size: 21px;
+font-weight: 800;
+}
+
+.school-register-logo {
+display: grid;
+width: 48px;
+height: 48px;
+place-items: center;
+border-radius: 14px;
+background: #e6f5ef;
+color: #087f5b;
+}
+
+.school-register-heading {
+margin-bottom: 27px;
+text-align: center;
+}
+
+.school-register-heading h1 {
+margin: 0 0 10px;
+color: #102c5b;
+font-size: clamp(25px, 5vw, 32px);
+font-weight: 800;
+}
+
+.school-register-heading p {
+margin: 0;
+color: #64748b;
+font-size: 14px;
+line-height: 1.7;
+}
+
+.school-register-heading strong {
+color: #174b91;
+}
+
+.school-register-field {
+display: flex;
+min-width: 0;
+flex-direction: column;
+gap: 8px;
+margin-bottom: 18px;
+}
+
+.school-register-field label {
+color: #27364b;
+font-size: 13px;
+font-weight: 700;
+}
+
+.school-register-field input,
+.school-register-field select {
+width: 100%;
+min-height: 48px;
+padding: 12px 14px;
+border: 1px solid #d7dfeb;
+border-radius: 10px;
+outline: none;
+background: #ffffff;
+color: #14213d;
+font: inherit;
+font-size: 14px;
+transition:
+border-color 0.2s ease,
+box-shadow 0.2s ease;
+}
+
+.school-register-field input::placeholder {
+color: #9aa6b7;
+}
+
+.school-register-field input:focus,
+.school-register-field select:focus {
+border-color: #1b65b9;
+box-shadow: 0 0 0 3px rgba(27, 101, 185, 0.12);
+}
+
+.school-register-two-columns {
+display: grid;
+grid-template-columns: repeat(2, minmax(0, 1fr));
+gap: 15px;
+}
+
+.school-register-password {
+position: relative;
+}
+
+.school-register-password input {
+padding-right: 48px;
+}
+
+.school-register-password button {
+position: absolute;
+top: 50%;
+right: 12px;
+display: grid;
+width: 30px;
+height: 30px;
+padding: 0;
+transform: translateY(-50%);
+place-items: center;
+border: none;
+background: transparent;
+color: #64748b;
+cursor: pointer;
+}
+
+.school-register-password button:hover {
+color: #174b91;
+}
+
+.school-register-submit {
+display: flex;
+width: 100%;
+min-height: 50px;
+align-items: center;
+justify-content: center;
+gap: 10px;
+margin-top: 8px;
+border: none;
+border-radius: 10px;
+background: #087f5b;
+color: #ffffff;
+font-size: 15px;
+font-weight: 700;
+cursor: pointer;
+transition:
+background 0.2s ease,
+transform 0.2s ease;
+}
+
+.school-register-submit:hover:not(:disabled) {
+transform: translateY(-1px);
+background: #066849;
+}
+
+.school-register-submit:disabled {
+cursor: not-allowed;
+opacity: 0.65;
+}
+
+.school-register-alert {
+margin-bottom: 20px;
+padding: 13px 15px;
+border-radius: 9px;
+font-size: 13px;
+line-height: 1.6;
+}
+
+.school-register-error {
+border: 1px solid #fecaca;
+background: #fef2f2;
+color: #b91c1c;
+}
+
+.school-register-success {
+border: 1px solid #a7f3d0;
+background: #ecfdf5;
+color: #047857;
+}
+
+.school-register-login {
+margin: 24px 0 0;
+color: #64748b;
+font-size: 14px;
+text-align: center;
+}
+
+.school-register-login a {
+color: #174b91;
+font-weight: 700;
+text-decoration: none;
+}
+
+.school-register-login a:hover {
+text-decoration: underline;
+}
+
+.school-register-footer {
+margin: 22px 0 0;
+padding-top: 18px;
+border-top: 1px solid #edf0f5;
+color: #8390a3;
+font-size: 12px;
+line-height: 1.7;
+text-align: center;
+}
+
+.school-register-loading {
+padding: 35px 10px;
+color: #64748b;
+text-align: center;
+}
+
+@media (max-width: 520px) {
+.school-user-register-page {
+padding: 22px 12px;
+}
+
+.school-user-register-card {
+padding: 24px 18px;
+border-radius: 15px;
+}
+
+.school-register-two-columns {
+grid-template-columns: 1fr;
+gap: 0;
+}
+
+.school-register-heading h1 {
+font-size: 26px;
+}
+}

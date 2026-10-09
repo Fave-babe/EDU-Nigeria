@@ -1,42 +1,59 @@
 import React, { useEffect, useState } from "react";
-import { Plus, RefreshCw, X, BookOpen } from "lucide-react";
+import {
+  Plus,
+  RefreshCw,
+  X,
+  BookOpen,
+  GraduationCap,
+  Users,
+  Layers,
+  LoaderCircle,
+} from "lucide-react";
 
 import http from "../api/http";
 import { classApi } from "../api/class.api";
 import { classSubjectApi } from "../api/classSubject.api";
+import "./ClassSubjects.css";
+
+const SCHOOL_ID = "6a8485d60293d305ecd84878";
+const ACADEMIC_SESSION_ID = "6aa71820239080fa23f5f8eb";
+
+const INITIAL_FORM = {
+  academicSession: ACADEMIC_SESSION_ID,
+  class: "",
+  subject: "",
+  teacher: "",
+  isCompulsory: false,
+};
 
 export default function ClassSubjects() {
   const [classes, setClasses] = useState([]);
   const [subjects, setSubjects] = useState([]);
   const [teachers, setTeachers] = useState([]);
-  const [assignments, setAssignments] = useState([]);
-
   const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
   const [showForm, setShowForm] = useState(false);
-
-  const [form, setForm] = useState({
-    academicSession: "6aa71820239080fa23f5f8eb",
-    class: "",
-    subject: "",
-    teacher: "",
-    isCompulsory: false,
-  });
-
-  const schoolId = "6a8485d60293d305ecd84878";
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+  const [form, setForm] = useState({ ...INITIAL_FORM });
 
   const loadData = async () => {
     try {
       setLoading(true);
+      setError("");
 
-      const [subjectsResponse, teachersResponse, classesResponse] =
-  await Promise.all([
-    http.get(`/subject/school/${schoolId}`),
-    http.get(`/teacher/school/${schoolId}`),
-    classApi.getClasses(
-      schoolId,
-      "6aa71820239080fa23f5f8eb"
-    ),
-  ]);
+      const [
+        subjectsResponse,
+        teachersResponse,
+        classesResponse,
+      ] = await Promise.all([
+        http.get(`/subject/school/${SCHOOL_ID}`),
+        http.get(`/teacher/school/${SCHOOL_ID}`),
+        classApi.getClasses(
+          SCHOOL_ID,
+          ACADEMIC_SESSION_ID
+        ),
+      ]);
 
       const schoolSubjects =
         subjectsResponse?.data?.subjects ||
@@ -53,19 +70,42 @@ export default function ClassSubjects() {
         classesResponse?.classes ||
         [];
 
-      setSubjects(schoolSubjects);
-      setTeachers(schoolTeachers);
+      setSubjects(
+        Array.isArray(schoolSubjects)
+          ? schoolSubjects
+          : []
+      );
+
+      setTeachers(
+        Array.isArray(schoolTeachers)
+          ? schoolTeachers
+          : []
+      );
 
       setClasses(
-        schoolClasses.filter(
-          (item) =>
-            !item.school ||
-            item.school === schoolId ||
-            item.school?._id === schoolId
-        )
+        (Array.isArray(schoolClasses)
+          ? schoolClasses
+          : []
+        ).filter((item) => {
+          const itemSchool =
+            item.school?._id || item.school;
+
+          return (
+            !itemSchool ||
+            String(itemSchool) === SCHOOL_ID
+          );
+        })
       );
-    } catch (error) {
-      console.error("Failed to load class subject data:", error);
+    } catch (err) {
+      console.error(
+        "Failed to load class subject data:",
+        err
+      );
+
+      setError(
+        err?.response?.data?.message ||
+          "Unable to load classes, subjects, and teachers."
+      );
     } finally {
       setLoading(false);
     }
@@ -75,179 +115,341 @@ export default function ClassSubjects() {
     loadData();
   }, []);
 
-  const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
+  const handleChange = (event) => {
+    const {
+      name,
+      value,
+      type,
+      checked,
+    } = event.target;
 
-    setForm((prev) => ({
-      ...prev,
-      [name]: type === "checkbox" ? checked : value,
+    setForm((previous) => ({
+      ...previous,
+      [name]:
+        type === "checkbox" ? checked : value,
     }));
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const openForm = () => {
+    setForm({ ...INITIAL_FORM });
+    setError("");
+    setSuccess("");
+    setShowForm(true);
+  };
 
-    if (!form.class || !form.subject || !form.teacher) {
-      alert("Please select a class, subject and teacher.");
+  const closeForm = () => {
+    if (saving) return;
+
+    setShowForm(false);
+    setForm({ ...INITIAL_FORM });
+    setError("");
+  };
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+
+    if (
+      !form.class ||
+      !form.subject ||
+      !form.teacher
+    ) {
+      setError(
+        "Please select a class, subject, and teacher."
+      );
       return;
     }
 
     try {
-      const response = await classSubjectApi.createClassSubject({
-        school: schoolId,
-        academicSession: form.academicSession,
-        class: form.class,
-        subject: form.subject,
-        teacher: form.teacher,
-        isCompulsory: form.isCompulsory,
-      });
+      setSaving(true);
+      setError("");
+      setSuccess("");
 
-      console.log("CLASS SUBJECT CREATED:", response);
+      const response =
+        await classSubjectApi.createClassSubject({
+          school: SCHOOL_ID,
+          academicSession: form.academicSession,
+          class: form.class,
+          subject: form.subject,
+          teacher: form.teacher,
+          isCompulsory: form.isCompulsory,
+        });
 
-      alert("Subject assigned successfully.");
-
-      setForm({
-        academicSession: "6aa71820239080fa23f5f8eb",
-        class: "",
-        subject: "",
-        teacher: "",
-        isCompulsory: false,
-      });
-
-      setShowForm(false);
-      await loadData();
-    } catch (error) {
-      console.error("Failed to create class subject:", error);
-
-      alert(
-        error?.response?.data?.message ||
-          "Failed to assign subject."
+      console.log(
+        "CLASS SUBJECT CREATED:",
+        response
       );
+
+      setSuccess("Subject assigned successfully.");
+      setForm({ ...INITIAL_FORM });
+      setShowForm(false);
+
+      await loadData();
+    } catch (err) {
+      console.error(
+        "Failed to create class subject:",
+        err
+      );
+
+      setError(
+        err?.response?.data?.message ||
+          "Failed to assign subject. Please try again."
+      );
+    } finally {
+      setSaving(false);
     }
   };
 
   return (
-    <div style={{ padding: "24px" }}>
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          marginBottom: "24px",
-        }}
-      >
-        <div>
-          <h1>Class Subjects</h1>
-          <p>
-            Assign subjects and teachers to school classes.
-          </p>
+    <div className="class-subjects-page">
+      {/* PAGE HEADER */}
+      <header className="cs-header">
+        <div className="cs-header-content">
+          <div className="cs-header-icon">
+            <BookOpen size={27} />
+          </div>
+
+          <div>
+            <h1>Class Subjects</h1>
+            <p>
+              Organise subjects and assign teachers
+              to your school classes.
+            </p>
+          </div>
         </div>
 
-        <div style={{ display: "flex", gap: "10px" }}>
-          <button onClick={loadData}>
-            <RefreshCw size={16} />
-            Refresh
+        <div className="cs-header-actions">
+          <button
+            type="button"
+            className="cs-btn cs-btn-secondary"
+            onClick={loadData}
+            disabled={loading}
+          >
+            <RefreshCw
+              size={16}
+              className={
+                loading ? "cs-spinner" : ""
+              }
+            />
+            {loading ? "Refreshing..." : "Refresh"}
           </button>
 
-          <button onClick={() => setShowForm(true)}>
-            <Plus size={16} />
+          <button
+            type="button"
+            className="cs-btn cs-btn-primary"
+            onClick={openForm}
+          >
+            <Plus size={17} />
             Assign Subject
           </button>
         </div>
-      </div>
+      </header>
 
-      {showForm && (
+      {/* NOTIFICATIONS */}
+      {error && (
         <div
+          role="alert"
           style={{
-            border: "1px solid #ddd",
-            padding: "20px",
-            marginBottom: "24px",
-            borderRadius: "8px",
+            padding: "13px 16px",
+            marginBottom: "20px",
+            borderRadius: "10px",
+            border: "1px solid #fecaca",
+            background: "#fff1f2",
+            color: "#b91c1c",
+            fontSize: "13px",
           }}
         >
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              marginBottom: "20px",
-            }}
-          >
-            <h2>Assign Subject</h2>
+          {error}
+        </div>
+      )}
 
-            <button onClick={() => setShowForm(false)}>
-              <X size={18} />
+      {success && (
+        <div
+          role="status"
+          style={{
+            padding: "13px 16px",
+            marginBottom: "20px",
+            borderRadius: "10px",
+            border: "1px solid #bbf7d0",
+            background: "#f0fdf4",
+            color: "#15803d",
+            fontSize: "13px",
+          }}
+        >
+          {success}
+        </div>
+      )}
+
+      {/* SUMMARY */}
+      <section className="cs-summary-grid">
+        <div className="cs-summary-card">
+          <div className="cs-summary-icon navy">
+            <Layers size={23} />
+          </div>
+
+          <div>
+            <div className="cs-summary-label">
+              Total Classes
+            </div>
+            <div className="cs-summary-value">
+              {loading ? "—" : classes.length}
+            </div>
+          </div>
+        </div>
+
+        <div className="cs-summary-card">
+          <div className="cs-summary-icon">
+            <BookOpen size={23} />
+          </div>
+
+          <div>
+            <div className="cs-summary-label">
+              Available Subjects
+            </div>
+            <div className="cs-summary-value">
+              {loading ? "—" : subjects.length}
+            </div>
+          </div>
+        </div>
+
+        <div className="cs-summary-card">
+          <div className="cs-summary-icon purple">
+            <Users size={23} />
+          </div>
+
+          <div>
+            <div className="cs-summary-label">
+              Available Teachers
+            </div>
+            <div className="cs-summary-value">
+              {loading ? "—" : teachers.length}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ASSIGN SUBJECT FORM */}
+      {showForm && (
+        <section className="cs-form-panel">
+          <div className="cs-form-header">
+            <div className="cs-form-title">
+              <div className="cs-form-title-icon">
+                <GraduationCap size={23} />
+              </div>
+
+              <div>
+                <h2>Assign a Subject</h2>
+                <p>
+                  Choose a class, subject, and teacher
+                  for this academic session.
+                </p>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              className="cs-close-btn"
+              onClick={closeForm}
+              disabled={saving}
+              aria-label="Close form"
+            >
+              <X size={19} />
             </button>
           </div>
 
           <form onSubmit={handleSubmit}>
-            <div style={{ marginBottom: "15px" }}>
-              <label>Class</label>
+            <div className="cs-form-grid">
+              <div className="cs-form-group">
+                <label htmlFor="class">
+                  Select Class *
+                </label>
 
-              <select
-                name="class"
-                value={form.class}
-                onChange={handleChange}
-                required
-              >
-                <option value="">Select class</option>
-
-                {classes.map((item) => (
-                  <option key={item._id} value={item._id}>
-                    {item.name}
-                    {item.level
-                      ? ` - ${item.level}`
-                      : ""}
-                    {item.arm ? ` ${item.arm}` : ""}
+                <select
+                  id="class"
+                  name="class"
+                  value={form.class}
+                  onChange={handleChange}
+                  required
+                >
+                  <option value="">
+                    Choose a class
                   </option>
-                ))}
-              </select>
+
+                  {classes.map((item) => (
+                    <option
+                      key={item._id}
+                      value={item._id}
+                    >
+                      {item.name}
+                      {item.level
+                        ? ` - ${item.level}`
+                        : ""}
+                      {item.arm
+                        ? ` ${item.arm}`
+                        : ""}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="cs-form-group">
+                <label htmlFor="subject">
+                  Select Subject *
+                </label>
+
+                <select
+                  id="subject"
+                  name="subject"
+                  value={form.subject}
+                  onChange={handleChange}
+                  required
+                >
+                  <option value="">
+                    Choose a subject
+                  </option>
+
+                  {subjects.map((item) => (
+                    <option
+                      key={item._id}
+                      value={item._id}
+                    >
+                      {item.name}
+                      {item.code
+                        ? ` (${item.code})`
+                        : ""}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="cs-form-group">
+                <label htmlFor="teacher">
+                  Assign Teacher *
+                </label>
+
+                <select
+                  id="teacher"
+                  name="teacher"
+                  value={form.teacher}
+                  onChange={handleChange}
+                  required
+                >
+                  <option value="">
+                    Choose a teacher
+                  </option>
+
+                  {teachers.map((item) => (
+                    <option
+                      key={item._id}
+                      value={item._id}
+                    >
+                      {item.firstName} {item.lastName}
+                    </option>
+                  ))}
+                </select>
+              </div>
             </div>
 
-            <div style={{ marginBottom: "15px" }}>
-              <label>Subject</label>
-
-              <select
-                name="subject"
-                value={form.subject}
-                onChange={handleChange}
-                required
-              >
-                <option value="">Select subject</option>
-
-                {subjects.map((item) => (
-                  <option key={item._id} value={item._id}>
-                    {item.name} ({item.code})
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div style={{ marginBottom: "15px" }}>
-              <label>Teacher</label>
-
-              <select
-                name="teacher"
-                value={form.teacher}
-                onChange={handleChange}
-                required
-              >
-                <option value="">Select teacher</option>
-
-                {teachers.map((item) => (
-                  <option key={item._id} value={item._id}>
-                    {item.firstName} {item.lastName}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <label
-              style={{
-                display: "flex",
-                gap: "8px",
-                marginBottom: "15px",
-              }}
-            >
+            <label className="cs-checkbox-row">
               <input
                 type="checkbox"
                 name="isCompulsory"
@@ -255,48 +457,126 @@ export default function ClassSubjects() {
                 onChange={handleChange}
               />
 
-              Compulsory subject
+              <span className="cs-checkbox-text">
+                <strong>
+                  Compulsory subject
+                </strong>
+                <span>
+                  Mark this subject as required for
+                  students in the selected class.
+                </span>
+              </span>
             </label>
 
-            <button type="submit">
-              <BookOpen size={16} />
-              Assign Subject
-            </button>
-          </form>
-        </div>
-      )}
+            <div className="cs-form-actions">
+              <button
+                type="button"
+                className="cs-btn cs-btn-secondary"
+                onClick={closeForm}
+                disabled={saving}
+              >
+                Cancel
+              </button>
 
-      {loading ? (
-        <p>Loading...</p>
-      ) : classes.length === 0 ? (
-        <p>No classes found.</p>
-      ) : (
-        <div>
-          <h2>Available Classes</h2>
-
-          {classes.map((item) => (
-            <div
-              key={item._id}
-              style={{
-                border: "1px solid #ddd",
-                padding: "16px",
-                marginBottom: "10px",
-                borderRadius: "8px",
-              }}
-            >
-              <strong>{item.name}</strong>
-
-              <div>
-                Level: {item.level || "Not specified"}
-              </div>
-
-              <div>
-                Arm: {item.arm || "Not specified"}
-              </div>
+              <button
+                type="submit"
+                className="cs-btn cs-btn-primary"
+                disabled={saving}
+              >
+                {saving ? (
+                  <>
+                    <LoaderCircle
+                      size={16}
+                      className="cs-spinner"
+                    />
+                    Assigning...
+                  </>
+                ) : (
+                  <>
+                    <BookOpen size={16} />
+                    Assign Subject
+                  </>
+                )}
+              </button>
             </div>
-          ))}
-        </div>
+          </form>
+        </section>
       )}
+
+      {/* AVAILABLE CLASSES */}
+      <section className="cs-section">
+        <div className="cs-section-heading">
+          <div>
+            <h2>Available Classes</h2>
+            <p>
+              Classes available for subject assignment.
+            </p>
+          </div>
+        </div>
+
+        {loading ? (
+          <div className="cs-state">
+            <div className="cs-state-icon">
+              <LoaderCircle
+                size={25}
+                className="cs-spinner"
+              />
+            </div>
+            <h3>Loading classes</h3>
+            <p>
+              Fetching your school's class information.
+            </p>
+          </div>
+        ) : classes.length === 0 ? (
+          <div className="cs-state">
+            <div className="cs-state-icon">
+              <GraduationCap size={26} />
+            </div>
+            <h3>No classes found</h3>
+            <p>
+              There are currently no classes available
+              for this school.
+            </p>
+          </div>
+        ) : (
+          <div className="cs-class-grid">
+            {classes.map((item) => (
+              <article
+                className="cs-class-card"
+                key={item._id}
+              >
+                <div className="cs-class-card-top">
+                  <div className="cs-class-icon">
+                    <GraduationCap size={24} />
+                  </div>
+
+                  <span className="cs-class-label">
+                    Class
+                  </span>
+                </div>
+
+                <h3>{item.name}</h3>
+
+                <div className="cs-class-details">
+                  <div className="cs-class-detail">
+                    <span>Level</span>
+                    <strong>
+                      {item.level || "Not specified"}
+                    </strong>
+                  </div>
+
+                  <div className="cs-class-detail">
+                    <span>Arm</span>
+                    <strong>
+                      {item.arm || "Not specified"}
+                    </strong>
+                  </div>
+                </div>
+              </article>
+            ))}
+          </div>
+        )}
+      </section>
     </div>
   );
 }

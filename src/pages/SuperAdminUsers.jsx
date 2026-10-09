@@ -1,812 +1,1065 @@
-
 import React, { useEffect, useMemo, useState } from "react";
 import {
-  Search,
-  Users,
-  UserPlus,
-  RefreshCw,
-  MoreVertical,
-  Pencil,
-  Trash2,
-  Mail,
-  Building2,
-  CheckCircle2,
-  XCircle,
-  Loader2,
-  X,
+Search,
+Users,
+UserPlus,
+RefreshCw,
+MoreVertical,
+Pencil,
+Trash2,
+Building2,
+CheckCircle2,
+XCircle,
+Loader2,
+X,
+ShieldCheck,
+GraduationCap,
+Mail,
+Phone,
+ChevronDown,
+UserRound,
+School,
 } from "lucide-react";
 
-import { getAdmins, createAdmin, deleteAdmin } from "../api/admin.api";
+import {
+getAdmins,
+createAdmin,
+deleteAdmin,
+} from "../api/admin.api";
+
 import { getSchools } from "../api/school.api";
 import "./SuperAdminUsers.css";
 
 export default function SuperAdminUsers() {
-  const [admins, setAdmins] = useState([]);
-  const [schools, setSchools] = useState([]);
+const [admins, setAdmins] = useState([]);
+const [schools, setSchools] = useState([]);
+const [loading, setLoading] = useState(true);
+const [refreshing, setRefreshing] = useState(false);
+const [error, setError] = useState("");
+const [search, setSearch] = useState("");
+const [status, setStatus] = useState("all");
+const [openMenu, setOpenMenu] = useState(null);
+const [showCreateModal, setShowCreateModal] = useState(false);
+const [creating, setCreating] = useState(false);
 
-  const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
-  const [error, setError] = useState("");
-
-  const [search, setSearch] = useState("");
-  const [status, setStatus] = useState("all");
-  const [openMenu, setOpenMenu] = useState(null);
-
-  const [showCreateModal, setShowCreateModal] = useState(false);
-  const [creating, setCreating] = useState(false);
-
-  const [form, setForm] = useState({
-  fullName: "",
-  email: "",
-  phone: "",
-  password: "",
-  school: "",
+const [form, setForm] = useState({
+fullName: "",
+email: "",
+phone: "",
+password: "",
+school: "",
 });
-  const [formError, setFormError] = useState("");
 
-  /* =========================================================
-     LOAD DATA
-  ========================================================= */
+const [formError, setFormError] = useState("");
+
+// =====================================================
+// LOAD DATA
+// =====================================================
+
 const loadData = async (isRefresh = false) => {
-  try {
-    if (isRefresh) {
-      setRefreshing(true);
-    } else {
-      setLoading(true);
-    }
+try {
+if (isRefresh) {
+setRefreshing(true);
+} else {
+setLoading(true);
+}
 
-    setError("");
 
-    // Load administrators
-    try {
-      const adminResponse = await getAdmins({
-        page: 1,
-        limit: 100,
-      });
+  setError("");
 
-      console.log("ADMIN RESPONSE:", adminResponse);
+  const results = await Promise.allSettled([
+    getAdmins({ page: 1, limit: 100 }),
+    getSchools(),
+  ]);
 
-      setAdmins(adminResponse?.admins || []);
-    } catch (adminError) {
-      console.error(
-        "FAILED TO LOAD ADMINS:",
-        adminError
-      );
+  const [adminResult, schoolResult] = results;
 
-      setError(
-        adminError?.message ||
-          "Failed to load administrators."
-      );
-    }
+  if (adminResult.status === "fulfilled") {
+    const response = adminResult.value;
 
-    // Load schools separately
-    try {
-      const schoolResponse = await getSchools();
+    const adminData = Array.isArray(response)
+      ? response
+      : Array.isArray(response?.admins)
+        ? response.admins
+        : Array.isArray(response?.data?.admins)
+          ? response.data.admins
+          : Array.isArray(response?.data?.data?.admins)
+            ? response.data.data.admins
+            : [];
 
-      console.log("SCHOOL RESPONSE:", schoolResponse);
-
-      setSchools(
-        Array.isArray(schoolResponse)
-          ? schoolResponse
-          : schoolResponse?.schools || []
-      );
-    } catch (schoolError) {
-      console.error(
-        "FAILED TO LOAD SCHOOLS:",
-        schoolError
-      );
-    }
-  } finally {
-    setLoading(false);
-    setRefreshing(false);
+    setAdmins(adminData);
+  } else {
+    throw adminResult.reason;
   }
+
+  if (schoolResult.status === "fulfilled") {
+    const response = schoolResult.value;
+
+    const schoolData = Array.isArray(response)
+      ? response
+      : Array.isArray(response?.schools)
+        ? response.schools
+        : Array.isArray(response?.data?.schools)
+          ? response.data.schools
+          : Array.isArray(response?.data?.data?.schools)
+            ? response.data.data.schools
+            : Array.isArray(response?.data)
+              ? response.data
+              : [];
+
+    setSchools(schoolData);
+  } else {
+    console.error(
+      "FAILED TO LOAD SCHOOLS:",
+      schoolResult.reason
+    );
+  }
+} catch (err) {
+  console.error("FAILED TO LOAD USERS:", err);
+
+  setError(
+    err?.response?.data?.message ||
+      err?.message ||
+      "Failed to load administrators."
+  );
+} finally {
+  setLoading(false);
+  setRefreshing(false);
+}
+
+
 };
 
-  useEffect(() => {
-    loadData();
-  }, []);
+useEffect(() => {
+loadData();
+}, []);
 
-  /* =========================================================
-     FILTERS
-  ========================================================= */
+// =====================================================
+// FILTER ADMINISTRATORS
+// =====================================================
 
-  const filteredAdmins = useMemo(() => {
-  const query = search.trim().toLowerCase();
+const filteredAdmins = useMemo(() => {
+const query = search.trim().toLowerCase();
 
-  return admins.filter((admin) => {
-    const fullName =
-      admin.fullName || "Unnamed Administrator";
+return admins.filter((admin) => {
+  const fullName =
+    admin.fullName || "Unnamed Administrator";
 
-    const schoolName =
-      typeof admin.school === "object"
-        ? admin.school?.name || ""
-        : "";
+  const schoolName =
+    typeof admin.school === "object"
+      ? admin.school?.name || ""
+      : getSchoolName(admin.school);
 
-    const matchesSearch =
-      !query ||
-      fullName.toLowerCase().includes(query) ||
-      (admin.email || "").toLowerCase().includes(query) ||
-      schoolName.toLowerCase().includes(query);
+  const matchesSearch =
+    !query ||
+    fullName.toLowerCase().includes(query) ||
+    (admin.email || "").toLowerCase().includes(query) ||
+    schoolName.toLowerCase().includes(query);
 
-    const matchesStatus =
-      status === "all" ||
-      (status === "active" && admin.isActive === true) ||
-      (status === "inactive" && admin.isActive !== true);
+  const matchesStatus =
+    status === "all" ||
+    (status === "active" && admin.isActive === true) ||
+    (status === "inactive" && admin.isActive !== true);
 
-    return matchesSearch && matchesStatus;
-  });
-}, [admins, search, status]);
-
-  /* =========================================================
-     STATISTICS
-  ========================================================= */
-
-  const totalAdmins = admins.length;
-
-  const activeAdmins = admins.filter(
-    (admin) => admin.isActive === true
-  ).length;
-
-  const inactiveAdmins = admins.filter(
-    (admin) => admin.isActive !== true
-  ).length;
-
-  /* =========================================================
-     FORM
-  ========================================================= */
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-
-    setForm((previous) => ({
-      ...previous,
-      [name]: value,
-    }));
-  };
-
- const resetForm = () => {
-  setForm({
-    fullName: "",
-    email: "",
-    phone: "",
-    password: "",
-    school: "",
-  });
-
-  setFormError("");
-};
-
-  const openCreateModal = () => {
-    resetForm();
-    setShowCreateModal(true);
-  };
-
-  const closeCreateModal = () => {
-    if (creating) return;
-
-    setShowCreateModal(false);
-    resetForm();
-  };
-
-  /* =========================================================
-     CREATE ADMIN
-  ========================================================= */
-
-  const handleCreateAdmin = async (e) => {
-    e.preventDefault();
-
-    setFormError("");
-
-    if (!form.fullName.trim()) {
-      setFormError("Full name is required.");
-      return;
-    }
-
-    
-
-    if (!form.email.trim()) {
-      setFormError("Email is required.");
-      return;
-    }
-
-    if (!form.password.trim()) {
-      setFormError("Password is required.");
-      return;
-    }
-
-    if (!form.school) {
-      setFormError("Please select a school.");
-      return;
-    }
-
-    try {
-      setCreating(true);
-
-      const response = await createAdmin({
-  fullName: form.fullName.trim(),
-  email: form.email.trim().toLowerCase(),
-  phone: form.phone.trim(),
-  password: form.password,
-  school: form.school,
+  return matchesSearch && matchesStatus;
 });
 
-      const newAdmin = response?.admin || response;
 
-      if (newAdmin) {
-        setAdmins((previous) => [
-          newAdmin,
-          ...previous,
-        ]);
-      }
+}, [admins, schools, search, status]);
 
-      setShowCreateModal(false);
-      resetForm();
-    } catch (err) {
-      console.error("Failed to create administrator:", err);
+// =====================================================
+// STATISTICS
+// =====================================================
 
-      setFormError(
-        err?.message || "Failed to create administrator."
-      );
-    } finally {
-      setCreating(false);
-    }
-  };
+const totalAdmins = admins.length;
 
-  /* =========================================================
-     DELETE ADMIN
-  ========================================================= */
+const activeAdmins = admins.filter(
+(admin) => admin.isActive === true
+).length;
 
-  const handleDelete = async (admin) => {
-    const fullName = admin.fullName || "Unnamed Administrator";
+const inactiveAdmins = admins.filter(
+(admin) => admin.isActive !== true
+).length;
 
-    const confirmed = window.confirm(
-      `Are you sure you want to delete ${fullName || admin.email}?`
-    );
+const assignedAdmins = admins.filter(
+(admin) => Boolean(admin.school)
+).length;
 
-    if (!confirmed) return;
+// =====================================================
+// SCHOOL HELPERS
+// =====================================================
 
-    try {
-      setOpenMenu(null);
+function getSchoolName(schoolReference) {
+if (!schoolReference) return "Not assigned";
 
-      await deleteAdmin(admin._id);
+if (typeof schoolReference === "object") {
+  return schoolReference.name || "Not assigned";
+}
 
-      setAdmins((previous) =>
-        previous.filter((item) => item._id !== admin._id)
-      );
-    } catch (err) {
-      console.error("Failed to delete administrator:", err);
+const school = schools.find(
+  (item) => item._id === schoolReference
+);
 
-      alert(
-        err?.message || "Failed to delete administrator."
-      );
-    }
-  };
+return school?.name || "Not assigned";
 
-  /* =========================================================
-     SCHOOL NAME
-  ========================================================= */
 
-  const getSchoolName = (admin) => {
-    if (!admin.school) return "Not assigned";
+}
 
-    if (typeof admin.school === "object") {
-      return admin.school.name || "Not assigned";
-    }
+function getSchoolType(admin) {
+if (
+admin.school &&
+typeof admin.school === "object"
+) {
+return admin.school.schoolType || "—";
+}
 
-    const school = schools.find(
-      (item) => item._id === admin.school
-    );
 
-    return school?.name || "Not assigned";
-  };
+const school = schools.find(
+  (item) => item._id === admin.school
+);
 
-  const getSchoolType = (admin) => {
-    if (
-      admin.school &&
-      typeof admin.school === "object"
-    ) {
-      return admin.school.schoolType || "—";
-    }
+return school?.schoolType || "—";
 
-    const school = schools.find(
-      (item) => item._id === admin.school
-    );
 
-    return school?.schoolType || "—";
-  };
+}
 
-  const formatDate = (date) => {
-    if (!date) return "—";
+// =====================================================
+// FORM HANDLERS
+// =====================================================
 
-    return new Date(date).toLocaleDateString("en-NG", {
-      day: "2-digit",
-      month: "short",
-      year: "numeric",
-    });
-  };
+const handleChange = (event) => {
+const { name, value } = event.target;
 
-  /* =========================================================
-     LOADING
-  ========================================================= */
 
-  if (loading) {
-    return (
-      <div className="super-users-page">
-        <div className="users-loading">
-          <Loader2 className="spin" size={30} />
-          <p>Loading administrators...</p>
+setForm((previous) => ({
+  ...previous,
+  [name]: value,
+}));
+
+
+};
+
+const resetForm = () => {
+setForm({
+fullName: "",
+email: "",
+phone: "",
+password: "",
+school: "",
+});
+
+
+setFormError("");
+
+
+};
+
+const openCreateModal = () => {
+resetForm();
+setShowCreateModal(true);
+};
+
+const closeCreateModal = () => {
+if (creating) return;
+
+setShowCreateModal(false);
+resetForm();
+
+
+};
+
+// =====================================================
+// CREATE ADMINISTRATOR
+// =====================================================
+
+const handleCreateAdmin = async (event) => {
+event.preventDefault();
+setFormError("");
+
+
+if (!form.fullName.trim()) {
+  setFormError("Full name is required.");
+  return;
+}
+
+if (!form.email.trim()) {
+  setFormError("Email address is required.");
+  return;
+}
+
+if (form.password.length < 8) {
+  setFormError(
+    "Password must contain at least 8 characters."
+  );
+  return;
+}
+
+if (!form.school) {
+  setFormError("Please select a school.");
+  return;
+}
+
+try {
+  setCreating(true);
+
+  await createAdmin({
+    fullName: form.fullName.trim(),
+    email: form.email.trim().toLowerCase(),
+    phone: form.phone.trim(),
+    password: form.password,
+    school: form.school,
+  });
+
+  setShowCreateModal(false);
+  resetForm();
+
+  await loadData(true);
+} catch (err) {
+  console.error(
+    "FAILED TO CREATE ADMINISTRATOR:",
+    err
+  );
+
+  setFormError(
+    err?.response?.data?.message ||
+      err?.message ||
+      "Failed to create administrator."
+  );
+} finally {
+  setCreating(false);
+}
+
+
+};
+
+// =====================================================
+// DELETE ADMINISTRATOR
+// =====================================================
+
+const handleDelete = async (admin) => {
+const fullName =
+admin.fullName || "Unnamed Administrator";
+
+
+const confirmed = window.confirm(
+  `Are you sure you want to delete ${fullName}?`
+);
+
+if (!confirmed) return;
+
+try {
+  setOpenMenu(null);
+
+  await deleteAdmin(admin._id);
+
+  setAdmins((previous) =>
+    previous.filter(
+      (item) => item._id !== admin._id
+    )
+  );
+} catch (err) {
+  console.error(
+    "FAILED TO DELETE ADMINISTRATOR:",
+    err
+  );
+
+  window.alert(
+    err?.response?.data?.message ||
+      err?.message ||
+      "Failed to delete administrator."
+  );
+}
+
+
+};
+
+// =====================================================
+// DATE FORMATTING
+// =====================================================
+
+const formatDate = (date) => {
+if (!date) return "—";
+
+
+const parsedDate = new Date(date);
+
+if (Number.isNaN(parsedDate.getTime())) {
+  return "—";
+}
+
+return parsedDate.toLocaleDateString("en-NG", {
+  day: "2-digit",
+  month: "short",
+  year: "numeric",
+});
+
+
+};
+
+// =====================================================
+// LOADING SCREEN
+// =====================================================
+
+if (loading) {
+return ( <div className="super-users-page"> <div className="users-loading"> <div className="users-loading-icon"> <Loader2 className="spin" size={32} /> </div>
+
+
+      <h2>Loading administrators</h2>
+
+      <p>
+        Please wait while we retrieve your data.
+      </p>
+    </div>
+  </div>
+);
+
+
+}
+
+// =====================================================
+// PAGE
+// =====================================================
+
+return (
+<div
+className="super-users-page"
+onClick={() => setOpenMenu(null)}
+> <div className="users-page-container">
+
+
+    {/* HEADER */}
+
+    <header className="users-header">
+      <div className="users-title-row">
+        <div className="users-title-icon">
+          <ShieldCheck size={26} />
+        </div>
+
+        <div className="users-title-content">
+          <div className="users-eyebrow">
+            PLATFORM MANAGEMENT
+          </div>
+
+          <h1>School Administrators</h1>
+
+          <p>
+            Manage administrator accounts across
+            all EduNigeria schools.
+          </p>
         </div>
       </div>
-    );
-  }
 
-  /* =========================================================
-     PAGE
-  ========================================================= */
+      <div className="users-header-actions">
+        <button
+          type="button"
+          className="users-refresh-btn"
+          onClick={(event) => {
+            event.stopPropagation();
+            loadData(true);
+          }}
+          disabled={refreshing}
+        >
+          <RefreshCw
+            size={17}
+            className={refreshing ? "spin" : ""}
+          />
 
-  return (
-    <div
-      className="super-users-page"
-      onClick={() => setOpenMenu(null)}
-    >
-      {/* HEADER */}
-      <div className="users-header">
+          {refreshing ? "Refreshing..." : "Refresh"}
+        </button>
+
+        <button
+          type="button"
+          className="users-add-btn"
+          onClick={(event) => {
+            event.stopPropagation();
+            openCreateModal();
+          }}
+        >
+          <UserPlus size={18} />
+          Add Administrator
+        </button>
+      </div>
+    </header>
+
+    {/* ERROR */}
+
+    {error && (
+      <div className="users-error">
+        <XCircle size={20} />
+
         <div>
-          <div className="users-title-row">
-            <div className="users-title-icon">
-              <Users size={24} />
-            </div>
-
-            <div>
-              <h1>School Administrators</h1>
-              <p>
-                Manage administrators assigned to schools
-                across EduNigeria.
-              </p>
-            </div>
-          </div>
+          <strong>Unable to load administrators</strong>
+          <p>{error}</p>
         </div>
 
-        <div className="users-header-actions">
-          <button
-            className="users-refresh-btn"
-            onClick={(e) => {
-              e.stopPropagation();
-              loadData(true);
-            }}
-            disabled={refreshing}
-          >
-            <RefreshCw
-              size={17}
-              className={refreshing ? "spin" : ""}
-            />
-            Refresh
-          </button>
+        <button
+          type="button"
+          onClick={() => loadData()}
+        >
+          Try Again
+        </button>
+      </div>
+    )}
 
-          <button
-            className="users-add-btn"
-            onClick={(e) => {
-              e.stopPropagation();
-              openCreateModal();
-            }}
-          >
-            <UserPlus size={17} />
-            Add Administrator
-          </button>
+    {/* STATISTICS */}
+
+    <section className="users-stats">
+      <div className="user-stat-card">
+        <div className="user-stat-icon purple">
+          <Users size={22} />
+        </div>
+
+        <div className="user-stat-content">
+          <span>Total Administrators</span>
+          <strong>{totalAdmins}</strong>
+          <small>All registered administrators</small>
         </div>
       </div>
 
-      {/* ERROR */}
-      {error && (
-        <div className="users-error">
-          <XCircle size={18} />
-          <span>{error}</span>
-
-          <button onClick={() => loadData()}>
-            Try Again
-          </button>
-        </div>
-      )}
-
-      {/* STAT CARDS */}
-      <div className="users-stats">
-        <div className="user-stat-card">
-          <div className="user-stat-icon">
-            <Users size={21} />
-          </div>
-
-          <div>
-            <span>Total Administrators</span>
-            <strong>{totalAdmins}</strong>
-          </div>
+      <div className="user-stat-card">
+        <div className="user-stat-icon active">
+          <CheckCircle2 size={22} />
         </div>
 
-        <div className="user-stat-card">
-          <div className="user-stat-icon active">
-            <CheckCircle2 size={21} />
-          </div>
+        <div className="user-stat-content">
+          <span>Active Accounts</span>
+          <strong>{activeAdmins}</strong>
+          <small>Currently active accounts</small>
+        </div>
+      </div>
 
-          <div>
-            <span>Active</span>
-            <strong>{activeAdmins}</strong>
-          </div>
+      <div className="user-stat-card">
+        <div className="user-stat-icon inactive">
+          <XCircle size={22} />
         </div>
 
-        <div className="user-stat-card">
-          <div className="user-stat-icon inactive">
-            <XCircle size={21} />
+        <div className="user-stat-content">
+          <span>Inactive Accounts</span>
+          <strong>{inactiveAdmins}</strong>
+          <small>Accounts not currently active</small>
+        </div>
+      </div>
+
+      <div className="user-stat-card">
+        <div className="user-stat-icon green">
+          <Building2 size={22} />
+        </div>
+
+        <div className="user-stat-content">
+          <span>Assigned Administrators</span>
+          <strong>{assignedAdmins}</strong>
+          <small>Linked to a school</small>
+        </div>
+      </div>
+    </section>
+
+    {/* TABLE PANEL */}
+
+    <section className="users-table-card">
+      <div className="users-table-top">
+        <div>
+          <div className="users-section-eyebrow">
+            ACCOUNT DIRECTORY
           </div>
 
-          <div>
-            <span>Inactive</span>
-            <strong>{inactiveAdmins}</strong>
-          </div>
+          <h2>Administrator Directory</h2>
+
+          <p>
+            Search and manage school administrator
+            accounts.
+          </p>
+        </div>
+
+        <div className="users-record-count">
+          <Users size={16} />
+          {filteredAdmins.length} records
         </div>
       </div>
 
       {/* TOOLBAR */}
+
       <div className="users-toolbar">
         <div className="users-search">
-          <Search size={18} />
+          <Search size={19} />
 
           <input
             type="text"
-            placeholder="Search by name, email or school..."
+            placeholder="Search name, email or school..."
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={(event) =>
+              setSearch(event.target.value)
+            }
           />
 
           {search && (
             <button
-              onClick={() => setSearch("")}
+              type="button"
               className="clear-search"
+              aria-label="Clear search"
+              onClick={() => setSearch("")}
             >
-              <X size={15} />
+              <X size={16} />
             </button>
           )}
         </div>
 
-        <select
-          className="users-status-filter"
-          value={status}
-          onChange={(e) => setStatus(e.target.value)}
-        >
-          <option value="all">All Status</option>
-          <option value="active">Active</option>
-          <option value="inactive">Inactive</option>
-        </select>
+        <label className="users-filter">
+          <span>Status:</span>
+
+          <div className="users-filter-select">
+            <select
+              value={status}
+              onChange={(event) =>
+                setStatus(event.target.value)
+              }
+            >
+              <option value="all">All Statuses</option>
+              <option value="active">Active</option>
+              <option value="inactive">Inactive</option>
+            </select>
+
+            <ChevronDown size={16} />
+          </div>
+        </label>
       </div>
 
       {/* TABLE */}
-      <div className="users-table-card">
-        <div className="users-table-top">
-          <div>
-            <h2>Administrators</h2>
 
-            <span>
-              Showing {filteredAdmins.length} of{" "}
-              {totalAdmins} administrators
-            </span>
+      {filteredAdmins.length === 0 ? (
+        <div className="users-empty">
+          <div className="users-empty-icon">
+            <Users size={34} />
           </div>
+
+          <h3>No administrators found</h3>
+
+          <p>
+            {search || status !== "all"
+              ? "Try changing your search or status filter."
+              : "Create an administrator account to get started."}
+          </p>
+
+          {!search && status === "all" && (
+            <button
+              type="button"
+              className="users-add-btn"
+              onClick={openCreateModal}
+            >
+              <UserPlus size={17} />
+              Add Administrator
+            </button>
+          )}
         </div>
-
-        {filteredAdmins.length === 0 ? (
-          <div className="users-empty">
-            <Users size={42} />
-
-            <h3>No administrators found</h3>
-
-            <p>
-              {search || status !== "all"
-                ? "Try changing your search or filter."
-                : "No school administrators have been created yet."}
-            </p>
-
-            {!search && status === "all" && (
-              <button
-                className="users-add-btn"
-                onClick={openCreateModal}
-              >
-                <UserPlus size={17} />
-                Add Administrator
-              </button>
-            )}
-          </div>
-        ) : (
+      ) : (
+        <>
           <div className="users-table-wrapper">
             <table className="users-table">
               <thead>
                 <tr>
                   <th>Administrator</th>
-                  <th>Email</th>
-                  <th>School</th>
+                  <th>Contact</th>
+                  <th>Assigned School</th>
                   <th>School Type</th>
                   <th>Status</th>
-                  <th>Created</th>
-                  <th></th>
+                  <th>Date Created</th>
+                  <th>Actions</th>
                 </tr>
               </thead>
-<tbody>
-  {filteredAdmins.map((admin) => {
-    const fullName =
-      admin.fullName || "Unnamed Administrator";
 
-    return (
-      <tr key={admin._id}>
-        <td>
-          <div className="user-cell">
-            <div className="user-avatar">
-              {fullName.charAt(0).toUpperCase()}
-            </div>
+              <tbody>
+                {filteredAdmins.map((admin) => {
+                  const fullName =
+                    admin.fullName ||
+                    "Unnamed Administrator";
 
-            <div>
-              <strong>{fullName}</strong>
-              <span>Administrator</span>
-            </div>
-          </div>
-        </td>
+                  return (
+                    <tr key={admin._id}>
+                      <td>
+                        <div className="user-cell">
+                          <div className="user-avatar">
+                            {fullName
+                              .charAt(0)
+                              .toUpperCase()}
+                          </div>
 
-        <td>
-          {admin.email || "—"}
-        </td>
+                          <div className="user-details">
+                            <strong>{fullName}</strong>
+                            <span>
+                              <ShieldCheck size={13} />
+                              School Administrator
+                            </span>
+                          </div>
+                        </div>
+                      </td>
 
-        <td>
-          {getSchoolName(admin)}
-        </td>
+                      <td>
+                        <div className="user-contact">
+                          <div>
+                            <Mail size={14} />
+                            <span>
+                              {admin.email || "No email"}
+                            </span>
+                          </div>
 
-        <td>
-          {getSchoolType(admin)}
-        </td>
+                          {admin.phone && (
+                            <div>
+                              <Phone size={14} />
+                              <span>{admin.phone}</span>
+                            </div>
+                          )}
+                        </div>
+                      </td>
 
-        <td>
-          {admin.isActive ? (
-            <span className="status-badge active">
-              <CheckCircle2 size={14} />
-              Active
-            </span>
-          ) : (
-            <span className="status-badge inactive">
-              <XCircle size={14} />
-              Inactive
-            </span>
-          )}
-        </td>
+                      <td>
+                        <div className="assigned-school">
+                          <div className="assigned-school-icon">
+                            <School size={17} />
+                          </div>
 
-        <td>
-          {formatDate(admin.createdAt)}
-        </td>
+                          <span>
+                            {getSchoolName(admin.school)}
+                          </span>
+                        </div>
+                      </td>
 
-        <td>
-          <div className="action-cell">
-            <button
-              type="button"
-              className="table-action"
-              onClick={(e) => {
-                e.stopPropagation();
+                      <td>
+                        <span className="school-type-badge">
+                          {getSchoolType(admin)}
+                        </span>
+                      </td>
 
-                setOpenMenu(
-                  openMenu === admin._id
-                    ? null
-                    : admin._id
-                );
-              }}
-            >
-              <MoreVertical size={18} />
-            </button>
+                      <td>
+                        {admin.isActive === true ? (
+                          <span className="status-badge active">
+                            <span className="status-dot" />
+                            Active
+                          </span>
+                        ) : (
+                          <span className="status-badge inactive">
+                            <span className="status-dot" />
+                            Inactive
+                          </span>
+                        )}
+                      </td>
 
-            {openMenu === admin._id && (
-              <div className="action-menu">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setOpenMenu(null);
-                    alert(
-                      "Edit administrator coming next."
-                    );
-                  }}
-                >
-                  <Pencil size={15} />
-                  Edit
-                </button>
+                      <td>
+                        <span className="user-date">
+                          {formatDate(admin.createdAt)}
+                        </span>
+                      </td>
 
-                <button
-                  type="button"
-                  className="danger"
-                  onClick={() =>
-                    handleDelete(admin)
-                  }
-                >
-                  <Trash2 size={15} />
-                  Delete
-                </button>
-              </div>
-            )}
-          </div>
-        </td>
-      </tr>
-    );
-  })}
-</tbody>
+                      <td>
+                        <div
+                          className="action-cell"
+                          onClick={(event) =>
+                            event.stopPropagation()
+                          }
+                        >
+                          <button
+                            type="button"
+                            className="table-action"
+                            aria-label="Administrator actions"
+                            onClick={() =>
+                              setOpenMenu(
+                                openMenu === admin._id
+                                  ? null
+                                  : admin._id
+                              )
+                            }
+                          >
+                            <MoreVertical size={19} />
+                          </button>
+
+                          {openMenu === admin._id && (
+                            <div className="action-menu">
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setOpenMenu(null);
+
+                                  window.alert(
+                                    "Administrator editing has not been connected yet."
+                                  );
+                                }}
+                              >
+                                <Pencil size={15} />
+                                Edit Administrator
+                              </button>
+
+                              <button
+                                type="button"
+                                className="danger"
+                                onClick={() =>
+                                  handleDelete(admin)
+                                }
+                              >
+                                <Trash2 size={15} />
+                                Delete Administrator
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
             </table>
           </div>
-        )}
-      </div>
 
-      {/* CREATE ADMIN MODAL */}
-      {showCreateModal && (
+          <div className="users-table-footer">
+            <span>
+              Showing{" "}
+              <strong>{filteredAdmins.length}</strong>{" "}
+              of <strong>{totalAdmins}</strong>{" "}
+              administrators
+            </span>
+
+            <span className="users-footer-note">
+              EduNigeria Platform Administration
+            </span>
+          </div>
+        </>
+      )}
+    </section>
+
+    {/* CREATE ADMIN MODAL */}
+
+    {showCreateModal && (
+      <div
+        className="users-modal-overlay"
+        onMouseDown={(event) => {
+          if (event.target === event.currentTarget) {
+            closeCreateModal();
+          }
+        }}
+      >
         <div
-          className="users-modal-overlay"
-          onClick={closeCreateModal}
+          className="users-modal"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="create-admin-title"
         >
-          <div
-            className="users-modal"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="users-modal-header">
-              <div>
-                <h2>Add Administrator</h2>
-
-                <p>
-                  Create an administrator account and
-                  assign it to a school.
-                </p>
-              </div>
-
-              <button
-                type="button"
-                className="modal-close"
-                onClick={closeCreateModal}
-                disabled={creating}
-              >
-                <X size={20} />
-              </button>
+          <div className="users-modal-header">
+            <div className="users-modal-title-icon">
+              <UserPlus size={23} />
             </div>
 
-            <form onSubmit={handleCreateAdmin}>
+            <div className="users-modal-heading">
+              <span>NEW ACCOUNT</span>
+              <h2 id="create-admin-title">
+                Add Administrator
+              </h2>
+
+              <p>
+                Create an administrator account and
+                assign it to an approved school.
+              </p>
+            </div>
+
+            <button
+              type="button"
+              className="modal-close"
+              onClick={closeCreateModal}
+              disabled={creating}
+              aria-label="Close modal"
+            >
+              <X size={20} />
+            </button>
+          </div>
+
+          <form onSubmit={handleCreateAdmin}>
+            <div className="users-modal-body">
               {formError && (
                 <div className="form-error">
-                  <XCircle size={17} />
+                  <XCircle size={18} />
                   <span>{formError}</span>
                 </div>
               )}
 
-              {/* FULL NAME */}
               <div className="form-group">
                 <label htmlFor="fullName">
                   Full Name
                 </label>
 
-                <input
-                  id="fullName"
-                  type="text"
-                  name="fullName"
-                  value={form.fullName}
-                  onChange={handleChange}
-                  placeholder="Enter administrator's full name"
-                  required
-                />
+                <div className="form-input-wrapper">
+                  <UserRound size={18} />
+
+                  <input
+                    id="fullName"
+                    type="text"
+                    name="fullName"
+                    value={form.fullName}
+                    onChange={handleChange}
+                    placeholder="Enter full name"
+                    autoComplete="name"
+                    required
+                    disabled={creating}
+                  />
+                </div>
               </div>
 
-              {/* EMAIL */}
               <div className="form-group">
                 <label htmlFor="email">
                   Email Address
                 </label>
 
-                <input
-                  id="email"
-                  type="email"
-                  name="email"
-                  value={form.email}
-                  onChange={handleChange}
-                  placeholder="admin@example.com"
-                  required
-                />
+                <div className="form-input-wrapper">
+                  <Mail size={18} />
+
+                  <input
+                    id="email"
+                    type="email"
+                    name="email"
+                    value={form.email}
+                    onChange={handleChange}
+                    placeholder="admin@example.com"
+                    autoComplete="email"
+                    required
+                    disabled={creating}
+                  />
+                </div>
               </div>
 
-              {/* PHONE */}
               <div className="form-group">
                 <label htmlFor="phone">
                   Phone Number
+                  <span className="optional-label">
+                    Optional
+                  </span>
                 </label>
 
-                <input
-                  id="phone"
-                  type="tel"
-                  name="phone"
-                  value={form.phone}
-                  onChange={handleChange}
-                  placeholder="08012345678"
-                />
+                <div className="form-input-wrapper">
+                  <Phone size={18} />
+
+                  <input
+                    id="phone"
+                    type="tel"
+                    name="phone"
+                    value={form.phone}
+                    onChange={handleChange}
+                    placeholder="Enter phone number"
+                    autoComplete="tel"
+                    disabled={creating}
+                  />
+                </div>
               </div>
 
-              {/* PASSWORD */}
               <div className="form-group">
                 <label htmlFor="password">
-                  Password
+                  Temporary Password
                 </label>
 
-                <input
-                  id="password"
-                  type="password"
-                  name="password"
-                  value={form.password}
-                  onChange={handleChange}
-                  placeholder="Enter password"
-                  required
-                />
+                <div className="form-input-wrapper">
+                  <ShieldCheck size={18} />
+
+                  <input
+                    id="password"
+                    type="password"
+                    name="password"
+                    value={form.password}
+                    onChange={handleChange}
+                    placeholder="At least 8 characters"
+                    autoComplete="new-password"
+                    minLength={8}
+                    required
+                    disabled={creating}
+                  />
+                </div>
+
+                <small className="form-help">
+                  Use a unique password for this administrator.
+                </small>
               </div>
 
-              {/* SCHOOL */}
               <div className="form-group">
                 <label htmlFor="school">
-                  School
+                  Assign School
                 </label>
 
-                <select
-                  id="school"
-                  name="school"
-                  value={form.school}
-                  onChange={handleChange}
-                  required
-                >
-                  <option value="">
-                    Select school
-                  </option>
+                <div className="form-input-wrapper select-wrapper">
+                  <Building2 size={18} />
 
-                  {schools
-                    .filter(
-                      (school) =>
-                        school.isActive !== false
-                    )
-                    .map((school) => (
-                      <option
-                        key={school._id}
-                        value={school._id}
-                      >
-                        {school.name}
-                      </option>
-                    ))}
-                </select>
+                  <select
+                    id="school"
+                    name="school"
+                    value={form.school}
+                    onChange={handleChange}
+                    required
+                    disabled={creating}
+                  >
+                    <option value="">
+                      Select an approved school
+                    </option>
+
+                    {schools
+                      .filter(
+                        (school) =>
+                          String(
+                            school.status || ""
+                          ).toLowerCase() === "approved" &&
+                          school.isActive === true
+                      )
+                      .map((school) => (
+                        <option
+                          key={school._id}
+                          value={school._id}
+                        >
+                          {school.name}
+                        </option>
+                      ))}
+                  </select>
+
+                  <ChevronDown
+                    size={17}
+                    className="select-chevron"
+                  />
+                </div>
+
+                <small className="form-help">
+                  Only approved and active schools are listed.
+                </small>
               </div>
+            </div>
 
-              {/* FOOTER */}
-              <div className="users-modal-footer">
-                <button
-                  type="button"
-                  className="cancel-btn"
-                  onClick={closeCreateModal}
-                  disabled={creating}
-                >
-                  Cancel
-                </button>
+            <div className="users-modal-footer">
+              <button
+                type="button"
+                className="cancel-btn"
+                onClick={closeCreateModal}
+                disabled={creating}
+              >
+                Cancel
+              </button>
 
-                <button
-                  type="submit"
-                  className="submit-admin-btn"
-                  disabled={creating}
-                >
-                  {creating ? (
-                    <>
-                      <Loader2
-                        size={17}
-                        className="spin"
-                      />
-                      Creating...
-                    </>
-                  ) : (
-                    <>
-                      <UserPlus size={17} />
-                      Create Administrator
-                    </>
-                  )}
-                </button>
-              </div>
-            </form>
-          </div>
+              <button
+                type="submit"
+                className="submit-admin-btn"
+                disabled={creating}
+              >
+                {creating ? (
+                  <>
+                    <Loader2
+                      size={18}
+                      className="spin"
+                    />
+                    Creating Account...
+                  </>
+                ) : (
+                  <>
+                    <UserPlus size={18} />
+                    Create Administrator
+                  </>
+                )}
+              </button>
+            </div>
+          </form>
         </div>
-      )}
-    </div>
-  );
-}
+      </div>
+    )}
+  </div>
+</div>
 
+
+);
+}

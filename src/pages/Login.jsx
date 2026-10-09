@@ -1,101 +1,179 @@
 import { useState } from "react";
-import { useNavigate, Navigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../context/authcontext";
 
-// Decides where a user lands after login.
-// Must match the actual routes in App.jsx.
-export function getRedirectPath(user) {
-  if (!user) return "/login";
+export default function Login() {
+const [email, setEmail] = useState("");
+const [password, setPassword] = useState("");
+const [error, setError] = useState("");
+const [submitting, setSubmitting] = useState(false);
 
-  if (user.role === "super_admin") return "/super-admin";
+const { login } = useAuth();
+const navigate = useNavigate();
 
-  if (user.role === "admin") return "/dashboard";
+function getRedirectPath(user) {
+const role = (
+user?.effectiveRole ||
+user?.role ||
+""
+).toLowerCase();
 
-  if (user.role === "staff") {
-    if (user.staffRole === "Counsellor") return "/Cdashboard";
-    return "/Sdashboard";
-  }
 
-  if (user.role === "student") return "/Stdashboard";
-
-  if (user.role === "teacher") return "/Tdashboard";
-
-  if (user.role === "bursar") return "/Bdashboard";
-
-  if (user.role === "parent") return "/Pdashboard";
-
-  // Unknown/unhandled role
-  return "/login";
+// Super Admin goes to the platform dashboard.
+if (role === "super_admin" || role === "superadmin") {
+  return "/super-admin";
 }
 
-export default function Login() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
+// School administrator goes to their school's homepage.
+if (role === "admin") {
+  const schoolName =
+    user?.school?.name ||
+    user?.schoolName ||
+    "";
 
-  const { login, user } = useAuth();
-  const navigate = useNavigate();
+  const schoolSlug =
+    user?.school?.slug ||
+    user?.schoolSlug ||
+    schoolName
+      .toLowerCase()
+      .trim()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-|-$/g, "");
 
-  if (user) {
-    return <Navigate to={getRedirectPath(user)} replace />;
+  return schoolSlug
+    ? `/school/${schoolSlug}`
+    : "/dashboard";
+}
+
+// Other school users go to their role-specific dashboard.
+if (role === "staff") {
+  const staffRole = user?.staffRole?.toLowerCase();
+
+  if (staffRole === "counsellor") return "/Cdashboard";
+  if (staffRole === "bursar") return "/Bdashboard";
+
+  return "/Sdashboard";
+}
+
+if (role === "counsellor") return "/Cdashboard";
+if (role === "teacher") return "/Tdashboard";
+if (role === "bursar") return "/Bdashboard";
+if (role === "student") return "/Stdashboard";
+if (role === "parent") return "/Pdashboard";
+
+return "/login";
+
+
+}
+
+async function handleSubmit(e) {
+e.preventDefault();
+setError("");
+setSubmitting(true);
+
+
+try {
+  const result = await login(email.trim(), password);
+
+  if (!result?.success) {
+    setError(
+      result?.message ||
+        "Login failed. Please check your email and password."
+    );
+    return;
   }
 
-  async function handleSubmit(e) {
-    e.preventDefault();
-    setError("");
+  const user = result.user;
+  const destination = getRedirectPath(user);
 
-    const result = await login(email, password);
-
-    console.log("Login result:", result);
-
-    if (result.success) {
-      navigate(getRedirectPath(result.user));
-    } else {
-      setError(result.message);
-    }
+  if (destination === "/login") {
+    setError(
+      "Your account role could not be identified. Please contact your administrator."
+    );
+    return;
   }
 
-  return (
-    <div className="login-page">
-      <div className="login-card">
-        <div className="login-header">
-          <div className="brand-icon-lg">E</div>
-          <h1>EduNigeria</h1>
-          <p>School Management System</p>
-        </div>
+  navigate(destination, { replace: true });
+} catch (err) {
+  console.error("EDUNIGERIA LOGIN ERROR:", err);
 
-        <form onSubmit={handleSubmit} className="login-form">
-          {error && <div className="error-msg">{error}</div>}
-
-          <div className="form-group">
-            <label>Email</label>
-
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="you@school.ng"
-              required
-            />
-          </div>
-
-          <div className="form-group">
-            <label>Password</label>
-
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="Enter password"
-              required
-            />
-          </div>
-
-          <button type="submit" className="btn-primary">
-            Sign In
-          </button>
-        </form>
-      </div>
-    </div>
+  setError(
+    err?.message ||
+      "Unable to log in. Please check your details and try again."
   );
+} finally {
+  setSubmitting(false);
+}
+
+
+}
+
+return ( <div className="login-page"> <div className="login-card"> <div className="login-header"> <div className="brand-icon-lg">E</div>
+
+
+      <h1>EduNigeria</h1>
+
+      <p>School Management System</p>
+
+      <p>
+        Sign in to access your school or manage the EduNigeria platform.
+      </p>
+    </div>
+
+    <form onSubmit={handleSubmit} className="login-form">
+      {error && (
+        <div className="error-msg" role="alert">
+          {error}
+        </div>
+      )}
+
+      <div className="form-group">
+        <label htmlFor="login-email">Email Address</label>
+
+        <input
+          id="login-email"
+          type="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          placeholder="Enter your email address"
+          autoComplete="username"
+          required
+        />
+      </div>
+
+      <div className="form-group">
+        <label htmlFor="login-password">Password</label>
+
+        <input
+          id="login-password"
+          type="password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          placeholder="Enter your password"
+          autoComplete="current-password"
+          required
+        />
+      </div>
+
+      <button
+        type="submit"
+        className="btn-primary"
+        disabled={submitting}
+      >
+        {submitting ? "Signing in..." : "Sign In"}
+      </button>
+    </form>
+
+    <div className="login-footer">
+      <Link to="/register">Register a school</Link>
+
+      <p>
+        Powered by <strong>EduNigeria</strong>
+      </p>
+    </div>
+  </div>
+</div>
+
+
+);
 }

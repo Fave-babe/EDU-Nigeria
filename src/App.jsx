@@ -7,8 +7,7 @@ import {
 } from "react-router-dom";
 
 import { AuthProvider, useAuth } from "./context/authcontext.jsx";
-
-import { PERMISSIONS, ROLES } from "./config/permissions";
+import { PERMISSIONS } from "./config/permissions";
 
 import Layout from "./components/Layout";
 import ThemeToggle from "./components/ThemeToggle";
@@ -20,6 +19,8 @@ import ThemeToggle from "./components/ThemeToggle";
 import Home from "./pages/Home";
 import About from "./pages/About";
 import Login from "./pages/Login";
+import SchoolLogin from "./pages/SchoolLogin";
+import SchoolUserRegister from "./pages/SchoolUserRegister";
 import Register from "./pages/Register";
 import EntranceExam from "./pages/EntranceExam";
 import CareerApplication from "./pages/CareerApplication";
@@ -35,10 +36,10 @@ import AdminDashboard from "./pages/AdminDashboard";
 import StaffDashboard from "./pages/StaffDashboard";
 import TeacherDashboard from "./pages/TeacherDashboard";
 import Cdashboard from "./pages/Cdashboard";
-//  import Counsellor from "./pages/counsellorStudents";
 import BursarDashboard from "./pages/BursarDashboard";
 import StudentDashboard from "./pages/StudentDashboard";
 import ParentDashboard from "./pages/ParentDashboard";
+import SuperAdminDashboard from "./pages/SuperAdminDashboard";
 
 // =========================================================
 // SCHOOL MODULES
@@ -56,7 +57,6 @@ import Staff from "./pages/Staff";
 import Teacher from "./pages/Teacher";
 import CounsellorFollowups from "./pages/CounsellorFollowups";
 import CounsellorStudents from "./pages/CounsellorStudents.jsx";
-// import Counsellor from "./pages/Counsellor";
 import ChangePassword from "./pages/ChangePassword";
 import AnnouncementManagement from "./pages/AnnouncementManagement";
 import AdminAdmissions from "./pages/AdminAdmission.jsx";
@@ -74,14 +74,9 @@ import Announcements from "./pages/Announcements";
 import Notifications from "./pages/Notifications";
 import Settings from "./pages/Settings";
 import Profile from "./pages/Profile";
-
+import ReviewApplication from "./pages/ReviewApplication";
 import CounsellingRecords from "./pages/CounsellingRecords";
 import TeacherStudents from "./pages/TeacherStudents";
-// =========================================================
-// SUPER ADMIN
-// =========================================================
-
-import SuperAdminDashboard from "./pages/SuperAdminDashboard";
 
 // =========================================================
 // PROTECTED ROUTE
@@ -142,7 +137,7 @@ function GuestRoute({ children }) {
 }
 
 // =========================================================
-// APPLICATION ROUTES
+// ROUTES WITHOUT LOCAL THEME TOGGLE
 // =========================================================
 
 const routesWithoutLocalThemeToggle = new Set([
@@ -164,6 +159,10 @@ const routesWithoutLocalThemeToggle = new Set([
   "/profile",
 ]);
 
+// =========================================================
+// APPLICATION ROUTES
+// =========================================================
+
 function AppRoutes() {
   const { pathname } = useLocation();
 
@@ -177,11 +176,11 @@ function AppRoutes() {
 
       <Routes>
         {/* ===================================================
-          PUBLIC ROUTES
-      =================================================== */}
+            PUBLIC ROUTES
+        =================================================== */}
 
         <Route path="/" element={<Home />} />
-
+        <Route path="/school/:schoolSlug" element={<Home />} />
         <Route path="/about" element={<About />} />
 
         <Route path="/entrance" element={<EntranceExam />} />
@@ -191,18 +190,20 @@ function AppRoutes() {
         <Route path="/careers/teaching" element={<TeachingOpportunities />} />
 
         {/* ===================================================
-          AUTH
-      =================================================== */}
+            AUTH
+        =================================================== */}
 
-        <Route
-          path="/login"
-          element={
-            <GuestRoute>
-              <Login />
-            </GuestRoute>
-          }
-        />
+        {/* EduNigeria Super Admin Login */}
+<Route
+  path="/login"
+  element={<Login />}
+/>
 
+{/* Individual School Login */}
+<Route
+  path="/school-login"
+  element={<SchoolLogin />}
+/>
         <Route
           path="/register"
           element={
@@ -212,9 +213,11 @@ function AppRoutes() {
           }
         />
 
+        <Route path="/school/register" element={<SchoolUserRegister />} />
+
         {/* ===================================================
-          SUPER ADMIN
-      =================================================== */}
+            SUPER ADMIN
+        =================================================== */}
 
         <Route
           path="/super-admin"
@@ -226,8 +229,21 @@ function AppRoutes() {
         />
 
         {/* ===================================================
-          SUPER ADMIN SCHOOLS
-      =================================================== */}
+            SUPER ADMIN SCHOOL REVIEW
+        =================================================== */}
+
+        <Route
+          path="/super-admin/schools/:id"
+          element={
+            <RoleRoute allowed={["super_admin"]}>
+              <ReviewApplication />
+            </RoleRoute>
+          }
+        />
+
+        {/* ===================================================
+            SUPER ADMIN SCHOOLS
+        =================================================== */}
 
         <Route
           path="/schools"
@@ -239,9 +255,8 @@ function AppRoutes() {
         />
 
         {/* ===================================================
-          SUPER ADMIN ADMINS
-          Kept for existing project compatibility.
-      =================================================== */}
+            SUPER ADMIN ADMINS
+        =================================================== */}
 
         <Route
           path="/superadmin"
@@ -262,8 +277,8 @@ function AppRoutes() {
         />
 
         {/* ===================================================
-          RESULTS
-      =================================================== */}
+            RESULTS
+        =================================================== */}
 
         <Route
           path="/results"
@@ -275,8 +290,8 @@ function AppRoutes() {
         />
 
         {/* ===================================================
-          ASSIGNMENTS
-      =================================================== */}
+            ASSIGNMENTS
+        =================================================== */}
 
         <Route
           path="/assignments"
@@ -288,8 +303,8 @@ function AppRoutes() {
         />
 
         {/* ===================================================
-          ANNOUNCEMENTS
-      =================================================== */}
+            ANNOUNCEMENTS
+        =================================================== */}
 
         <Route
           path="/announcements"
@@ -301,8 +316,8 @@ function AppRoutes() {
         />
 
         {/* ===================================================
-          NOTIFICATIONS
-      =================================================== */}
+            NOTIFICATIONS
+        =================================================== */}
 
         <Route
           path="/notifications"
@@ -314,8 +329,8 @@ function AppRoutes() {
         />
 
         {/* ===================================================
-          SETTINGS
-      =================================================== */}
+            SETTINGS
+        =================================================== */}
 
         <Route
           path="/settings"
@@ -325,9 +340,10 @@ function AppRoutes() {
             </RoleRoute>
           }
         />
+
         {/* ===================================================
-          PROFILE
-      =================================================== */}
+            PROFILE
+        =================================================== */}
 
         <Route
           path="/profile"
@@ -339,8 +355,8 @@ function AppRoutes() {
         />
 
         {/* ===================================================
-          PROTECTED APPLICATION
-      =================================================== */}
+            PROTECTED APPLICATION
+        =================================================== */}
 
         <Route
           element={
@@ -349,6 +365,10 @@ function AppRoutes() {
             </ProtectedRoute>
           }
         >
+          {/* =================================================
+              CHANGE PASSWORD
+          ================================================= */}
+
           <Route
             path="/change-password"
             element={
@@ -357,9 +377,10 @@ function AppRoutes() {
               </RoleRoute>
             }
           />
+
           {/* =================================================
-            ADMIN DASHBOARD
-        ================================================= */}
+              ADMIN DASHBOARD
+          ================================================= */}
 
           <Route
             path="/dashboard"
@@ -369,7 +390,9 @@ function AppRoutes() {
               </RoleRoute>
             }
           />
+
           <Route path="/class-subjects" element={<ClassSubjects />} />
+
           <Route
             path="/announcement-management"
             element={
@@ -378,11 +401,12 @@ function AppRoutes() {
               </RoleRoute>
             }
           />
+
           <Route path="/admissions" element={<AdminAdmissions />} />
 
           {/* =================================================
-            STAFF DASHBOARD
-        ================================================= */}
+              STAFF DASHBOARD
+          ================================================= */}
 
           <Route
             path="/Sdashboard"
@@ -394,8 +418,8 @@ function AppRoutes() {
           />
 
           {/* =================================================
-            COUNSELLOR DASHBOARD
-        ================================================= */}
+              COUNSELLOR DASHBOARD
+          ================================================= */}
 
           <Route
             path="/Cdashboard"
@@ -423,6 +447,7 @@ function AppRoutes() {
               </RoleRoute>
             }
           />
+
           <Route
             path="/counsellor/followups"
             element={
@@ -431,9 +456,10 @@ function AppRoutes() {
               </RoleRoute>
             }
           />
+
           {/* =================================================
-            TEACHER DASHBOARD
-        ================================================= */}
+              TEACHER DASHBOARD
+          ================================================= */}
 
           <Route
             path="/Tdashboard"
@@ -443,10 +469,15 @@ function AppRoutes() {
               </RoleRoute>
             }
           />
+
           <Route path="/subjects" element={<Subjects />} />
+
           <Route path="/Tstudents" element={<TeacherStudents />} />
+
           <Route path="/Tattendance" element={<TeacherAttendance />} />
+
           <Route path="/lesson-notes" element={<LessonNotes />} />
+
           <Route
             path="/student/lesson-notes"
             element={
@@ -457,8 +488,8 @@ function AppRoutes() {
           />
 
           {/* =================================================
-            BURSAR DASHBOARD
-        ================================================= */}
+              BURSAR DASHBOARD
+          ================================================= */}
 
           <Route
             path="/Bdashboard"
@@ -468,12 +499,14 @@ function AppRoutes() {
               </RoleRoute>
             }
           />
+
           <Route path="/finance/invoice/:paymentId" element={<Invoice />} />
+
           <Route path="/record-payment" element={<RecordPayment />} />
 
           {/* =================================================
-            STUDENT DASHBOARD
-        ================================================= */}
+              STUDENT DASHBOARD
+          ================================================= */}
 
           <Route
             path="/Stdashboard"
@@ -483,11 +516,12 @@ function AppRoutes() {
               </RoleRoute>
             }
           />
+
           <Route path="/grades" element={<GradeSummary />} />
 
           {/* =================================================
-            PARENT DASHBOARD
-        ================================================= */}
+              PARENT DASHBOARD
+          ================================================= */}
 
           <Route
             path="/Pdashboard"
@@ -499,8 +533,8 @@ function AppRoutes() {
           />
 
           {/* =================================================
-            STUDENTS
-        ================================================= */}
+              STUDENTS
+          ================================================= */}
 
           <Route
             path="/students"
@@ -521,8 +555,8 @@ function AppRoutes() {
           />
 
           {/* =================================================
-            STAFF
-        ================================================= */}
+              STAFF
+          ================================================= */}
 
           <Route
             path="/staff"
@@ -534,8 +568,8 @@ function AppRoutes() {
           />
 
           {/* =================================================
-            TEACHERS
-        ================================================= */}
+              TEACHERS
+          ================================================= */}
 
           <Route
             path="/teachers"
@@ -547,8 +581,8 @@ function AppRoutes() {
           />
 
           {/* =================================================
-    CLASSES
-================================================= */}
+              CLASSES
+          ================================================= */}
 
           <Route
             path="/classes"
@@ -560,8 +594,8 @@ function AppRoutes() {
           />
 
           {/* =================================================
-            ACADEMICS
-        ================================================= */}
+              ACADEMICS
+          ================================================= */}
 
           <Route
             path="/academics"
@@ -573,8 +607,8 @@ function AppRoutes() {
           />
 
           {/* =================================================
-            ATTENDANCE
-        ================================================= */}
+              ATTENDANCE
+          ================================================= */}
 
           <Route
             path="/attendance"
@@ -586,8 +620,8 @@ function AppRoutes() {
           />
 
           {/* =================================================
-            TIMETABLE
-        ================================================= */}
+              TIMETABLE
+          ================================================= */}
 
           <Route
             path="/timetable"
@@ -599,8 +633,8 @@ function AppRoutes() {
           />
 
           {/* =================================================
-            FINANCE
-        ================================================= */}
+              FINANCE
+          ================================================= */}
 
           <Route
             path="/finance"
@@ -612,8 +646,8 @@ function AppRoutes() {
           />
 
           {/* =================================================
-            COUNSELLING
-        ================================================= */}
+              COUNSELLING
+          ================================================= */}
 
           <Route
             path="/counselling"
@@ -625,8 +659,8 @@ function AppRoutes() {
           />
 
           {/* =================================================
-            COMMUNICATIONS
-        ================================================= */}
+              COMMUNICATIONS
+          ================================================= */}
 
           <Route
             path="/communications"
@@ -638,8 +672,8 @@ function AppRoutes() {
           />
 
           {/* =================================================
-            REPORTS
-        ================================================= */}
+              REPORTS
+          ================================================= */}
 
           <Route
             path="/reports"
@@ -651,8 +685,8 @@ function AppRoutes() {
           />
 
           {/* =================================================
-            TEACHING OPPORTUNITIES
-        ================================================= */}
+              TEACHING OPPORTUNITIES
+          ================================================= */}
 
           <Route
             path="/opportunities"
@@ -665,8 +699,8 @@ function AppRoutes() {
         </Route>
 
         {/* ===================================================
-          CATCH ALL
-      =================================================== */}
+            CATCH ALL
+        =================================================== */}
 
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

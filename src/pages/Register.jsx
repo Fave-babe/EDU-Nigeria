@@ -1,368 +1,110 @@
-import { useEffect, useState } from "react";
+
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../context/authcontext";
-
-import {
-  GraduationCap,
-  BookOpen,
-  Users,
-  ClipboardList,
-  ArrowRight,
-  Plus,
-  X,
-} from "lucide-react";
-
-import { createAdmissionApplication } from "../api/admissionApplication.api";
-
-const ROLES = [
-  { id: "student", label: "Student", icon: GraduationCap },
-  { id: "teacher", label: "Teacher", icon: BookOpen },
-  { id: "parent", label: "Parent", icon: Users },
-  { id: "staff", label: "Staff", icon: ClipboardList },
-];
-
-const CLASS_OPTIONS = [
-  "Nursery 1",
-  "Nursery 2",
-  "Primary 1",
-  "Primary 2",
-  "Primary 3",
-  "Primary 4",
-  "Primary 5",
-  "Primary 6",
-  "JSS 1",
-  "JSS 2",
-  "JSS 3",
-  "SS 1",
-  "SS 2",
-  "SS 3",
-];
-
-const STAFF_ROLE_OPTIONS = [
-  "Counsellor",
-  "Cleaner",
-  "Bursar",
-  "Receptionist",
-  "Security",
-  "Librarian",
-  "IT Support",
-  "Cook / Kitchen Staff",
-  "Driver",
-  "Nurse",
-  "Administrator",
-  "Other",
-];
-
-const SUBJECT_OPTIONS = [
-  "Mathematics",
-  "English Language",
-  "Basic Science",
-  "Physics",
-  "Chemistry",
-  "Biology",
-  "Agricultural Science",
-  "Social Studies",
-  "Civic Education",
-  "Government",
-  "Economics",
-  "Geography",
-  "History",
-  "Literature in English",
-  "French",
-  "Computer Studies / ICT",
-  "Fine Art",
-  "Music",
-  "Physical Education",
-  "Christian Religious Studies",
-  "Islamic Religious Studies",
-  "Business Studies",
-  "Home Economics",
-  "Other",
-];
+import { ArrowRight, School } from "lucide-react";
+import { registerSchoolApplication } from "../api/school.api";
 
 function Register() {
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
+  const navigate = useNavigate();
+
+  // School information
+  const [schoolName, setSchoolName] = useState("");
+  const [schoolType, setSchoolType] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [role, setRole] = useState("student");
-
-  const [schools, setSchools] = useState([]);
-  const [school, setSchool] = useState("");
-  const [loadingSchools, setLoadingSchools] = useState(false);
-
-  // Student fields
-  const [studentClass, setStudentClass] = useState("");
-  const [gender, setGender] = useState("");
-  const [dob, setDob] = useState("");
-  const [previousSchool, setPreviousSchool] = useState("");
-  const [studentPhone, setStudentPhone] = useState("");
-  const [studentAddress, setStudentAddress] = useState("");
-
-  // Parent fields
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [phone, setPhone] = useState("");
   const [address, setAddress] = useState("");
-  const [children, setChildren] = useState([""]);
-
-  // Staff fields
-  const [staffPhone, setStaffPhone] = useState("");
-  const [staffRole, setStaffRole] = useState("");
-
-  // Teacher fields
-  const [teacherPhone, setTeacherPhone] = useState("");
-  const [subject, setSubject] = useState("");
-  const [employmentType, setEmploymentType] = useState("");
+  const [city, setCity] = useState("");
+  const [state, setState] = useState("");
+  const [country, setCountry] = useState("Nigeria");
 
   const [submitting, setSubmitting] = useState(false);
-
-  const navigate = useNavigate();
-  const { register } = useAuth();
-
-  // =====================================================
-  // LOAD SCHOOLS
-  // =====================================================
-
-  useEffect(() => {
-    const fetchSchools = async () => {
-      try {
-        setLoadingSchools(true);
-
-        const response = await fetch("/api/v1/school/public");
-
-        if (!response.ok) {
-          throw new Error("Failed to load schools");
-        }
-
-        const data = await response.json();
-
-        console.log("Schools response:", data);
-
-        const schoolList = data.schools || [];
-
-        console.log("SCHOOLS BEING STORED:", schoolList);
-
-        setSchools(schoolList);
-      } catch (error) {
-        console.error("Error loading schools:", error);
-      } finally {
-        setLoadingSchools(false);
-      }
-    };
-
-    fetchSchools();
-  }, []);
-
-  // =====================================================
-  // PARENT CHILDREN
-  // =====================================================
-
-  const handleChildChange = (index, value) => {
-    setChildren((prev) =>
-      prev.map((child, i) => (i === index ? value : child)),
-    );
-  };
-
-  const addChildField = () => {
-    setChildren((prev) => [...prev, ""]);
-  };
-
-  const removeChildField = (index) => {
-    setChildren((prev) => prev.filter((_, i) => i !== index));
-  };
-
-  // =====================================================
-  // SUBMIT REGISTRATION
-  // =====================================================
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // =====================================================
-    // SCHOOL VALIDATION
-    // Student, Teacher, Parent and Staff require a school
-    // =====================================================
-
-    if (
-      (role === "student" ||
-        role === "teacher" ||
-        role === "parent" ||
-        role === "staff") &&
-      !school
-    ) {
-      alert("Please select your school.");
+    if (!schoolName.trim()) {
+      alert("Please enter the school name.");
       return;
     }
 
-    // =====================================================
-    // STUDENT ADMISSION APPLICATION
-    // =====================================================
-
-    if (role === "student") {
-      if (!studentClass) {
-        alert("Please select the class you are applying for.");
-        return;
-      }
-
-      if (!gender) {
-        alert("Please select your gender.");
-        return;
-      }
-
-      if (!dob) {
-        alert("Please select your date of birth.");
-        return;
-      }
-
-      if (!password || password.length < 6) {
-        alert("Student password must be at least 6 characters.");
-        return;
-      }
-
-      if (!previousSchool.trim()) {
-        alert("Please enter your previous school.");
-        return;
-      }
-
-      try {
-        setSubmitting(true);
-
-        const applicationData = {
-          firstName: firstName.trim(),
-          lastName: lastName.trim(),
-          gender,
-          dob,
-          email: email.trim().toLowerCase(),
-          password,
-          phone: studentPhone.trim(),
-          address: studentAddress.trim(),
-          previousSchool: previousSchool.trim(),
-          school,
-          applyingForClass: studentClass,
-        };
-
-        console.log("ADMISSION APPLICATION BEING SENT:", {
-          ...applicationData,
-          password: "[HIDDEN]",
-        });
-
-        const result = await createAdmissionApplication(applicationData);
-
-        console.log("ADMISSION APPLICATION RESULT:", result);
-
-        const application = result?.application;
-
-        if (!application?._id) {
-          throw new Error(
-            "Admission application was created but no application ID was returned.",
-          );
-        }
-
-        alert(
-          "Application submitted successfully! You will now take the entrance examination.",
-        );
-
-        navigate("/entrance", {
-          state: {
-            applicationId: application._id,
-            studentClass,
-          },
-        });
-
-        return;
-      } catch (error) {
-        console.error("ADMISSION APPLICATION ERROR:", error);
-        console.error("ERROR RESPONSE:", error?.response);
-        console.error("ERROR RESPONSE DATA:", error?.response?.data);
-
-        alert(
-          error?.response?.data?.message ||
-            error?.message ||
-            "Unable to submit admission application.",
-        );
-
-        return;
-      } finally {
-        setSubmitting(false);
-      }
+    if (!schoolType) {
+      alert("Please select the school type.");
+      return;
     }
 
-    // =====================================================
-    // OTHER USER REGISTRATION
-    // =====================================================
+    if (!email.trim()) {
+      alert("Please enter the school email.");
+      return;
+    }
 
-    const payload = {
-      firstName: firstName.trim(),
-      lastName: lastName.trim(),
+    if (!password) {
+      alert("Please create a school password.");
+      return;
+    }
+
+    if (password.length < 8) {
+      alert("The school password must be at least 8 characters.");
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      alert("The passwords do not match.");
+      return;
+    }
+
+    if (!phone.trim()) {
+      alert("Please enter the school phone number.");
+      return;
+    }
+
+    if (!address.trim()) {
+      alert("Please enter the school address.");
+      return;
+    }
+
+    if (!city.trim()) {
+      alert("Please enter the city.");
+      return;
+    }
+
+    if (!state.trim()) {
+      alert("Please enter the state.");
+      return;
+    }
+
+    const schoolData = {
+      name: schoolName.trim(),
+      schoolType,
       email: email.trim().toLowerCase(),
       password,
-      role,
+      phone: phone.trim(),
+      address: address.trim(),
+      city: city.trim(),
+      state: state.trim(),
+      country: country.trim() || "Nigeria",
     };
-
-    // =====================================================
-    // TEACHER
-    // =====================================================
-
-    if (role === "teacher") {
-      payload.school = school;
-      payload.phone = teacherPhone.trim();
-      payload.subject = subject;
-      payload.employmentType = employmentType;
-    }
-
-    // =====================================================
-    // PARENT
-    // =====================================================
-
-    if (role === "parent") {
-      payload.school = school;
-      payload.phone = phone;
-      payload.address = address;
-
-      // Children are linked later using Student IDs.
-      payload.children = [];
-    }
-
-    // =====================================================
-    // STAFF
-    // =====================================================
-
-    if (role === "staff") {
-      payload.fullName = `${firstName} ${lastName}`.trim();
-      payload.school = school;
-      payload.phone = staffPhone.trim();
-      payload.staffRole = staffRole;
-    }
-
-    console.log("REGISTRATION PAYLOAD:", payload);
 
     try {
       setSubmitting(true);
 
-      const result = await register(payload);
+      // Submit the school's own login credentials.
+      // Never log the password to the browser console.
+      await registerSchoolApplication(schoolData);
 
-      console.log("REGISTRATION RESULT:", result);
+      alert(
+        "School registration submitted successfully. Your application is waiting for Super Admin approval. You can log in after your school is approved."
+      );
 
-      if (result.success) {
-        if (role === "parent") {
-          navigate("/Pdashboard");
-        } else if (role === "teacher") {
-          navigate("/Tdashboard");
-        } else if (role === "staff") {
-          navigate("/Sdashboard");
-        }
-      } else {
-        alert(result.message);
-      }
+      navigate("/school/application-pending");
     } catch (error) {
-      console.error("REGISTRATION ERROR:", error);
-      console.error("ERROR MESSAGE:", error?.message);
-      console.error("ERROR RESPONSE:", error?.response);
-      console.error("ERROR RESPONSE DATA:", error?.response?.data);
+      console.error("SCHOOL REGISTRATION ERROR:", error);
 
       alert(
         error?.response?.data?.message ||
           error?.message ||
-          "Registration failed. Please try again.",
+          "Unable to submit school registration. Please try again."
       );
     } finally {
       setSubmitting(false);
@@ -370,11 +112,10 @@ function Register() {
   };
 
   return (
-    <div className="reg-page">
+    <div className="school-register-page">
       <style>{`
-        .reg-page {
+        .school-register-page {
           --ink: #1557b0;
-          --gold: #f7f3e8;
           --blue: #2f4b7c;
           --paper: #f7f3e8;
           min-height: 100vh;
@@ -386,680 +127,396 @@ function Register() {
         }
 
         @media (min-height: 700px) {
-          .reg-page {
+          .school-register-page {
             align-items: center;
           }
         }
 
-        .reg-card {
+        .school-register-card {
           width: 100%;
-          max-width: 420px;
-          max-height: calc(100vh - 48px);
-          overflow-y: auto;
-          background: #fff;
+          max-width: 520px;
+          background: #ffffff;
           border: 1px solid rgba(33, 48, 31, 0.1);
-          border-radius: 14px;
+          border-radius: 16px;
           box-shadow:
             0 1px 3px rgba(21, 87, 176, 0.06),
-            0 8px 24px rgba(21, 87, 176, 0.06);
-          padding: 32px 28px;
+            0 8px 28px rgba(21, 87, 176, 0.08);
+          padding: 34px 30px;
         }
 
-        .reg-eyebrow {
+        .school-register-icon {
+          width: 46px;
+          height: 46px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border-radius: 12px;
+          background: rgba(21, 87, 176, 0.08);
+          color: var(--ink);
+          margin-bottom: 16px;
+        }
+
+        .school-register-eyebrow {
           font-family: monospace;
           font-size: 11px;
           text-transform: uppercase;
-          letter-spacing: 0.25em;
+          letter-spacing: 0.2em;
           color: var(--blue);
-          opacity: 0.55;
+          opacity: 0.6;
         }
 
-        .reg-card h2 {
-          font-size: 1.35rem;
+        .school-register-card h2 {
+          font-size: 1.5rem;
           color: var(--ink);
-          margin: 6px 0 2px;
+          margin: 7px 0 6px;
           font-weight: 600;
         }
 
-        .reg-subtitle {
+        .school-register-subtitle {
           font-size: 13px;
-          color: rgba(33, 48, 31, 0.5);
-          margin: 0 0 20px;
+          line-height: 1.6;
+          color: rgba(33, 48, 31, 0.58);
+          margin: 0 0 24px;
         }
 
-        .reg-form {
+        .school-register-form {
           display: flex;
           flex-direction: column;
-          gap: 16px;
+          gap: 17px;
         }
 
-        .reg-label {
+        .school-register-section-title {
+          font-size: 14px;
+          font-weight: 600;
+          color: var(--ink);
+          margin-top: 8px;
+          margin-bottom: -5px;
+        }
+
+        .school-register-label {
           display: block;
           font-family: monospace;
           font-size: 10px;
           letter-spacing: 0.12em;
           text-transform: uppercase;
-          color: rgba(28, 60, 11, 0.45);
-          margin-bottom: 6px;
+          color: rgba(28, 60, 11, 0.5);
+          margin-bottom: 7px;
         }
 
-        .reg-row {
-          display: grid;
-          grid-template-columns: 1fr 1fr;
-          gap: 12px;
-        }
-
-        @media (max-width: 380px) {
-          .reg-row {
-            grid-template-columns: 1fr;
-          }
-        }
-
-        .reg-input,
-        .reg-select {
+        .school-register-input,
+        .school-register-select {
           width: 100%;
+          box-sizing: border-box;
           background: transparent;
           border: none;
           border-bottom: 2px solid rgba(33, 48, 31, 0.15);
           outline: none;
-          padding: 6px 0;
+          padding: 8px 0;
           font-size: 14px;
           color: var(--ink);
           transition: border-color 0.2s ease;
         }
 
-        .reg-select {
-          background: #fff;
+        .school-register-select {
+          background: #ffffff;
         }
 
-        .reg-input:focus,
-        .reg-select:focus {
+        .school-register-input:focus,
+        .school-register-select:focus {
           border-bottom-color: var(--blue);
         }
 
-        .role-picker {
+        .school-register-row {
           display: grid;
-          grid-template-columns: repeat(4, 1fr);
-          gap: 6px;
-          margin-top: 6px;
+          grid-template-columns: 1fr 1fr;
+          gap: 14px;
         }
 
-        .role-chip {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          gap: 4px;
-          padding: 9px 2px;
-          border-radius: 8px;
-          border: 1px solid rgba(33, 48, 31, 0.15);
-          background: transparent;
-          color: rgba(33, 48, 31, 0.5);
-          font-size: 11px;
-          cursor: pointer;
-          transition: all 0.2s ease;
-        }
-
-        .role-chip:hover {
-          border-color: rgba(21, 87, 176, 0.3);
-        }
-
-        .role-chip.active {
-          border-color: var(--ink);
-          background: rgba(21, 87, 176, 0.07);
-          color: var(--ink);
-        }
-
-        .gender-picker,
-        .employment-picker {
-          display: flex;
-          gap: 8px;
-          margin-top: 6px;
-        }
-
-        .gender-chip,
-        .employment-chip {
-          flex: 1;
-          padding: 8px 4px;
-          border-radius: 8px;
-          border: 1px solid rgba(33, 48, 31, 0.15);
-          background: transparent;
-          color: rgba(33, 48, 31, 0.5);
-          font-size: 12px;
-          cursor: pointer;
-          transition: all 0.2s ease;
-        }
-
-        .gender-chip:hover,
-        .employment-chip:hover {
-          border-color: rgba(21, 87, 176, 0.3);
-        }
-
-        .gender-chip.active,
-        .employment-chip.active {
-          border-color: var(--ink);
-          background: rgba(21, 87, 176, 0.07);
-          color: var(--ink);
-        }
-
-        .role-section {
-          display: flex;
-          flex-direction: column;
-          gap: 16px;
-          padding-top: 4px;
-          border-top: 1px dashed rgba(33, 48, 31, 0.12);
-        }
-
-        .child-row {
-          display: flex;
-          align-items: center;
-          gap: 8px;
-          margin-bottom: 10px;
-        }
-
-        .child-row:last-child {
-          margin-bottom: 0;
-        }
-
-        .child-row .reg-input {
-          flex: 1;
-        }
-
-        .child-remove-btn {
-          background: transparent;
-          border: none;
-          color: rgba(33, 48, 31, 0.4);
-          cursor: pointer;
-          display: flex;
-          align-items: center;
-          padding: 4px;
-        }
-
-        .child-remove-btn:hover {
-          color: #c0392b;
-        }
-
-        .add-child-btn {
-          display: flex;
-          align-items: center;
-          gap: 6px;
-          background: transparent;
-          border: 1px dashed rgba(33, 48, 31, 0.3);
-          border-radius: 6px;
-          padding: 6px 10px;
-          font-size: 12px;
-          color: var(--blue);
-          cursor: pointer;
-          margin-top: 2px;
-        }
-
-        .add-child-btn:hover {
-          border-color: var(--blue);
-        }
-
-        .reg-submit {
+        .school-register-submit {
           width: 100%;
           display: flex;
           align-items: center;
           justify-content: center;
           gap: 8px;
           background: var(--ink);
-          color: #fff;
+          color: #ffffff;
           font-weight: 500;
           font-size: 14px;
-          padding: 11px;
+          padding: 12px;
           border: none;
-          border-radius: 6px;
+          border-radius: 7px;
           cursor: pointer;
           transition: background 0.2s ease;
-          margin-top: 4px;
+          margin-top: 5px;
         }
 
-        .reg-submit:hover {
+        .school-register-submit:hover {
           background: var(--blue);
         }
 
-        .reg-submit:disabled {
+        .school-register-submit:disabled {
           opacity: 0.6;
           cursor: not-allowed;
         }
 
-        .reg-signin {
+        .school-register-login {
           text-align: center;
           font-size: 13px;
           color: rgba(33, 48, 31, 0.6);
-          margin: 0;
+          margin: 3px 0 0;
         }
 
-        .reg-signin span {
+        .school-register-login span {
           color: var(--blue);
           font-weight: 500;
           cursor: pointer;
         }
+
+        .school-register-note {
+          background: rgba(21, 87, 176, 0.05);
+          border-radius: 8px;
+          padding: 12px 13px;
+          font-size: 12px;
+          line-height: 1.55;
+          color: rgba(33, 48, 31, 0.62);
+        }
+
+        @media (max-width: 520px) {
+          .school-register-card {
+            padding: 28px 22px;
+          }
+
+          .school-register-row {
+            grid-template-columns: 1fr;
+          }
+        }
       `}</style>
 
-      <div className="reg-card">
-        <span className="reg-eyebrow">Enrollment · EDU Nigeria</span>
+      <div className="school-register-card">
+        <div className="school-register-icon">
+          <School size={24} />
+        </div>
 
-        <h2>Create your entry</h2>
+        <span className="school-register-eyebrow">
+          EduNigeria · School Registration
+        </span>
 
-        <p className="reg-subtitle">
-          Students must complete an entrance examination before admission can be
-          reviewed.
+        <h2>Register your school</h2>
+
+        <p className="school-register-subtitle">
+          Register your school using its official email and password.
+          Your application will be reviewed by the Super Admin before
+          your school can access its dashboard.
         </p>
 
-        <form onSubmit={handleSubmit} className="reg-form">
-          {/* Role picker */}
+        <form onSubmit={handleSubmit} className="school-register-form">
+          <div className="school-register-section-title">
+            School Information
+          </div>
 
           <div>
-            <label className="reg-label">Role</label>
+            <label className="school-register-label">
+              School name
+            </label>
 
-            <div className="role-picker">
-              {ROLES.map(({ id, label, icon: Icon }) => {
-                const active = role === id;
-
-                return (
-                  <button
-                    key={id}
-                    type="button"
-                    onClick={() => setRole(id)}
-                    className={`role-chip${active ? " active" : ""}`}
-                  >
-                    <Icon size={16} strokeWidth={active ? 2.25 : 1.75} />
-
-                    {label}
-                  </button>
-                );
-              })}
-            </div>
+            <input
+              type="text"
+              value={schoolName}
+              onChange={(e) => setSchoolName(e.target.value)}
+              className="school-register-input"
+              placeholder="Favour International School"
+              autoComplete="organization"
+              required
+            />
           </div>
 
-          {/* Name row */}
+          <div>
+            <label className="school-register-label">
+              School type
+            </label>
 
-          <div className="reg-row">
-            <div>
-              <label className="reg-label">First name</label>
+            <select
+              value={schoolType}
+              onChange={(e) => setSchoolType(e.target.value)}
+              className="school-register-select"
+              required
+            >
+              <option value="" disabled>
+                Select school type
+              </option>
 
-              <input
-                type="text"
-                value={firstName}
-                onChange={(e) => setFirstName(e.target.value)}
-                className="reg-input"
-                placeholder="Ada"
-                required
-              />
-            </div>
-
-            <div>
-              <label className="reg-label">Last name</label>
-
-              <input
-                type="text"
-                value={lastName}
-                onChange={(e) => setLastName(e.target.value)}
-                className="reg-input"
-                placeholder="Lovelace"
-                required
-              />
-            </div>
+              <option value="Primary">Primary</option>
+              <option value="Secondary">Secondary</option>
+              <option value="Primary & Secondary">
+                Primary &amp; Secondary
+              </option>
+            </select>
           </div>
 
-          {/* Email + Password */}
-
-          <div className="reg-row">
+          <div className="school-register-row">
             <div>
-              <label className="reg-label">Email</label>
+              <label className="school-register-label">
+                School email
+              </label>
 
               <input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="reg-input"
-                placeholder="ada@school.edu"
+                className="school-register-input"
+                placeholder="school@example.com"
+                autoComplete="email"
                 required
               />
             </div>
 
             <div>
-              <label className="reg-label">Password</label>
+              <label className="school-register-label">
+                Phone number
+              </label>
 
               <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="reg-input"
-                placeholder="••••••••"
-                minLength={6}
+                type="tel"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                className="school-register-input"
+                placeholder="080X XXX XXXX"
+                autoComplete="tel"
                 required
               />
             </div>
           </div>
 
-          {/* School */}
+          <div>
+            <label className="school-register-label">
+              School password
+            </label>
 
-          {(role === "student" ||
-            role === "teacher" ||
-            role === "parent" ||
-            role === "staff") && (
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="school-register-input"
+              placeholder="Create a school password"
+              autoComplete="new-password"
+              minLength={8}
+              required
+            />
+
+            <small>
+              Use at least 8 characters. The school will use this password
+              to log in.
+            </small>
+          </div>
+
+          <div>
+            <label className="school-register-label">
+              Confirm school password
+            </label>
+
+            <input
+              type="password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              className="school-register-input"
+              placeholder="Enter the password again"
+              autoComplete="new-password"
+              minLength={8}
+              required
+            />
+          </div>
+
+          <div>
+            <label className="school-register-label">
+              School address
+            </label>
+
+            <input
+              type="text"
+              value={address}
+              onChange={(e) => setAddress(e.target.value)}
+              className="school-register-input"
+              placeholder="12 Allen Avenue"
+              autoComplete="street-address"
+              required
+            />
+          </div>
+
+          <div className="school-register-row">
             <div>
-              <label className="reg-label">School</label>
+              <label className="school-register-label">
+                City
+              </label>
 
-              <select
-                value={school}
-                onChange={(e) => setSchool(e.target.value)}
-                className="reg-select"
+              <input
+                type="text"
+                value={city}
+                onChange={(e) => setCity(e.target.value)}
+                className="school-register-input"
+                placeholder="Ikeja"
+                autoComplete="address-level2"
                 required
-              >
-                <option value="">
-                  {loadingSchools ? "Loading schools..." : "Select your school"}
-                </option>
-
-                {schools.map((item) => (
-                  <option key={item._id} value={item._id}>
-                    {item.name}
-                  </option>
-                ))}
-              </select>
+              />
             </div>
-          )}
 
-          {/* Student fields */}
+            <div>
+              <label className="school-register-label">
+                State
+              </label>
 
-          {role === "student" && (
-            <div className="role-section">
-              <div className="reg-row">
-                <div>
-                  <label className="reg-label">Class applying for</label>
-
-                  <select
-                    value={studentClass}
-                    onChange={(e) => setStudentClass(e.target.value)}
-                    className="reg-select"
-                    required
-                  >
-                    <option value="" disabled>
-                      Select class
-                    </option>
-
-                    {CLASS_OPTIONS.map((c) => (
-                      <option key={c} value={c}>
-                        {c}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <div>
-                  <label className="reg-label">Gender</label>
-
-                  <div className="gender-picker">
-                    {["Male", "Female"].map((g) => (
-                      <button
-                        key={g}
-                        type="button"
-                        onClick={() => setGender(g)}
-                        className={`gender-chip${
-                          gender === g ? " active" : ""
-                        }`}
-                      >
-                        {g}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              </div>
-
-              {/* Date of birth */}
-
-              <div>
-                <label className="reg-label">Date of birth</label>
-
-                <input
-                  type="date"
-                  value={dob}
-                  onChange={(e) => setDob(e.target.value)}
-                  className="reg-input"
-                  required
-                />
-              </div>
-
-              {/* Phone */}
-
-              <div>
-                <label className="reg-label">Phone number</label>
-
-                <input
-                  type="tel"
-                  value={studentPhone}
-                  onChange={(e) => setStudentPhone(e.target.value)}
-                  className="reg-input"
-                  placeholder="080X XXX XXXX"
-                />
-              </div>
-
-              {/* Address */}
-
-              <div>
-                <label className="reg-label">Home address</label>
-
-                <input
-                  type="text"
-                  value={studentAddress}
-                  onChange={(e) => setStudentAddress(e.target.value)}
-                  className="reg-input"
-                  placeholder="12 Allen Avenue, Ikeja, Lagos"
-                />
-              </div>
-
-              {/* Previous school */}
-
-              <div>
-                <label className="reg-label">Previous school attended</label>
-
-                <input
-                  type="text"
-                  value={previousSchool}
-                  onChange={(e) => setPreviousSchool(e.target.value)}
-                  className="reg-input"
-                  placeholder="e.g. Bright Stars Nursery & Primary"
-                  required
-                />
-              </div>
-
-              <p className="reg-signin">
-                After submitting your details, you will take the entrance
-                examination. Your admission will then be reviewed by the school
-                administrator.
-              </p>
+              <input
+                type="text"
+                value={state}
+                onChange={(e) => setState(e.target.value)}
+                className="school-register-input"
+                placeholder="Lagos"
+                autoComplete="address-level1"
+                required
+              />
             </div>
-          )}
+          </div>
 
-          {/* Teacher fields */}
+          <div>
+            <label className="school-register-label">
+              Country
+            </label>
 
-          {role === "teacher" && (
-            <div className="role-section">
-              <div className="reg-row">
-                <div>
-                  <label className="reg-label">Phone number</label>
+            <input
+              type="text"
+              value={country}
+              onChange={(e) => setCountry(e.target.value)}
+              className="school-register-input"
+              placeholder="Nigeria"
+              autoComplete="country-name"
+              required
+            />
+          </div>
 
-                  <input
-                    type="tel"
-                    value={teacherPhone}
-                    onChange={(e) => setTeacherPhone(e.target.value)}
-                    className="reg-input"
-                    placeholder="080X XXX XXXX"
-                    required
-                  />
-                </div>
+          <div className="school-register-note">
+            <strong>What happens next?</strong>
+            <br />
+            Your school application will remain pending until the
+            EduNigeria Super Admin reviews and approves it. After approval,
+            you can log in with your school's email and password.
+          </div>
 
-                <div>
-                  <label className="reg-label">Employment type</label>
-
-                  <div className="employment-picker">
-                    {["Full-time", "Part-time"].map((type) => (
-                      <button
-                        key={type}
-                        type="button"
-                        onClick={() => setEmploymentType(type)}
-                        className={`employment-chip${
-                          employmentType === type ? " active" : ""
-                        }`}
-                      >
-                        {type}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              </div>
-
-              <div>
-                <label className="reg-label">Subject taught</label>
-
-                <select
-                  value={subject}
-                  onChange={(e) => setSubject(e.target.value)}
-                  className="reg-select"
-                  required
-                >
-                  <option value="" disabled>
-                    Select subject
-                  </option>
-
-                  {SUBJECT_OPTIONS.map((item) => (
-                    <option key={item} value={item}>
-                      {item}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
-          )}
-
-          {/* Parent fields */}
-
-          {role === "parent" && (
-            <div className="role-section">
-              <div>
-                <label className="reg-label">Phone number</label>
-
-                <input
-                  type="tel"
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  className="reg-input"
-                  placeholder="080X XXX XXXX"
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="reg-label">Home address</label>
-
-                <input
-                  type="text"
-                  value={address}
-                  onChange={(e) => setAddress(e.target.value)}
-                  className="reg-input"
-                  placeholder="12 Allen Avenue, Ikeja, Lagos"
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="reg-label">Child / children</label>
-
-                {children.map((child, index) => (
-                  <div className="child-row" key={index}>
-                    <input
-                      type="text"
-                      value={child}
-                      onChange={(e) => handleChildChange(index, e.target.value)}
-                      className="reg-input"
-                      placeholder={`Child ${index + 1} full name`}
-                      required
-                    />
-
-                    {children.length > 1 && (
-                      <button
-                        type="button"
-                        className="child-remove-btn"
-                        onClick={() => removeChildField(index)}
-                        aria-label="Remove child"
-                      >
-                        <X size={15} />
-                      </button>
-                    )}
-                  </div>
-                ))}
-
-                <button
-                  type="button"
-                  className="add-child-btn"
-                  onClick={addChildField}
-                >
-                  <Plus size={13} />
-                  Add another child
-                </button>
-              </div>
-            </div>
-          )}
-
-          {/* Staff fields */}
-
-          {role === "staff" && (
-            <div className="role-section">
-              <div>
-                <label className="reg-label">Phone number</label>
-
-                <input
-                  type="tel"
-                  value={staffPhone}
-                  onChange={(e) => setStaffPhone(e.target.value)}
-                  className="reg-input"
-                  placeholder="080X XXX XXXX"
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="reg-label">Staff role</label>
-
-                <select
-                  value={staffRole}
-                  onChange={(e) => setStaffRole(e.target.value)}
-                  className="reg-select"
-                  required
-                >
-                  <option value="" disabled>
-                    Select role
-                  </option>
-
-                  {STAFF_ROLE_OPTIONS.map((item) => (
-                    <option key={item} value={item}>
-                      {item}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
-          )}
-
-          {/* Submit */}
-
-          <button type="submit" className="reg-submit" disabled={submitting}>
+          <button
+            type="submit"
+            className="school-register-submit"
+            disabled={submitting}
+          >
             {submitting
-              ? role === "student"
-                ? "Submitting Application..."
-                : "Registering..."
-              : role === "student"
-                ? "Submit & Take Exam"
-                : "Register"}
+              ? "Submitting Application..."
+              : "Submit School Application"}
 
             {!submitting && <ArrowRight size={16} />}
           </button>
 
-          <p className="reg-signin">
-            Already enrolled?{" "}
-            <span onClick={() => navigate("/login")}>Sign in</span>
+          <p className="school-register-login">
+            Already have an approved school account?{" "}
+            <span onClick={() => navigate("/login")}>
+              Sign in
+            </span>
           </p>
         </form>
       </div>
@@ -1068,3 +525,4 @@ function Register() {
 }
 
 export default Register;
+
